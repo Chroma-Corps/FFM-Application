@@ -12,10 +12,10 @@ from App.Backend.controllers import (
 
 user_views = Blueprint('user_views', __name__)
 
-@user_views.route('/users', methods=['GET'])
+@user_views.route('/allusers', methods=['GET'])
 def get_user_page():
-    users = get_all_users()
-    return
+    users = get_all_users_json()
+    return jsonify(users)
 
 @user_views.route('/users', methods=['POST'])
 def create_user_action():

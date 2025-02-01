@@ -6,8 +6,9 @@
 <!-- ![Tests](https://github.com/Chroma-Corps/FFM-Application/actions/workflows/dev.yml/badge.svg) -->
 
 # Dependencies
-* Python3/pip3
-* Packages Listed In Requirements.txt
+* Python 3 and pip
+* Expo CLI (npm install -g expo-cli)
+* Python packages listed in requirements.txt
 
 # Installing Dependencies
 ```bash

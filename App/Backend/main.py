@@ -24,7 +24,7 @@ def add_views(app):
 def create_app(overrides={}):
     app = Flask(__name__)
     load_config(app, overrides)
-    CORS(app)
+    CORS(app, origins=["http://192.168.0.7:8080", "http://localhost:8080"])
     add_auth_context(app)
     photos = UploadSet('photos', TEXT + DOCUMENTS + IMAGES)
     configure_uploads(app, photos)
