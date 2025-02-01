@@ -15,24 +15,36 @@
 $ pip install -r requirements.txt
 ```
 
-# Running the Project
+# Running the Project 
 
-_For development run the serve command (what you execute):_
-```bash
-$ flask run
-```
+To start the project, follow these steps in order (subject to change):
 
-_For production using gunicorn (what the production server executes):_
-```bash
-$ gunicorn wsgi:app
-```
-
-# Deploying
-You can deploy your version of this app to render by clicking on the "Deploy to Render" link above.
-
-# Initializing the Database
-When connecting the project to a fresh empty database ensure the appropriate configuration is set then file then run the following command. This must also be executed once when running the app on heroku by opening the heroku console, executing bash and running the command in the dyno.
+## 1. Setting Up and Running Flask
+First, initialize the Flask application by running:  
 
 ```bash
 $ flask init
-```
+```  
+This command prepares the backend by setting up any necessary configurations or database migrations.  
+
+Next, start the Flask server with:  
+
+```bash
+$ flask run
+```  
+This will launch the backend, making it ready to handle requests. You should see the server running, listening for incoming connections.  
+
+## 2. Starting the React Native Frontend
+Once the backend is running, open another terminal and navigate to the React folder:  
+
+```bash
+$ cd React
+```  
+This ensures you're in the correct folder before starting the frontend.  
+
+Now, launch the React Native development server with:  
+
+```bash
+$ npm start
+```  
+This will initialize the Metro bundler, allowing you to run the mobile app on an emulator or physical device. If everything is set up correctly, the app should now be ready for interaction.  
