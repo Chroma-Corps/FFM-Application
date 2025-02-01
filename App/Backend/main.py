@@ -6,23 +6,23 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
 
 
-from App.database import init_db
-from App.config import load_config
+from App.Backend.database import init_db
+from App.Backend.config import load_config
 
 
-from App.controllers import (
+from App.Backend.controllers import (
     setup_jwt,
     add_auth_context
 )
 
-from App.views import views, setup_admin
+from App.Backend.views import views, setup_admin
 
 def add_views(app):
     for view in views:
         app.register_blueprint(view)
 
 def create_app(overrides={}):
-    app = Flask(__name__, static_url_path='/static')
+    app = Flask(__name__)
     load_config(app, overrides)
     CORS(app)
     add_auth_context(app)

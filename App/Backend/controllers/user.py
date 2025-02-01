@@ -1,5 +1,5 @@
-from App.models import User
-from App.database import db
+from App.Backend.models import User
+from App.Backend.database import db
 
 def create_user(username, password):
     newuser = User(username=username, password=password)

@@ -4,14 +4,11 @@ from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, se
 
 from.index import index_views
 
-from App.controllers import (
+from App.Backend.controllers import (
     login
 )
 
-auth_views = Blueprint('auth_views', __name__, template_folder='../templates')
-
-
-
+auth_views = Blueprint('auth_views', __name__)
 
 '''
 Page/Action Routes
@@ -19,12 +16,12 @@ Page/Action Routes
 @auth_views.route('/users', methods=['GET'])
 def get_user_page():
     users = get_all_users()
-    return render_template('users.html', users=users)
+    return
 
 @auth_views.route('/identify', methods=['GET'])
 @jwt_required()
 def identify_page():
-    return render_template('message.html', title="Identify", message=f"You are logged in as {current_user.id} - {current_user.username}")
+    return
     
 
 @auth_views.route('/login', methods=['POST'])
