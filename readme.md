@@ -17,10 +17,10 @@ $ pip install -r requirements.txt
 
 # Running the Project 
 
-To start the project, follow these steps in order (subject to change):
+To start the project, follow these steps in order:
 
 ## 1. Setting Up and Running Flask
-First, initialize the Flask application by running:  
+First, initialize the Flask application by running: 
 
 ```bash
 $ flask init
@@ -33,6 +33,8 @@ Next, start the Flask server with:
 $ flask run
 ```  
 This will launch the backend, making it ready to handle requests. You should see the server running, listening for incoming connections.  
+
+![flask](./images/flask.png)
 
 ## 2. Starting the React Native Frontend
 Once the backend is running, open another terminal and navigate to the React folder:  
@@ -47,4 +49,8 @@ Now, launch the React Native development server with:
 ```bash
 $ npm start
 ```  
-This will initialize the Metro bundler, allowing you to run the mobile app on an emulator or physical device. If everything is set up correctly, the app should now be ready for interaction.  
+This will initialize the Metro bundler, allowing you to run the mobile app on an emulator, on the web browser or a physical device.
+
+If everything is set up correctly, the app should now be ready for interaction.
+
+![react](./images/react.png)

@@ -1,29 +1,51 @@
 // rfce
-
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {Card, FAB} from 'react-native-paper';
+import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 
-function home(props) {
+function home() {
 
-    const [data, setData] = useState([])
+    const [data, setData] = useState([]);
 
-   useEffect(() => {
-        fetch('http://192.168.0.7:8080/allusers', {
-          method: 'GET',
-        })
-          .then((resp) => resp.json())
-          .then((users) => {
-            console.log('Fetched Users:', users);
-            setData(users);
-          })
-          .catch((error) => {
-            console.error('Uh-Oh! Error Fetching Users:', error);
-          });
-      }, [])
+    const checkServer = async (urls) => {
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, { method: 'GET' });
+          if (response.ok) return url;
+        } catch (error) {
+          console.log(`Failed To Connect To ${url}`);
+        }
+      }
+      return null;
+    };
+
+    useEffect(() => {
+      const possibleUrls = [
+        `${API_URL_LOCAL}/allusers`, // For Web
+        `${API_URL_DEVICE}/allusers`, // For Mobile
+      ];
+  
+      checkServer(possibleUrls).then((workingUrl) => {
+        if (workingUrl) {
+          console.log(`Using Server: ${workingUrl}`);
+          fetch(workingUrl, { method: 'GET' })
+            .then((resp) => resp.json())
+            .then((users) => {
+              console.log('Fetched Users:', users);
+              setData(users);
+            })
+            .catch((error) => {
+              console.error('Uh-Oh! Error Fetching Users:', error);
+            });
+        } else {
+          console.error('No accessible server found.');
+        }
+      });
+    }, []);
 
     // const fetchData = () => {
-    //     fetch('http://192.168.0.7:8080/allusers', {
+    //     fetch('http://127.0.0.1:8080/allusers', {
     //       method: 'GET',
     //     })
     //       .then((resp) => resp.json())
@@ -64,7 +86,7 @@ function home(props) {
             // fetchData();
             }}
         />
-        <Text style = {styles.bottomText}>{props.name}</Text>
+        <Text style = {styles.bottomText}>Chroma Corps</Text>
     </View>
   )
 }
