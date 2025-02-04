@@ -4,15 +4,23 @@ import Logo from '../components/Logo'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import Paragraph from '../components/Paragraph'
+// import { SafeAreaView } from "react-native";
+// import Carousel from "./components/Carousel";
 
 export default function StartScreen({ navigation }) {
   return (
     <Background>
-      <Logo />
-      <Header>Login Template</Header>
+
+      {/* <SafeAreaView>
+        <Carousel />
+      </SafeAreaView> */}
+
+      <Header>Welcome</Header>
+
       <Paragraph>
-        The easiest way to start with your amazing application.
+        Are you ready to be finaincialy stable :D
       </Paragraph>
+
       <Button
         mode="contained"
         onPress={() => navigation.navigate('LoginScreen')}

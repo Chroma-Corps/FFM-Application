@@ -10,7 +10,6 @@ export default function Dashboard({ navigation }) {
   return (
     <Background>
       <Home />
-      <Logo />
       <Header>Let’s start</Header>
       <Paragraph>
         Your amazing app starts here. Open you favorite code editor and start
