@@ -1,11 +1,11 @@
 import React from 'react'
 import Background from '../components/Background'
-import Logo from '../components/Logo'
+// import Logo from '../components/Logo'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import Paragraph from '../components/Paragraph'
 import Carousel from '../components/Carousel'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, SafeAreaView, Text } from 'react-native'
 
 
 export default function StartScreen({ navigation }) {
@@ -13,9 +13,9 @@ export default function StartScreen({ navigation }) {
 
     <Background>
 
-      <View style={styles.carouselView}>
+      <SafeAreaView>
         <Carousel />
-      </View>
+      </SafeAreaView>
 
       <Header>Welcome</Header>
 
@@ -41,7 +41,7 @@ export default function StartScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   carouselView: {
-    flex: 0.9,
+    flex: 0.2,
     backgroundColor: 'white',
   }
 })
