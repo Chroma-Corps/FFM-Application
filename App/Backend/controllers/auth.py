@@ -27,7 +27,6 @@ def setup_jwt(app):
 
   return jwt
 
-
 # Context processor to make 'is_authenticated' available to all templates
 def add_auth_context(app):
   @app.context_processor

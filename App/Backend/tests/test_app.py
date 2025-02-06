@@ -22,24 +22,24 @@ LOGGER = logging.getLogger(__name__)
 class UserUnitTests(unittest.TestCase):
 
     def test_new_user(self):
-        user = User("bob@mail.com", "bobpass")
+        user = User("Bob Bobberson", "bob@mail.com", "bobpass")
         assert user.email == "bob@mail.com"
 
     # pure function no side effects or integrations called
     def test_get_json(self):
-        user = User("bob@mail.com", "bobpass")
+        user = User("Bob Bobberson", "bob@mail.com", "bobpass")
         user_json = user.get_json()
         self.assertDictEqual(user_json, {"id":None, "email":"bob@mail.com"})
     
     def test_hashed_password(self):
         password = "mypass"
         hashed = generate_password_hash(password, method='sha256')
-        user = User("bob@mail.com", password)
+        user = User("Bob Bobberson", "bob@mail.com", password)
         assert user.password != password
 
     def test_check_password(self):
         password = "mypass"
-        user = User("bob@mail.com", password)
+        user = User("Bob Bobberson", "bob@mail.com", password)
         assert user.check_password(password)
 
 '''
@@ -57,13 +57,13 @@ def empty_db():
 
 
 def test_authenticate():
-    user = create_user("bob@mail.com", "bobpass")
+    user = create_user("Bob Bobberson", "bob@mail.com", "bobpass")
     assert login("bob@mail.com", "bobpass") != None
 
 class UsersIntegrationTests(unittest.TestCase):
 
     def test_create_user(self):
-        user = create_user("rick@mail.com", "bobpass")
+        user = create_user("Rick Rickson", "rick@mail.com", "bobpass")
         assert user.email == "rick@mail.com"
 
     def test_get_all_users_json(self):
