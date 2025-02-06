@@ -6,42 +6,47 @@ import Button from '../components/Button'
 import Paragraph from '../components/Paragraph'
 import Carousel from '../components/Carousel'
 import { StyleSheet, View, SafeAreaView, Text } from 'react-native'
+import { theme } from '../core/theme'
 
 
 export default function StartScreen({ navigation }) {
   return (
 
-    <Background>
+    <View style={styles.startScreenContainer}>
 
-      <SafeAreaView>
+      <SafeAreaView style={{ width: '100%' }}>
         <Carousel />
       </SafeAreaView>
 
-      <Header>Welcome</Header>
+      <Background>
 
-      <Paragraph>
-        Are you ready to be finaincialy stable :D
-      </Paragraph>
+        <Header>Welcome</Header>
 
-      <Button
-        mode="contained"
-        onPress={() => navigation.navigate('LoginScreen')}
-      >
-        Login
-      </Button>
-      <Button
-        mode="outlined"
-        onPress={() => navigation.navigate('RegisterScreen')}
-      >
-        Sign Up
-      </Button>
-    </Background>
+        <Paragraph>
+          Ready to take control of your finances with confidence?
+          Let's build a smart, sustainable budget that works for you—one step at a time
+        </Paragraph>
+
+        <Button
+          mode="contained"
+          onPress={() => navigation.navigate('LoginScreen')}
+        >
+          Login
+        </Button>
+        <Button
+          mode="outlined"
+          onPress={() => navigation.navigate('RegisterScreen')}
+        >
+          Sign Up
+        </Button>
+      </Background>
+    </View >
   )
 }
 
 const styles = StyleSheet.create({
-  carouselView: {
-    flex: 0.2,
-    backgroundColor: 'white',
-  }
+  startScreenContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+  },
 })

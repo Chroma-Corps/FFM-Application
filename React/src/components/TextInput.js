@@ -30,11 +30,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface,
   },
   description: {
+    fontFamily: theme.fonts.light.fontFamily,
     fontSize: 13,
     color: theme.colors.secondary,
     paddingTop: 8,
   },
   error: {
+    fontFamily: theme.fonts.light.fontFamily,
     fontSize: 13,
     color: theme.colors.error,
     paddingTop: 8,

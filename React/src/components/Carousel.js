@@ -8,15 +8,15 @@ const ITEM_HEIGHT = 400
 
 const data = [
     {
-        "src": require('../assets/slider_1.jpeg'),
+        "src": require('../assets/images/slider_1.jpeg'),
         "alt": "Image01 "
     },
     {
-        "src": require('../assets/slider_2.jpeg'),
+        "src": require('../assets/images/slider_2.jpeg'),
         "alt": "Image02 "
     },
     {
-        "src": require('../assets/slider_3.jpeg'),
+        "src": require('../assets/images/slider_3.jpeg'),
         "alt": "Image03 "
     }
 ];
@@ -53,7 +53,7 @@ const PaginationDot = ({ index, scrollX }) => {
         const backgroundColor = interpolateColor(
             scrollX.value,
             [0, ITEM_WIDTH, ITEM_HEIGHT],
-            ['#9095A7', '#9095A7', '#9095A7'],
+            ['#48A6A7', '#48A6A7', '#48A6A7'],
         )
 
         return {
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     },
 
     imageBackgroundStyle: {
-        resizeMode: 'cover',
+        resizeMode: 'contain',
         width: '100%',
         height: '100%',
         borderRadius: 14,

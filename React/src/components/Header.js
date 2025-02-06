@@ -4,14 +4,15 @@ import { Text } from 'react-native-paper'
 import { theme } from '../core/theme'
 
 export default function Header(props) {
+
   return <Text style={styles.header} {...props} />
 }
 
 const styles = StyleSheet.create({
   header: {
-    fontSize: 21,
-    color: theme.colors.primary,
-    fontWeight: 'bold',
+    fontSize: 60,
+    fontFamily: theme.fonts.bold.fontFamily, // Use custom font
+    color: theme.colors.heading,
     paddingVertical: 10,
   },
 })
