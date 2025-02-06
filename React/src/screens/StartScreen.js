@@ -4,16 +4,18 @@ import Logo from '../components/Logo'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import Paragraph from '../components/Paragraph'
-// import { SafeAreaView } from "react-native";
-// import Carousel from "./components/Carousel";
+import Carousel from '../components/Carousel'
+import { StyleSheet, View } from 'react-native'
+
 
 export default function StartScreen({ navigation }) {
   return (
+
     <Background>
 
-      {/* <SafeAreaView>
+      <View style={styles.carouselView}>
         <Carousel />
-      </SafeAreaView> */}
+      </View>
 
       <Header>Welcome</Header>
 
@@ -36,3 +38,10 @@ export default function StartScreen({ navigation }) {
     </Background>
   )
 }
+
+const styles = StyleSheet.create({
+  carouselView: {
+    flex: 0.9,
+    backgroundColor: 'white',
+  }
+})
