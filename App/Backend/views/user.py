@@ -20,6 +20,6 @@ def get_user_page():
 @user_views.route('/users', methods=['POST'])
 def create_user_action():
     data = request.form
-    flash(f"User {data['username']} created!")
-    create_user(data['username'], data['password'])
+    flash(f"User With Email: {data['email']} created!")
+    create_user(data['email'], data['password'])
     return
