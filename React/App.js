@@ -3,6 +3,7 @@ import { Provider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { theme } from './src/core/theme'
+import { useFonts } from 'expo-font'
 import {
   StartScreen,
   LoginScreen,
@@ -14,6 +15,19 @@ import {
 const Stack = createStackNavigator()
 
 export default function App() {
+
+  const [fontsLoaded] = useFonts({
+    "Quicksand-Light": require("./src/assets/fonts/Quicksand-Light.ttf"),
+    "Quicksand-Medium": require("./src/assets/fonts/Quicksand-Medium.ttf"),
+    "Quicksand-Regular": require("./src/assets/fonts/Quicksand-Regular.ttf"),
+    "Quicksand-SemiBold": require("./src/assets/fonts/Quicksand-SemiBold.ttf"),
+    "Quicksand-Bold": require("./src/assets/fonts/Quicksand-Bold.ttf")
+  })
+
+  if (!fontsLoaded) {
+    return null
+  }
+
   return (
     <Provider theme={theme}>
       <NavigationContainer>
