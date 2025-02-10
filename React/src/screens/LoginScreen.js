@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { TouchableOpacity, StyleSheet, View } from 'react-native'
-import { Text } from 'react-native-paper'
+import { Text, Card } from 'react-native-paper'
 import Background from '../components/Background'
 import Logo from '../components/Logo'
 import Header from '../components/Header'
@@ -25,103 +25,207 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: passwordError })
       return
     }
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Dashboard' }],
+    })
+  }
 
-    setLoading(true)
+  const onSocialGooglePressed = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Dashboard' }],
+    })
+  }
 
-    try {
-        // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_DEVICE}/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.value,
-            password: password.value,
-          }),
-        })
-
-        const data = await response.json()
-
-        if (response.ok) {
-          console.log('Login Successful:', data)
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Dashboard' }],
-          })
-        } else {
-          console.error('Login Failed:', data.message)
-          alert(data.message)
-        }
-    } catch(error) {
-      console.error('Error Loggin In', error)
-      alert('An Error Occurred, Please Try Again Later')
-    } finally {
-      setLoading(false)
-    }
+  const onSocialFacebookPressed = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Dashboard' }],
+    })
   }
 
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
-      <Logo />
-      <Header>Welcome back.</Header>
-      <TextInput
-        label="Email"
-        returnKeyType="next"
-        value={email.value}
-        onChangeText={(text) => setEmail({ value: text, error: '' })}
-        error={!!email.error}
-        errorText={email.error}
-        autoCapitalize="none"
-        autoCompleteType="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-      />
-      <TextInput
-        label="Password"
-        returnKeyType="done"
-        value={password.value}
-        onChangeText={(text) => setPassword({ value: text, error: '' })}
-        error={!!password.error}
-        errorText={password.error}
-        secureTextEntry
-      />
-      <View style={styles.forgotPassword}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ResetPasswordScreen')}
-        >
-          <Text style={styles.forgot}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View>
-      <Button mode="contained" onPress={onLoginPressed} loading={loading}>
-        Login
-      </Button>
-      <View style={styles.row}>
-        <Text>Don’t have an account? </Text>
+
+      <Header style={[{ textAlign: 'center' }, styles.header]}> Login </Header>
+      <Text style={styles.cardDescription}>Enter the following details to sign in to your account </Text>
+
+      <Card style={styles.card}>
+        <Card.Content>
+
+          <TextInput
+            label="Email"
+            returnKeyType="next"
+            value={email.value}
+            onChangeText={(text) => setEmail({ value: text, error: '' })}
+            error={!!email.error}
+            errorText={email.error}
+            autoCapitalize="none"
+            autoCompleteType="email"
+            textContentType="emailAddress"
+            keyboardType="email-address"
+            style={styles.input}
+          />
+
+          <TextInput
+            label="Password"
+            returnKeyType="done"
+            value={password.value}
+            onChangeText={(text) => setPassword({ value: text, error: '' })}
+            error={!!password.error}
+            errorText={password.error}
+            secureTextEntry
+            style={styles.input}
+          />
+
+          <View style={styles.forgotPassword}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ResetPasswordScreen')}
+            >
+              <Text style={styles.forgot}>Forgot your password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Button
+            mode="contained"
+            onPress={onLoginPressed}
+            style={{ backgroundColor: theme.colors.secondary }}
+            labelStyle={{ color: theme.colors.text, fontFamily: theme.fonts.bold.fontFamily }}
+          >
+            Login
+          </Button>
+
+          <Text style={styles.orText}>- or login with -</Text>
+
+          <Button
+            mode="contained"
+            style={styles.socialButton}
+            labelStyle={[
+              styles.buttonLabel,
+              { fontFamily: theme.fonts.bold.fontFamily, color: theme.colors.text }
+            ]}
+            icon="google" //thnx to react-native-vector-icons hehe
+          >
+            Google
+          </Button>
+
+          <Button
+            mode="contained"
+            style={styles.socialButton}
+            labelStyle={[
+              styles.buttonLabel,
+              { fontFamily: theme.fonts.bold.fontFamily, color: theme.colors.text }
+            ]}
+            icon="facebook" //thnx to react-native-vector-icons hehe
+          >
+            Facebook
+          </Button>
+
+          <View style={styles.dottedLine} />
+
+        </Card.Content>
+      </Card>
+
+      <View style={[styles.row, { marginTop: 30 }]}>
+        <Text style={[styles.forgot, { color: theme.colors.description }]}>Don’t have an account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('RegisterScreen')}>
           <Text style={styles.link}>Sign up</Text>
         </TouchableOpacity>
       </View>
+
     </Background>
   )
 }
 
 const styles = StyleSheet.create({
+  card: {
+    padding: 10,
+    borderRadius: 10,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    backgroundColor: '#f2f2f2', // Slightly darker card background
+  },
+
+  cardDescription: {
+    textAlign: 'center',
+    fontFamily: theme.fonts.medium.fontFamily,
+    marginBottom: 10,
+    fontWeight: 'bold',
+    color: theme.colors.description,
+  },
+
+  header: {
+    fontSize: 60,
+    fontFamily: theme.fonts.bold.fontFamily, // Use custom font
+    color: theme.colors.heading,
+    paddingVertical: 10,
+  },
+
+  input: {
+    fontFamily: theme.fonts.regular.fontFamily,
+    color: theme.colors.text,
+    backgroundColor: 'transparent',
+    marginBottom: 12,
+  },
+
   forgotPassword: {
     width: '100%',
-    alignItems: 'flex-end',
-    marginBottom: 24,
+    alignItems: 'flex-start',
+    marginBottom: 16,
   },
+
+  orText: {
+    textAlign: 'center',
+    marginVertical: 12,
+    fontFamily: theme.fonts.medium.fontFamily,
+    fontWeight: 'bold',
+  },
+
+  socialButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+
+  socialButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    backgroundColor: '#D0D0D0',
+  },
+
+  buttonLabel: {
+    fontWeight: 'bold',
+  },
+
+  dottedLine: {
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.text,
+    borderStyle: 'dotted',
+    marginVertical: 20,
+  },
+
   row: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     marginTop: 4,
+    justifyContent: 'center',
   },
+
   forgot: {
+    fontFamily: theme.fonts.medium.fontFamily,
+    textDecorationLine: 'underline',
     fontSize: 13,
-    color: theme.colors.secondary,
+    fontWeight: 'bold',
+    color: theme.colors.text,
   },
+
   link: {
+    fontFamily: theme.fonts.medium.fontFamily,
     fontWeight: 'bold',
     color: theme.colors.primary,
   },
