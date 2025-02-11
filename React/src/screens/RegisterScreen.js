@@ -11,13 +11,15 @@ import { theme } from '../core/theme'
 import { emailValidator } from '../helpers/emailValidator'
 import { passwordValidator } from '../helpers/passwordValidator'
 import { nameValidator } from '../helpers/nameValidator'
+import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: '', error: '' })
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
+  const [loading, setLoading] = useState(false)
 
-  const onSignUpPressed = () => {
+  const onSignUpPressed = async () => {
     const nameError = nameValidator(name.value)
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
@@ -27,10 +29,41 @@ export default function RegisterScreen({ navigation }) {
       setPassword({ ...password, error: passwordError })
       return
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
+
+    setLoading(true)
+
+    try {
+      // Replace With API_URL_DEVICE When Testing Mobile
+      const response = await fetch(`${API_URL_LOCAL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.value,
+          email: email.value,
+          password: password.value,
+        }),
+      })
+
+      const data = await response.json()
+
+      if(response.ok) {
+        console.log('Registration Successful:', data)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Dashboard' }],
+        })
+      } else {
+        console.error('Registration Failed:', data.message)
+        alert(data.message)
+      }
+    } catch(error) {
+      console.error('Error Registering', error)
+      alert('An Error Occurred, Please Try Again Later')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -71,6 +104,7 @@ export default function RegisterScreen({ navigation }) {
         mode="contained"
         onPress={onSignUpPressed}
         style={{ marginTop: 24 }}
+        loading={loading}
       >
         Sign Up
       </Button>

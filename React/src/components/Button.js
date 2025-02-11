@@ -23,8 +23,10 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 10,
     paddingVertical: 2,
+    borderRadius: 8
   },
   text: {
+    fontFamily: theme.fonts.medium.fontFamily,
     fontWeight: 'bold',
     fontSize: 15,
     lineHeight: 26,
