@@ -8,61 +8,31 @@ function home() {
 
     const [data, setData] = useState([]);
 
-    const checkServer = async (urls) => {
-      for (const url of urls) {
-        try {
-          const response = await fetch(url, { method: 'GET' });
-          if (response.ok) return url;
-        } catch (error) {
-          console.log(`Failed To Connect To ${url}`);
+    const fetchData = async () => {
+      try {
+        // Replace With API_URL_DEVICE When Testing Mobile
+        const response = await fetch(`${API_URL_DEVICE}/allusers`, { method: 'GET' });
+        if (response.ok) {
+          const users = await response.json();
+          console.log('Fetched Users:', users);
+          setData(users);
+        } else {
+          console.error('Failed To Fetch Users:', response.statusText);
         }
+      } catch (error) {
+        console.error('Error Fetching Users:', error);
       }
-      return null;
     };
 
     useEffect(() => {
-      const possibleUrls = [
-        `${API_URL_LOCAL}/allusers`, // For Web
-        `${API_URL_DEVICE}/allusers`, // For Mobile
-      ];
-  
-      checkServer(possibleUrls).then((workingUrl) => {
-        if (workingUrl) {
-          console.log(`Using Server: ${workingUrl}`);
-          fetch(workingUrl, { method: 'GET' })
-            .then((resp) => resp.json())
-            .then((users) => {
-              console.log('Fetched Users:', users);
-              setData(users);
-            })
-            .catch((error) => {
-              console.error('Uh-Oh! Error Fetching Users:', error);
-            });
-        } else {
-          console.error('No accessible server found.');
-        }
-      });
+      fetchData();
     }, []);
-
-    // const fetchData = () => {
-    //     fetch('http://127.0.0.1:8080/allusers', {
-    //       method: 'GET',
-    //     })
-    //       .then((resp) => resp.json())
-    //       .then((users) => {
-    //         console.log('Fetched users:', users);
-    //         setData(users);
-    //       })
-    //       .catch((error) => {
-    //         console.error('Error fetching users:', error);
-    //       });
-    //   };
 
     const renderData = (item) => {
         return (
             <Card style={styles.cardStyle}>
                 <Text style={{fontSize:18}}>{item.id}</Text>
-                <Text>{item.username}</Text>
+                <Text>{item.email}</Text>
             </Card>
         )
     }
@@ -83,7 +53,6 @@ function home() {
         theme = {{colors:{accent:"green"}}}
         onPress={() => {
             console.log("Pressed!");
-            // fetchData();
             }}
         />
         <Text style = {styles.bottomText}>Chroma Corps</Text>

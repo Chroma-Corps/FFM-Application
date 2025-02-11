@@ -10,23 +10,55 @@ import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 import { emailValidator } from '../helpers/emailValidator'
 import { passwordValidator } from '../helpers/passwordValidator'
+import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
+  const [loading, setLoading] = useState(false)
 
-  const onLoginPressed = () => {
+  const onLoginPressed = async () => {
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
-    if (emailError || passwordError) {
+    if (passwordError) {
       setEmail({ ...email, error: emailError })
       setPassword({ ...password, error: passwordError })
       return
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
+
+    setLoading(true)
+
+    try {
+        // Replace With API_URL_DEVICE When Testing Mobile
+        const response = await fetch(`${API_URL_DEVICE}/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.value,
+            password: password.value,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (response.ok) {
+          console.log('Login Successful:', data)
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Dashboard' }],
+          })
+        } else {
+          console.error('Login Failed:', data.message)
+          alert(data.message)
+        }
+    } catch(error) {
+      console.error('Error Loggin In', error)
+      alert('An Error Occurred, Please Try Again Later')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -62,7 +94,7 @@ export default function LoginScreen({ navigation }) {
           <Text style={styles.forgot}>Forgot your password?</Text>
         </TouchableOpacity>
       </View>
-      <Button mode="contained" onPress={onLoginPressed}>
+      <Button mode="contained" onPress={onLoginPressed} loading={loading}>
         Login
       </Button>
       <View style={styles.row}>
