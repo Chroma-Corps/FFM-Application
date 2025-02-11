@@ -19,6 +19,7 @@ export default function StartScreen({ navigation }) {
         Ready to take control of your finances with confidence?
         Let's build a smart, sustainable budget that works for you—one step at a time
         </Paragraph>
+        
         <Button
           mode="contained"
           onPress={() => navigation.navigate('LoginScreen')}

@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     borderRadius: 8
   },
   text: {
-    fontFamily: theme.fonts.bodyMedium.fontFamily,
+    fontFamily: theme.fonts.medium.fontFamily,
     fontWeight: 'bold',
     fontSize: 15,
     lineHeight: 26,

@@ -127,7 +127,6 @@ const CarouselCard = ({ item, id, scrollX, total }) => {
             </Animated.View>
         </Animated.View>
     )
-
 }
 
 const CarouselCardPagination = ({ data, scrollX }) => {
@@ -190,12 +189,14 @@ const styles = StyleSheet.create({
         height: ITEM_HEIGHT,
         overflow: 'hidden',
     },
+  
     imageBackgroundStyle: {
         resizeMode: 'contain',
         width: '100%',
         height: '100%',
         overflow: 'hidden',
     },
+  
     imageBackgroundView: {
         paddingHorizontal: 20,
         paddingVertical: 20,
@@ -203,6 +204,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         gap: 2
     },
+  
     caroselCardView: {
         width: ITEM_WIDTH,
         height: ITEM_HEIGHT,
@@ -212,6 +214,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
     },
+
     cardImage: {
         height: 20,
         width: 20
@@ -222,6 +225,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 10
     },
+
     dot: {
         height: 10,
         marginHorizontal: 8,
