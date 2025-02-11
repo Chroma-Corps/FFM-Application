@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
 
-
 from.index import index_views
 
 from App.Backend.controllers import (
-    login
+    login,
+    get_all_users
 )
 
 auth_views = Blueprint('auth_views', __name__)
@@ -22,18 +22,17 @@ def get_user_page():
 @jwt_required()
 def identify_page():
     return
-    
 
 @auth_views.route('/login', methods=['POST'])
 def login_action():
-    data = request.form
-    token = login(data['username'], data['password'])
-    response = redirect(request.referrer)
+    data = request.get_json()
+    token = login(data['email'], data['password'])
+
     if not token:
-        flash('Bad username or password given'), 401
-    else:
-        flash('Login Successful')
-        set_access_cookies(response, token) 
+        return jsonify({"message": "Bad email Or Password Given"}), 401
+
+    response = jsonify({"message": "Login Successful"})
+    set_access_cookies(response, token)
     return response
 
 @auth_views.route('/logout', methods=['GET'])
@@ -50,9 +49,9 @@ API Routes
 @auth_views.route('/api/login', methods=['POST'])
 def user_login_api():
   data = request.json
-  token = login(data['username'], data['password'])
+  token = login(data['email'], data['password'])
   if not token:
-    return jsonify(message='bad username or password given'), 401
+    return jsonify(message='bad email or password given'), 401
   response = jsonify(access_token=token) 
   set_access_cookies(response, token)
   return response
@@ -60,7 +59,7 @@ def user_login_api():
 @auth_views.route('/api/identify', methods=['GET'])
 @jwt_required()
 def identify_user():
-    return jsonify({'message': f"username: {current_user.username}, id : {current_user.id}"})
+    return jsonify({'message': f"email: {current_user.email}, id : {current_user.id}"})
 
 @auth_views.route('/api/logout', methods=['GET'])
 def logout_api():
