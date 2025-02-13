@@ -28,10 +28,12 @@ class Transaction(db.Model):
     transactionTime = db.Column(db.Time, nullable=False, default=datetime.utcnow)
 
     # Relationships
+    userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
     budget = db.relationship('Budget', back_populates='transaction')
 
-    def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
+    def __init__(self, userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
+        self.userID = userID
         self.transactionTitle = transactionTitle
         self.transactionDesc = transactionDesc
         self.transactionType = transactionType
@@ -43,14 +45,15 @@ class Transaction(db.Model):
 
     def get_json(self):
         return {
-            'Transaction ID': self.transactionID,
-            'Transaction Title': self.transactionTitle,
-            'Transaction Description': self.transactionDesc,
-            'Transaction Type': self.transactionType.value,
-            'Transaction Category': self.transactionCategory.value,
-            'Transaction Amount': self.transactionAmount,
-            'Transaction Date': self.transactionDate.strftime("%Y-%m-%d"),
-            'Transaction Time': self.transactionTime.strftime("%H:%M:%S")
+            'userID': self.userID,
+            'transactionID': self.transactionID,
+            'transactionTitle': self.transactionTitle,
+            'transactionDescription': self.transactionDesc,
+            'transactionType': self.transactionType.value,
+            'transactionCategory': self.transactionCategory.value,
+            'transactionAmount': self.transactionAmount,
+            'transactionDate': self.transactionDate.strftime("%Y-%m-%d"),
+            'transactionTime': self.transactionTime.strftime("%H:%M:%S"),
         }
 
     def __str__(self):

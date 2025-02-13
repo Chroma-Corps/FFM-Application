@@ -2,8 +2,8 @@ from App.Backend.models import Budget
 from App.Backend.database import db
 
 # Create A New Budget
-def create_budget(budgetTitle, startDate, endDate):
-    new_budget = Budget(budgetTitle=budgetTitle, startDate=startDate, endDate=endDate)
+def create_budget(budgetTitle, startDate, endDate, userID):
+    new_budget = Budget(budgetTitle=budgetTitle, startDate=startDate, endDate=endDate, userID=userID)
     db.session.add(new_budget)
     db.session.commit()
     return new_budget
@@ -19,6 +19,14 @@ def get_all_budgets():
 # Get All Budgets (JSON)
 def get_all_budgets_json():
     budgets = Budget.query.all()
+    if not budgets:
+        return []
+    budgets = [budget.get_json() for budget in budgets]
+    return budgets
+
+# Get Budgets for Specific User (JSON)
+def get_user_budgets_json(user_id):
+    budgets = Budget.query.filter_by(userID=user_id).all()
     if not budgets:
         return []
     budgets = [budget.get_json() for budget in budgets]

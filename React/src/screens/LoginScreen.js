@@ -11,6 +11,7 @@ import { theme } from '../core/theme'
 import { emailValidator } from '../helpers/emailValidator'
 import { passwordValidator } from '../helpers/passwordValidator'
 import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: '', error: '' })
@@ -44,10 +45,14 @@ export default function LoginScreen({ navigation }) {
         const data = await response.json()
 
         if (response.ok) {
+          AsyncStorage.setItem('access_token', data.token);
+          AsyncStorage.setItem('userID', data.userID);
+
           console.log('Login Successful:', data)
+
           navigation.reset({
             index: 0,
-            routes: [{ name: 'Dashboard' }],
+            routes: [{ name: 'Budgets' }],
           })
         } else {
           console.error('Login Failed:', data.message)

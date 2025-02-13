@@ -10,19 +10,22 @@ class Budget(db.Model):
     endDate = db.Column(db.Date,nullable=False)
 
     # Relationships
+    userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     transaction = db.relationship('Transaction', back_populates='budget', cascade='all, delete-orphan')
 
-    def __init__(self, budgetTitle, startDate, endDate):
+    def __init__(self, budgetTitle, startDate, endDate, userID):
         self.budgetTitle = budgetTitle
         self.startDate = startDate
         self.endDate = endDate
+        self.userID = userID
 
     def get_json(self):
         return{
-            'Budget ID': self.budgetID,
-            'Budget Title': self.budgetTitle,
-            'Start Date': self.startDate,
-            'End Date': self.endDate
+            'budgetID': self.budgetID,
+            'budgetTitle': self.budgetTitle,
+            'startDate': self.startDate.strftime("%a, %d %b %Y"),
+            'endDate': self.endDate.strftime("%a, %d %b %Y"),
+            'userID': self.userID
         }
 
     def __str__(self):

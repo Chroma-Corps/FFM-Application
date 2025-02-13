@@ -2,8 +2,9 @@ from App.Backend.models import Transaction
 from App.Backend.database import db
 
 # Add Transaction
-def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
+def add_transaction(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
     new_transaction = Transaction(
+        userID=userID,
         transactionTitle=transactionTitle,
         transactionDesc=transactionDesc,
         transactionType=transactionType,
