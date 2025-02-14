@@ -51,11 +51,17 @@ export default function TransactionsScreen({ navigation }) {
 
   const renderData = (item) => {
       return (
-          <Card style={styles.cardStyle}>
-              <Text style={{fontSize:18}}>{item.transactionTitle} - {item.transactionAmount}</Text>
-              <Text>{item.transactionDesc}</Text>
-              <Text>{item.transactionCategory}</Text>
-          </Card>
+          <>
+            <View>
+              <Text style={styles.dateText}>{item.transactionDate}</Text>
+            </View>
+            <Card style={styles.cardStyle}>
+              <View style={styles.cardRow}>
+                <Text style={styles.titleText}>{item.transactionTitle}</Text>
+                <Text style={styles.amountText}>- ${item.transactionAmount}</Text>
+              </View>
+            </Card>
+          </>
       )
   }
 
@@ -92,8 +98,40 @@ const styles = StyleSheet.create({
         paddingTop: 100
     },
 
+    cardText: {
+      color: "#fff",
+      fontFamily: theme.fonts.medium.fontFamily,
+    },
+
     cardStyle: {
-      margin: 15,
-      padding: 25
-    }
+      margin: 10,
+      padding: 25,
+      backgroundColor: '#181818',
+      borderColor: theme.colors.secondary,
+      borderWidth: 2,
+      borderRadius: 30,
+    },
+    cardRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    amountText: {
+      fontSize: 15,
+      color: '#E57373',
+      fontFamily: theme.fonts.bold.fontFamily,
+    },
+    titleText: {
+      fontSize: 18,
+      color: theme.colors.surface,
+      fontFamily: theme.fonts.bold.fontFamily,
+    },
+    dateText: {
+      fontSize: 15,
+      fontFamily: theme.fonts.medium.fontFamily,
+      color: theme.colors.description,
+      lineHeight: 21,
+      textAlign: 'center',
+      paddingTop: 10
+  },
 })
