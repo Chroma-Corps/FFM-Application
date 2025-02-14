@@ -6,11 +6,18 @@ import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
 import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import BackButton from '../components/BackButton'
 
 export default function CreateBudgetsScreen({navigation}) {
     const [budgetTitle, setBudgetTitle] = useState('');
+    const [budgetAmount, setBudgetAmount] = useState('');
+    const [remainingBudgetAmount, setRemainingBudgetAmount] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const handleAmountChange = (value) => {
+        setBudgetAmount(value);
+        setRemainingBudgetAmount(value);
+      };
 
     const createBudget = async () => {
         const token = await AsyncStorage.getItem("access_token");
@@ -33,7 +40,7 @@ export default function CreateBudgetsScreen({navigation}) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ budgetTitle, startDate, endDate, userID })
+                body: JSON.stringify({ budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID })
             });
             
             if (response.ok) {
@@ -54,9 +61,11 @@ export default function CreateBudgetsScreen({navigation}) {
                 <InAppHeader>New Budget</InAppHeader>
                 <Card style={styles.card}>
                     <TextInput placeholder="Budget Title" value={budgetTitle} onChangeText={setBudgetTitle} style={styles.input} />
+                    <TextInput placeholder="Amount" value={budgetAmount} onChangeText={handleAmountChange} style={styles.input} keyboardType="numeric" />
                     <TextInput placeholder="Start Date" value={startDate} onChangeText={setStartDate} style={styles.input} />
                     <TextInput placeholder="End Date" value={endDate} onChangeText={setEndDate} style={styles.input} />
                 </Card>
+                <BackButton goBack={navigation.goBack} />
                 <Button onPress={createBudget}>Create</Button>
             </InAppBackground>
         </View>

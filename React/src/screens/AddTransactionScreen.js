@@ -9,6 +9,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Button from '../components/Button';
 import TransactionType from '../constants/TransactionTypes';
 import TransactionCategories from '../constants/TransactionCategories';
+import BackButton from '../components/BackButton'
 
 export default function AddTransactionScreen({ navigation }) {
     const [transactionTitle, setTransactionTitle] = useState('');
@@ -188,6 +189,7 @@ export default function AddTransactionScreen({ navigation }) {
                     placeholder="Select a Budget"
                 />
             </Card>
+            <BackButton goBack={navigation.goBack} />
             <Button onPress={addTransaction} style={styles.button}>
                 Add
             </Button>

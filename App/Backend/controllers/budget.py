@@ -2,8 +2,8 @@ from App.Backend.models import Budget
 from App.Backend.database import db
 
 # Create A New Budget
-def create_budget(budgetTitle, startDate, endDate, userID):
-    new_budget = Budget(budgetTitle, startDate, endDate, userID)
+def create_budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID):
+    new_budget = Budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID)
     db.session.add(new_budget)
     db.session.commit()
     return new_budget
@@ -40,11 +40,13 @@ def get_user_budgets_json(user_id):
     return budgets
 
 # Update Existing Budget
-def update_budget(id, budgetTitle=None, startDate=None, endDate=None):
+def update_budget(id, budgetTitle=None, budgetAmount=None, startDate=None, endDate=None):
     budget = get_budget(id)
     if budget:
         if budgetTitle:
             budget.budgetTitle = budgetTitle
+        if budgetAmount:
+            budget.budgetAmount = budgetAmount
         if startDate:
             budget.startDate = startDate
         if endDate:

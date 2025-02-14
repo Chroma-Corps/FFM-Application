@@ -1,6 +1,7 @@
 import datetime
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
+from App.Backend.models.budget import Budget
 from App.Backend.models.transaction import Transaction, TransactionCategory, TransactionType
 
 from App.Backend.controllers import (
@@ -25,7 +26,7 @@ def list_all_transactions():
 
 @transaction_views.route('/add-transaction', methods=['POST'])
 @jwt_required()
-def new_budget():
+def new_transaction():
     try:
         data = request.get_json()
         userID = data.get('userID')
@@ -41,8 +42,14 @@ def new_budget():
         if not all([userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime]):
             return jsonify({"error": "Missing required fields"}), 400
 
+        budget = Budget.query.get(data['budgetID'])
+
+        transactionAmount = float(transactionAmount)
         transactionDate = string_to_date(transactionDate)
         transactionTime = string_to_time(transactionTime)
+
+        updated_remaining_budget_amount = budget.remainingBudgetAmount - transactionAmount
+        budget.remainingBudgetAmount = updated_remaining_budget_amount
 
         new_transaction = add_transaction(
             userID=userID,

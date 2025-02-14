@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
+import InAppHeader from '../components/InAppHeader'
+import PlusFAB from '../components/PlusFAB';
+import BackButton from '../components/BackButton'
 
-export default function BudgetDetailsScreen({ route }) {
+export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
     const [budgetDetails, setBudgetDetails] = useState(null);
 
@@ -45,7 +48,7 @@ export default function BudgetDetailsScreen({ route }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{budgetDetails.budgetTitle}</Text>
+            <InAppHeader>{budgetDetails.budgetTitle}</InAppHeader>
             <Text>From: {budgetDetails.startDate} to {budgetDetails.endDate}</Text>
 
             <Text style={styles.subtitle}>Transactions:</Text>
@@ -54,18 +57,15 @@ export default function BudgetDetailsScreen({ route }) {
                 renderItem={renderTransaction}
                 keyExtractor={(item) => `${item.transactionID}`}
             />
+            <BackButton goBack={navigation.goBack} />
+            <PlusFAB onPress={() => navigation.push('AddTransaction')}/>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        padding: 20,
-    },
-
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
+        flex: 1
     },
 
     subtitle: {

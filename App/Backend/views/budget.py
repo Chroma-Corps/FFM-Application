@@ -30,17 +30,19 @@ def new_budget():
     try:
         data = request.get_json()
         budgetTitle = data.get('budgetTitle')
+        budgetAmount = data.get('budgetAmount')
+        remainingBudgetAmount = data.get('remainingBudgetAmount')
         startDate = data.get('startDate')
         endDate = data.get('endDate')
         userID = data.get('userID')
 
-        if not all([budgetTitle, startDate, endDate, userID]):
+        if not all([budgetTitle, budgetAmount, startDate, endDate, userID]):
             return jsonify({"error": "Missing required fields"}), 400
 
         startDate = string_to_date(startDate)
         endDate = string_to_date(endDate)
 
-        new_budget = create_budget(budgetTitle=budgetTitle, startDate=startDate, endDate=endDate, userID=userID)
+        new_budget = create_budget(budgetTitle=budgetTitle, budgetAmount=budgetAmount, remainingBudgetAmount=remainingBudgetAmount, startDate=startDate, endDate=endDate, userID=userID)
         return jsonify({"message": "Budget created successfully", "budgetID": new_budget.budgetID}), 201
 
     except Exception as e:

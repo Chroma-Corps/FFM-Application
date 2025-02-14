@@ -57,6 +57,10 @@ export default function BudgetsScreen({ navigation }) {
           >
             <Card style={styles.cardStyle}>
               <Text style={{fontSize:18}}>{item.budgetTitle}</Text>
+              <Text>
+                <Text style={{ fontWeight: 'bold' }}>${item.remainingBudgetAmount} </Text>
+                left of ${item.budgetAmount}
+              </Text>
               <Text>{item.startDate} to {item.endDate}</Text>
             </Card>
           </TouchableOpacity>
