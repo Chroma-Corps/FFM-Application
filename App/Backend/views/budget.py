@@ -15,7 +15,6 @@ def string_to_date(date_str):
     return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
 
 @budget_views.route('/budgets', methods=['GET'])
-@jwt_required()
 def list_all_budgets():
     try:
         budgets = get_all_budgets_json()

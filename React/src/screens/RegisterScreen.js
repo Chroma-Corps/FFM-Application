@@ -52,7 +52,7 @@ export default function RegisterScreen({ navigation }) {
         console.log('Registration Successful:', data)
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Dashboard' }],
+          routes: [{ name: 'Home' }],
         })
       } else {
         console.error('Registration Failed:', data.message)

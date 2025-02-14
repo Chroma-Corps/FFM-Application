@@ -15,7 +15,7 @@ export default function CreateBudgetsScreen({navigation}) {
 
     const createBudget = async () => {
         const token = await AsyncStorage.getItem("access_token");
-        const userID = await AsyncStorage.getItem('userID');
+        const userID = await AsyncStorage.getItem('user_id');
 
         if (!budgetTitle || !startDate || !endDate) {
             Alert.alert('Error', 'Please fill in all fields');
