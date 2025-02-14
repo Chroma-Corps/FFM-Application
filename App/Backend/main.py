@@ -1,17 +1,25 @@
 import os
-from flask import Flask, render_template
+from flask import Flask
+from flask_login import LoginManager, current_user
 from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
-
-
 from App.Backend.database import init_db
 from App.Backend.config import load_config
 
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    get_jwt_identity,
+    jwt_required,
+    set_access_cookies,
+    unset_jwt_cookies,
+)
 
 from App.Backend.controllers import (
     setup_jwt,
+    setup_flask_login,
     add_auth_context
 )
 
@@ -31,10 +39,9 @@ def create_app(overrides={}):
     add_views(app)
     init_db(app)
     jwt = setup_jwt(app)
+    setup_flask_login(app)
     setup_admin(app)
-    @jwt.invalid_token_loader
-    @jwt.unauthorized_loader
-    def custom_unauthorized_response(error):
-        return render_template('401.html', error=error), 401
+    # @jwt.invalid_token_loader
+    # @jwt.unauthorized_loader
     app.app_context().push()
     return app
