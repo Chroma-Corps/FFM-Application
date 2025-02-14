@@ -12,6 +12,7 @@ import {
   Dashboard,
 } from './src/screens'
 import BudgetsScreen from './src/screens/BudgetsScreen'
+import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
 
 
 const Stack = createStackNavigator()
@@ -44,6 +45,7 @@ export default function App() {
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
           <Stack.Screen name="Dashboard" component={Dashboard} />
           <Stack.Screen name="Budgets" component={BudgetsScreen} />
+          <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
           <Stack.Screen
             name="ResetPasswordScreen"
             component={ResetPasswordScreen}

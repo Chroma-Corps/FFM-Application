@@ -31,7 +31,7 @@ export default function LoginScreen({ navigation }) {
 
     try {
         // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_DEVICE}/login`, {
+        const response = await fetch(`${API_URL_LOCAL}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -46,7 +46,7 @@ export default function LoginScreen({ navigation }) {
 
         if (response.ok) {
           AsyncStorage.setItem('access_token', data.token);
-          AsyncStorage.setItem('userID', data.userID);
+          AsyncStorage.setItem('user_id', data.userID);
 
           console.log('Login Successful:', data)
 

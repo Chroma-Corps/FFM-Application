@@ -1,6 +1,7 @@
 // rfce
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
 import PlusFAB from '../components/PlusFAB';
@@ -16,15 +17,15 @@ export default function BudgetsScreen({ navigation }) {
 
     const fetchData = async () => {
       try {
-        const token = await AsyncStorage.getItem("access_token");  // Await the Promise
-        const userID = await AsyncStorage.getItem("user_id");  // Await the Promise
+        const token = await AsyncStorage.getItem("access_token");
+        const userID = await AsyncStorage.getItem("user_id");
         
         if (!token) {
           console.error('No Token Found');
           return;
         }
     
-        const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
+        const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -45,9 +46,11 @@ export default function BudgetsScreen({ navigation }) {
     };
     
 
-    useEffect(() => {
-      fetchData();
-    }, []);
+    useFocusEffect(
+      useCallback(() => {
+          fetchData();
+      }, [])
+  );
 
     const renderData = (item) => {
         return (
@@ -63,26 +66,27 @@ export default function BudgetsScreen({ navigation }) {
         <View style={styles.budgetsScreen}>
             <InAppBackground>
                 <InAppHeader>Budgets</InAppHeader>
-                <FlatList 
-                    data = {data} 
-                    renderItem={({item}) => {
-                        return renderData(item)
-                    }}
-                    keyExtractor={item =>`${item.budgetID}`}
-                />
-                {/* <Text style={styles.defaultText}>You Have No Budgets Yet!</Text> */}
-                <PlusFAB/>
-                <Button
-                        mode="outlined"
-                        onPress={() =>
-                          navigation.reset({
-                            index: 0,
-                            routes: [{ name: 'StartScreen' }],
-                          })
-                        }
-                      >
-                        Logout
-                </Button>
+                {data.length === 0 ? (
+                    <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
+                ) : (
+                    <FlatList 
+                        data={data} 
+                        renderItem={({ item }) => renderData(item)}
+                        keyExtractor={item => `${item.budgetID}`}
+                    />
+                )}
+                <PlusFAB onPress={() => navigation.push('CreateBudget')}/>
+                {/* <Button
+                    mode="outlined"
+                    onPress={() =>
+                      navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'StartScreen' }],
+                      })
+                    }
+                  >
+                    Logout
+                </Button> */}
             </InAppBackground>
         </View>
     )

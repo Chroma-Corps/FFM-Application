@@ -2,12 +2,12 @@ import React from 'react'
 import { StyleSheet } from 'react-native'
 import {FAB} from 'react-native-paper';
 
-export default function PlusFAB({style}) {
+export default function PlusFAB({style, onPress}) {
     return (
         <FAB 
         style = {[styles.fab, style]}
         icon="plus"
-        onPress={() => {console.log("Pressed!");}}
+        onPress={onPress}
         />
     )
 }
