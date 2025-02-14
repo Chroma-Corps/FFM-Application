@@ -13,6 +13,12 @@ export default function Button({ mode, style, ...props }) {
       ]}
       labelStyle={styles.text}
       mode={mode}
+      theme={{
+        colors: {
+          ...theme.colors,
+          outline: theme.colors.primary,
+        },
+      }}
       {...props}
     />
   )

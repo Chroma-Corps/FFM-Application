@@ -63,7 +63,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     keyExtractor={(item) => `${item.transactionID}`}
                 />
                 <BackButton goBack={navigation.goBack} />
-                <PlusFAB onPress={() => navigation.push('AddTransaction')}/>
+                {/* <PlusFAB onPress={() => navigation.push('AddTransaction')}/> */}
             </InAppBackground>
         </View>
     );

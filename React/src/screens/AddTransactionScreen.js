@@ -10,6 +10,7 @@ import Button from '../components/Button';
 import TransactionType from '../constants/TransactionTypes';
 import TransactionCategories from '../constants/TransactionCategories';
 import BackButton from '../components/BackButton'
+import { theme } from '../core/theme'
 
 export default function AddTransactionScreen({ navigation }) {
     const [transactionTitle, setTransactionTitle] = useState('');
@@ -134,7 +135,6 @@ export default function AddTransactionScreen({ navigation }) {
                     onChangeText={setTransactionDesc}
                     style={styles.input}
                 />
-                <Text style={styles.label}>Categories</Text>
                 <View style={styles.radioContainer}>
                     {Object.values(TransactionCategories).map((type) => (
                         <TouchableOpacity
@@ -170,24 +170,27 @@ export default function AddTransactionScreen({ navigation }) {
                     onChangeText={setTransactionTime}
                     style={styles.input}
                 />
-
-                <Text style={styles.label}>Select Budget</Text>
-                <DropDownPicker
-                    open={open}
-                    value={selectedBudget}
-                    items={[
-                    { label: 'No Budget', value: null },
-                    ...(Array.isArray(budgets) ? budgets : []).map((budget) => ({
-                        label: budget.budgetTitle,
-                        value: budget.budgetID,
-                    })),
-                    ]}
-                    setOpen={setOpen}
-                    setValue={setSelectedBudget}
-                    containerStyle={styles.pickerContainer}
-                    style={styles.picker}
-                    placeholder="Select a Budget"
-                />
+                <View style={styles.container}>
+                    <DropDownPicker
+                        open={open}
+                        value={selectedBudget}
+                        items={[
+                        { label: 'No Budget', value: null },
+                        ...(Array.isArray(budgets) ? budgets : []).map((budget) => ({
+                            label: budget.budgetTitle,
+                            value: budget.budgetID,
+                        })),
+                        ]}
+                        setOpen={setOpen}
+                        setValue={setSelectedBudget}
+                        containerStyle={styles.pickerContainer}
+                        placeholder="Choose Budget"
+                        placeholderStyle={styles.placeholderStyle}
+                        textStyle={styles.textStyle}
+                        listItemLabelStyle={styles.listItemLabelStyle}
+                        dropDownContainerStyle={styles.dropDownContainerStyle}
+                    />
+                </View>
             </Card>
             <BackButton goBack={navigation.goBack} />
             <Button onPress={addTransaction} style={styles.button}>
@@ -205,45 +208,68 @@ export default function AddTransactionScreen({ navigation }) {
         },
 
         card: {
-            margin: 20,
-            padding: 15,
             flex: 1,
+            margin: 10,
+            padding: 25,
+            backgroundColor: '#181818',
+            borderColor: theme.colors.secondary,
+            borderWidth: 2,
+            borderRadius: 10,
         },
 
         input: {
-            borderBottomWidth: 1,
-            marginBottom: 10,
-            padding: 8,
+            borderWidth: 2,
+            borderColor: theme.colors.primary,
+            backgroundColor: '#f9f9f9',
+            padding: 5,
+            borderRadius: 8,
+            fontSize: 14,
+            color: '#333',
+            marginBottom: 15,
+            fontFamily: theme.fonts.medium.fontFamily,
         },
 
-        label: {
-            fontSize: 16,
-            fontWeight: 'bold',
-            marginBottom: 5,
-        },
-
-        button: { marginBottom: 20, },
+        button: { marginBottom: 0, },
 
         radioContainer: { 
             flexDirection: "row",
             flexWrap: "wrap",
             justifyContent: "center",
             alignItems: "center",
-            marginTop: 10,
         },
 
         radioButton: {
             padding: 10,
             marginHorizontal: 5,
+            marginVertical: 10,
             borderWidth: 1,
-            borderColor: "#007AFF",
+            borderColor: theme.colors.surface,
             borderRadius: 5,
-            backgroundColor: "transparent",
+            backgroundColor: "#181818",
         },
 
-        radioSelected: { backgroundColor: "#007AFF",},
-        radioText: { color: "black" },
+        radioSelected: { backgroundColor: theme.colors.primary },
+        radioText: { color: theme.colors.surface, fontFamily: theme.fonts.medium.fontFamily, fontSize: 12 },
         radioTextSelected: { color: "white" },
-        pickerContainer: { marginBottom: 10 },
-        picker: { borderColor: "#ccc" },
+
+        container: {
+            padding: 15,
+          },
+          pickerContainer: {
+            width: '100%',
+          },
+          placeholderStyle: {
+            fontFamily: theme.fonts.medium.fontFamily,
+          },
+          textStyle: {
+            fontFamily: theme.fonts.medium.fontFamily,
+          },
+          listItemLabelStyle: {
+            fontFamily: theme.fonts.medium.fontFamily,
+          },
+          dropDownContainerStyle: {
+            backgroundColor: '#f9f9f9',
+            borderColor: theme.colors.secondary,
+            borderWidth: 2,
+          },
     });
