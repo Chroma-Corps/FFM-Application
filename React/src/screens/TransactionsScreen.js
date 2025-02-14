@@ -72,7 +72,7 @@ export default function TransactionsScreen({ navigation }) {
               keyExtractor={item => `${item.transactionID}`}
           />
         )}
-      <PlusFAB onPress={() => navigation.push('')}/>
+      <PlusFAB onPress={() => navigation.push('AddTransaction')}/>
       </InAppBackground>
     </View>
   );

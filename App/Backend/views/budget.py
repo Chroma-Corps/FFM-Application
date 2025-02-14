@@ -23,7 +23,7 @@ def list_all_budgets():
         print(f"Error: {e}")
         return jsonify(error="Failed to fetch budgets"), 500
 
-@budget_views.route('/create', methods=['POST'])
+@budget_views.route('/create-budget', methods=['POST'])
 @jwt_required()
 def new_budget():
     try:

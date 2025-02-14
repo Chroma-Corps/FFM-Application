@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Alert } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
-import PlusFAB from '../components/PlusFAB';
 import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
 import { API_URL_LOCAL } from '@env';
@@ -17,13 +16,18 @@ export default function CreateBudgetsScreen({navigation}) {
         const token = await AsyncStorage.getItem("access_token");
         const userID = await AsyncStorage.getItem('user_id');
 
+        if (!token || !userID) {
+            console.error('No Token or UserID Found');
+            return;
+          }
+
         if (!budgetTitle || !startDate || !endDate) {
             Alert.alert('Error', 'Please fill in all fields');
             return;
         }
 
         try {
-            const response = await fetch(`${API_URL_LOCAL}/create`, {
+            const response = await fetch(`${API_URL_LOCAL}/create-budget`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${token}`,

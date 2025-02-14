@@ -13,6 +13,7 @@ import {
 } from './src/screens'
 import BudgetsScreen from './src/screens/BudgetsScreen'
 import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
+import AddTransactionScreen from './src/screens/AddTransactionScreen'
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
 
 
@@ -47,6 +48,7 @@ export default function App() {
           <Stack.Screen name="Dashboard" component={Dashboard} />
           <Stack.Screen name="Budgets" component={BudgetsScreen} />
           <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
+          <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
           <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
 
           <Stack.Screen name="Home" component={BottomTabsNavigator} />
