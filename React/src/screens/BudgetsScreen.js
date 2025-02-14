@@ -24,7 +24,7 @@ export default function BudgetsScreen({ navigation }) {
           return;
         }
     
-        const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
+        const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -56,12 +56,12 @@ export default function BudgetsScreen({ navigation }) {
             onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
           >
             <Card style={styles.cardStyle}>
-              <Text style={{fontSize:18}}>{item.budgetTitle}</Text>
-              <Text>
-                <Text style={{ fontWeight: 'bold' }}>${item.remainingBudgetAmount} </Text>
+              <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
+              <Text style={styles.cardText}>
+                <Text style={{fontWeight: 'bold'}}>${item.remainingBudgetAmount} </Text>
                 left of ${item.budgetAmount}
               </Text>
-              <Text>{item.startDate} to {item.endDate}</Text>
+              <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
             </Card>
           </TouchableOpacity>
         );
@@ -100,8 +100,24 @@ const styles = StyleSheet.create({
         paddingTop: 100
     },
 
+    cardTitle: {
+      color: theme.colors.description,
+      fontSize: 20,
+      fontFamily: theme.fonts.bold.fontFamily,
+    },
+
+    cardText: {
+      color: "#fff",
+      fontFamily: theme.fonts.medium.fontFamily,
+    },
+
     cardStyle: {
       margin: 10,
-      padding: 25
+      padding: 25,
+      backgroundColor: '#181818',
+      borderColor: theme.colors.secondary,
+      borderWidth: 2,
+      borderRadius: 30,
     }
+    
 })

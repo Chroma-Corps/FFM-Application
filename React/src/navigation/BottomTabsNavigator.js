@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import Dashboard from '../screens/Dashboard' 
 import BudgetsScreen from '../screens/BudgetsScreen'
 import TransactionsScreen from '../screens/TransactionsScreen'
+import { theme } from '../core/theme'
 
 const Tab = createBottomTabNavigator()
 
@@ -20,8 +21,20 @@ export default function BottomTabsNavigator() {
 
           return <MaterialIcons name={iconName} size={size} color={color} />
         },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.surface,
+        tabBarStyle: {
+          backgroundColor: '#181818',
+          borderTopColor: theme.colors.secondary,
+          borderTopWidth: 2,
+          height: 70,
+          justifyContent: 'center',
+          paddingBottom: 10,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontFamily: theme.fonts.medium.fontFamily,
+        },
         headerShown: false,
       })}
     >

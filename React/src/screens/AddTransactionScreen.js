@@ -34,7 +34,7 @@ export default function AddTransactionScreen({ navigation }) {
                     return;
                 }
 
-                const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
+                const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
                     method: 'GET',
                     headers: {
                     'Authorization': `Bearer ${token}`,
@@ -68,7 +68,7 @@ export default function AddTransactionScreen({ navigation }) {
             return;
             }
 
-            const response = await fetch(`${API_URL_LOCAL}/add-transaction`, {
+            const response = await fetch(`${API_URL_DEVICE}/add-transaction`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,

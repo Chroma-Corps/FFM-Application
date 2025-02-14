@@ -3,6 +3,7 @@ import { PaperProvider, Provider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { theme } from './src/core/theme'
+import PlusFAB from './src/components/PlusFAB'
 import { useFonts } from 'expo-font'
 import {
   StartScreen,
@@ -36,26 +37,28 @@ export default function App() {
 
   return (
     <Provider theme={theme}>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="StartScreen"
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="StartScreen" component={StartScreen} />
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-          <Stack.Screen name="Dashboard" component={Dashboard} />
-          <Stack.Screen name="Budgets" component={BudgetsScreen} />
-          <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
-          <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
-          <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
-          <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
+      <PaperProvider theme={theme}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="StartScreen"
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="StartScreen" component={StartScreen} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+            <Stack.Screen name="Dashboard" component={Dashboard} />
+            <Stack.Screen name="Budgets" component={BudgetsScreen} />
+            <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
+            <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
+            <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
+            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
 
-          <Stack.Screen name="Home" component={BottomTabsNavigator} />
-        </Stack.Navigator>
-      </NavigationContainer>
+            <Stack.Screen name="Home" component={BottomTabsNavigator} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
     </Provider>
   )
 }

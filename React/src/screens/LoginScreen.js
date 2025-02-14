@@ -30,7 +30,7 @@ export default function LoginScreen({ navigation }) {
 
     try {
         // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_LOCAL}/login`, {
+        const response = await fetch(`${API_URL_DEVICE}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
