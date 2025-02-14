@@ -54,7 +54,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                 <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
                 <Text style={styles.dateText}>From: {budgetDetails.startDate} to {budgetDetails.endDate}</Text>
                 <Text style={styles.amountText}>
-                    <Text style={{fontWeight: 'bold'}}>${budgetDetails.remainingBudgetAmount} </Text>
+                    <Text style={styles.amountTextBold}>${budgetDetails.remainingBudgetAmount} </Text>
                     left of ${budgetDetails.budgetAmount}
                 </Text>
                 <FlatList
@@ -76,8 +76,9 @@ const styles = StyleSheet.create({
     transactionCard: {
         padding: 15,
         marginVertical: 20,
-        borderWidth: 1,
-        borderColor: '#ccc',
+        borderBottomWidth: 2,
+        borderTopWidth: 2,
+        borderColor: theme.colors.surface,
         borderRadius: 20,
     },
 
@@ -110,6 +111,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: theme.colors.secondary,
         fontFamily: theme.fonts.medium.fontFamily,
+        textAlign: 'center',
+        paddingTop: 20,
+      },
+      amountTextBold: {
+        fontSize: 20,
+        color: theme.colors.secondary,
+        fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'center',
         paddingTop: 20,
       },

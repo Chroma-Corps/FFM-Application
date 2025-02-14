@@ -7,6 +7,7 @@ import InAppBackground from '../components/InAppBackground';
 import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BackButton from '../components/BackButton'
+import { theme } from '../core/theme'
 
 export default function CreateBudgetsScreen({navigation}) {
     const [budgetTitle, setBudgetTitle] = useState('');
@@ -77,12 +78,22 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     card: {
-        padding: 15,
-        margin: 25,
+        flex: 1,
+        margin: 10,
+        padding: 25,
+        backgroundColor: '#181818',
+        borderColor: theme.colors.secondary,
+        borderWidth: 2,
+        borderRadius: 10,
     },
     input: {
-        borderBottomWidth: 1,
-        marginBottom: 10,
-        padding: 8,
+        borderWidth: 2,
+        borderColor: theme.colors.primary,
+        backgroundColor: '#f9f9f9',
+        padding: 12,
+        borderRadius: 8,
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 30,
     },
 });
