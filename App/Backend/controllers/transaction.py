@@ -34,6 +34,14 @@ def get_all_transactions_json():
     transactions = [transaction.get_json() for transaction in transactions]
     return transactions
 
+# Get Transactions for Specific User (JSON)
+def get_user_transactions_json(user_id):
+    transactions = Transaction.query.filter_by(userID=user_id).all()
+    if not transactions:
+        return []
+    transactions = [transactions.get_json() for transactions in transactions]
+    return transactions
+
 # Update Existing Transaction
 def update_transaction(id, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory=None, transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None):
     transaction = get_transaction(id)

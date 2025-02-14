@@ -74,17 +74,6 @@ export default function BudgetsScreen({ navigation }) {
                     />
                 )}
                 <PlusFAB onPress={() => navigation.push('CreateBudget')}/>
-                {/* <Button
-                    mode="outlined"
-                    onPress={() =>
-                      navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'StartScreen' }],
-                      })
-                    }
-                  >
-                    Logout
-                </Button> */}
             </InAppBackground>
         </View>
     )
@@ -107,5 +96,5 @@ const styles = StyleSheet.create({
     cardStyle: {
       margin: 15,
       padding: 25
-  }
+    }
 })
