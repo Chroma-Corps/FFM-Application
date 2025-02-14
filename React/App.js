@@ -15,6 +15,7 @@ import BudgetsScreen from './src/screens/BudgetsScreen'
 import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
 import AddTransactionScreen from './src/screens/AddTransactionScreen'
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
+import BudgetDetailsScreen from './src/screens/BudgetDetailsScreen'
 
 
 const Stack = createStackNavigator()
@@ -48,6 +49,7 @@ export default function App() {
           <Stack.Screen name="Dashboard" component={Dashboard} />
           <Stack.Screen name="Budgets" component={BudgetsScreen} />
           <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
+          <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
           <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
           <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
 

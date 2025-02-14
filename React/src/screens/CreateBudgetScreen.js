@@ -4,7 +4,7 @@ import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL } from '@env';
+import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateBudgetsScreen({navigation}) {

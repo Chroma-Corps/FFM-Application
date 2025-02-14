@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import get_jwt_identity, jwt_required, current_user, unset_jwt_cookies, set_access_cookies
+from App.Backend.controllers.budget import get_budget_json
 from App.Backend.models.budget import Budget
 import datetime
 
@@ -55,3 +56,10 @@ def list_user_budgets(user_id):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify(error="Failed to fetch budgets"), 500
+
+@budget_views.route('/budget/<int:id>', methods=['GET'])
+def get_budget_details(id):
+    budget_data = get_budget_json(id)
+    if not budget_data:
+        return jsonify({'error': 'Budget not found'}), 404 
+    return jsonify(budget_data)

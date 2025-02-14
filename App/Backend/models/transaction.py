@@ -1,5 +1,4 @@
 import enum
-from datetime import datetime
 from App.Backend.database import db
 
 class TransactionType(enum.Enum):
@@ -24,8 +23,8 @@ class Transaction(db.Model):
     transactionType = db.Column(db.Enum(TransactionType), nullable=False)
     transactionCategory = db.Column(db.Enum(TransactionCategory), nullable=False)
     transactionAmount = db.Column(db.Float, nullable=False)
-    transactionDate = db.Column(db.Date, nullable=False, default=datetime.utcnow)
-    transactionTime = db.Column(db.Time, nullable=False, default=datetime.utcnow)
+    transactionDate = db.Column(db.Date, nullable=False)
+    transactionTime = db.Column(db.Time, nullable=False)
 
     # Relationships
     userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -52,8 +51,8 @@ class Transaction(db.Model):
             'transactionType': self.transactionType.value,
             'transactionCategory': self.transactionCategory.value,
             'transactionAmount': self.transactionAmount,
-            'transactionDate': self.transactionDate.strftime("%Y-%m-%d"),
-            'transactionTime': self.transactionTime.strftime("%H:%M:%S"),
+            'transactionDate': self.transactionDate.strftime("%a, %d %b %Y"),
+            'transactionTime': self.transactionTime.strftime("%H:%M"),
         }
 
     def __str__(self):

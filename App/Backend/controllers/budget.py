@@ -12,6 +12,13 @@ def create_budget(budgetTitle, startDate, endDate, userID):
 def get_budget(id):
     return Budget.query.get(id)
 
+# Get Budget By ID (JSON)
+def get_budget_json(id):
+    budget = Budget.query.get(id)
+    if budget:
+        return budget.get_json()
+    return None
+
 # Get All Budgets
 def get_all_budgets():
     return Budget.query.all()

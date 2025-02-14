@@ -1,6 +1,6 @@
 // rfce
 import React, {useState, useCallback} from 'react';
-import {View, Text, StyleSheet, FlatList} from 'react-native';
+import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
@@ -52,12 +52,15 @@ export default function BudgetsScreen({ navigation }) {
 
     const renderData = (item) => {
         return (
+          <TouchableOpacity
+            onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
+          >
             <Card style={styles.cardStyle}>
-                <Text style={{fontSize:18}}>{item.budgetTitle}</Text>
-                <Text>{item.startDate} to {item.endDate}</Text>
-                <Text>{item.userID}</Text>
+              <Text style={{fontSize:18}}>{item.budgetTitle}</Text>
+              <Text>{item.startDate} to {item.endDate}</Text>
             </Card>
-        )
+          </TouchableOpacity>
+        );
     }
 
     return (
@@ -94,7 +97,7 @@ const styles = StyleSheet.create({
     },
 
     cardStyle: {
-      margin: 15,
+      margin: 10,
       padding: 25
     }
 })
