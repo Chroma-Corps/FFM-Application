@@ -3,7 +3,9 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import InAppHeader from '../components/InAppHeader'
 import PlusFAB from '../components/PlusFAB';
+import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
+import InAppBackground from '../components/InAppBackground';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
@@ -37,28 +39,32 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         return (
             <View style={styles.transactionCard}>
                 <Text style={styles.transactionTitle}>{item.transactionTitle}</Text>
-                <Text>{item.transactionDescription}</Text>
-                <Text>Amount: ${item.transactionAmount}</Text>
-                <Text>Category: {item.transactionCategory}</Text>
-                <Text>Date: {item.transactionDate}</Text>
-                <Text>Time: {item.transactionTime}</Text>
+                <Text style={styles.descriptionText}>{item.transactionDescription}</Text>
+                <Text style={styles.descriptionText}>Amount: ${item.transactionAmount}</Text>
+                <Text style={styles.descriptionText}>Category: {item.transactionCategory}</Text>
+                <Text style={styles.descriptionText}>Date: {item.transactionDate}</Text>
+                {/* <Text style={styles.descriptionText}>Time: {item.transactionTime}</Text> */}
             </View>
         );
     };
 
     return (
         <View style={styles.container}>
-            <InAppHeader>{budgetDetails.budgetTitle}</InAppHeader>
-            <Text>From: {budgetDetails.startDate} to {budgetDetails.endDate}</Text>
-
-            <Text style={styles.subtitle}>Transactions:</Text>
-            <FlatList
-                data={budgetDetails.transactions}
-                renderItem={renderTransaction}
-                keyExtractor={(item) => `${item.transactionID}`}
-            />
-            <BackButton goBack={navigation.goBack} />
-            <PlusFAB onPress={() => navigation.push('AddTransaction')}/>
+            <InAppBackground>
+                <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
+                <Text style={styles.dateText}>From: {budgetDetails.startDate} to {budgetDetails.endDate}</Text>
+                <Text style={styles.amountText}>
+                    <Text style={{fontWeight: 'bold'}}>${budgetDetails.remainingBudgetAmount} </Text>
+                    left of ${budgetDetails.budgetAmount}
+                </Text>
+                <FlatList
+                    data={budgetDetails.transactions}
+                    renderItem={renderTransaction}
+                    keyExtractor={(item) => `${item.transactionID}`}
+                />
+                <BackButton goBack={navigation.goBack} />
+                <PlusFAB onPress={() => navigation.push('AddTransaction')}/>
+            </InAppBackground>
         </View>
     );
 }
@@ -67,23 +73,44 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
-
-    subtitle: {
-        fontSize: 18,
-        marginTop: 20,
-        fontWeight: 'bold',
-    },
-
     transactionCard: {
         padding: 15,
-        marginVertical: 10,
+        marginVertical: 20,
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius: 8,
+        borderRadius: 20,
     },
 
     transactionTitle: {
-        fontWeight: 'bold',
+        color: theme.colors.primary,
+        fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 18,
     },
+    dateText: {
+          fontSize: 15,
+          fontFamily: theme.fonts.medium.fontFamily,
+          color: theme.colors.description,
+          lineHeight: 21,
+          textAlign: 'center',
+          paddingTop: 10
+      },
+      titleText: {
+        fontSize: 25,
+        color: theme.colors.surface,
+        fontFamily: theme.fonts.bold.fontFamily,
+        textAlign: 'center',
+      },
+
+      descriptionText: {
+        fontSize: 15,
+        color: theme.colors.surface,
+        fontFamily: theme.fonts.medium.fontFamily,
+      },
+      amountText: {
+        fontSize: 20,
+        color: theme.colors.secondary,
+        fontFamily: theme.fonts.medium.fontFamily,
+        textAlign: 'center',
+        paddingTop: 20,
+      },
 });
