@@ -1,17 +1,15 @@
-import os, tempfile, pytest, logging, unittest
-from werkzeug.security import check_password_hash, generate_password_hash
-
+import pytest, logging, unittest
+from flask import current_app
 from App.main import create_app
 from App.database import db, create_db
 from App.models import User
-# from App.controllers import (
-#     create_user,
-#     get_all_users_json,
-#     login,
-#     get_user,
-#     update_user
-# )
-
+from App.controllers import (
+    create_user,
+    get_all_users_json,
+    my_login_user,
+    get_user,
+    update_user
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -76,34 +74,30 @@ class UserUnitTests(unittest.TestCase):
     Integration Tests
 '''
 
-# This fixture creates an empty database for the test and deletes it after the test
-# scope="class" would execute the fixture once and resued for all methods in the class
-# @pytest.fixture(autouse=True, scope="module")
-# def empty_db():
-#     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
-#     create_db()
-#     yield app.test_client()
-#     db.drop_all()
+class UserIntegrationTests(unittest.TestCase):
 
+    def test_int_01_create_user(self):
+        newuser = create_user("Johnny Applesauce", "johnny@mail.com", "johnnypass")
+        user = get_user(newuser.id)
+        assert user.email == "johnny@mail.com"
 
-# def test_authenticate():
-#     user = create_user("Bob Bobberson", "bob@mail.com", "bobpass")
-#     assert login("bob@mail.com", "bobpass") != None
+    def test_int_02_authenticate(self):
+        newuser = create_user("Bubble Bub", "bubble@mail.com", "bubblepass")
+        with current_app.test_request_context():
+            response = my_login_user(newuser)
+            assert response is not None
 
-# class UsersIntegrationTests(unittest.TestCase):
+    def test_int_03_get_all_users_json(self):
+        users_json = get_all_users_json()
+        print(users_json)
+        self.assertListEqual([{"id":1, "name":"Johnny Applesauce","email":"johnny@mail.com"},
+                              {"id":2, "name":"Bubble Bub", "email":"bubble@mail.com"}
+                              ], users_json)
 
-#     def test_create_user(self):
-#         user = create_user("Rick Rickson", "rick@mail.com", "bobpass")
-#         assert user.email == "rick@mail.com"
-
-#     def test_get_all_users_json(self):
-#         users_json = get_all_users_json()
-#         self.assertListEqual([{"id":1, "email":"bob@mail.com"}, {"id":2, "email":"rick@mail.com"}], users_json)
-
-#     # Tests data changes in the database
-#     def test_update_user(self):
-#         update_user(1, "ronnie@mail.com")
-#         user = get_user(1)
-#         assert user.email == "ronnie@mail.com"
+    def test_int_04_update_user(self):
+        newuser = create_user("Ronnie Ron", "runnie@mail.com", "ronniepass")
+        update_user(newuser.id, "ronnie@mail.com")
+        user = get_user(newuser.id)
+        assert user.email == "ronnie@mail.com"
         
 
