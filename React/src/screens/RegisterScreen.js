@@ -34,7 +34,7 @@ export default function RegisterScreen({ navigation }) {
 
     try {
       // Replace With API_URL_DEVICE When Testing Mobile
-      const response = await fetch(`${API_URL_DEVICE}/register`, {
+      const response = await fetch(`${API_URL_LOCAL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

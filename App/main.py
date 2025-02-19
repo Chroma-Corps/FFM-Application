@@ -5,8 +5,8 @@ from flask_uploads import DOCUMENTS, IMAGES, TEXT, UploadSet, configure_uploads
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import  FileStorage
-from App.Backend.database import init_db
-from App.Backend.config import load_config
+from App.database import init_db
+from App.config import load_config
 
 from flask_jwt_extended import (
     JWTManager,
@@ -17,13 +17,13 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 
-from App.Backend.controllers import (
+from App.controllers import (
     setup_jwt,
     setup_flask_login,
     add_auth_context
 )
 
-from App.Backend.views import views, setup_admin
+from App.views import views, setup_admin
 
 def add_views(app):
     for view in views:

@@ -1,5 +1,5 @@
 from werkzeug.security import check_password_hash, generate_password_hash
-from App.Backend.database import db
+from App.database import db
 from flask_login import UserMixin
 
 class User(db.Model, UserMixin):

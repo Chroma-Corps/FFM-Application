@@ -1,5 +1,5 @@
-from App.Backend.models import Budget
-from App.Backend.database import db
+from App.models import Budget
+from App.database import db
 
 # Create A New Budget
 def create_budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID):

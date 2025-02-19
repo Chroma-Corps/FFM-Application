@@ -23,7 +23,7 @@ export default function TransactionsScreen({ navigation }) {
         return;
       }
   
-      const response = await fetch(`${API_URL_DEVICE}/transactions/${userID}`, {
+      const response = await fetch(`${API_URL_LOCAL}/transactions/${userID}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

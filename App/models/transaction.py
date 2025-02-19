@@ -1,5 +1,5 @@
 import enum
-from App.Backend.database import db
+from App.database import db
 
 class TransactionType(enum.Enum):
     INCOME = "income"

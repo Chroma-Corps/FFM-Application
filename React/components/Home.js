@@ -11,7 +11,7 @@ function home() {
     const fetchData = async () => {
       try {
         // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_DEVICE}/allusers`, { method: 'GET' });
+        const response = await fetch(`${API_URL_LOCAL}/allusers`, { method: 'GET' });
         if (response.ok) {
           const users = await response.json();
           console.log('Fetched Users:', users);

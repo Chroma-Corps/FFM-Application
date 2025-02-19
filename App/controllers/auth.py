@@ -1,7 +1,7 @@
 import flask_login
 from flask import jsonify
 from functools import wraps
-from App.Backend.models import User
+from App.models import User
 from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity, unset_jwt_cookies, verify_jwt_in_request
 
 # Setup JWT Authentication

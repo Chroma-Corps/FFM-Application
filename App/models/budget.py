@@ -1,4 +1,4 @@
-from App.Backend.database import db
+from App.database import db
 
 class Budget(db.Model):
     __tablename__='budget'
