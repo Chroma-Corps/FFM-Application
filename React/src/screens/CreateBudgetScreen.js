@@ -35,7 +35,7 @@ export default function CreateBudgetsScreen({navigation}) {
         }
 
         try {
-            const response = await fetch(`${API_URL_DEVICE}/create-budget`, {
+            const response = await fetch(`${API_URL_LOCAL}/create-budget`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${token}`,

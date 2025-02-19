@@ -24,7 +24,7 @@ export default function BudgetsScreen({ navigation }) {
           return;
         }
     
-        const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
+        const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

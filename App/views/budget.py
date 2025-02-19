@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import get_jwt_identity, jwt_required, current_user, unset_jwt_cookies, set_access_cookies
-from App.Backend.controllers.budget import get_budget_json
-from App.Backend.models.budget import Budget
+from App.controllers.budget import get_budget_json
+from App.models.budget import Budget
 import datetime
 
-from App.Backend.controllers import (
+from App.controllers import (
     get_all_budgets_json,
     get_user_budgets_json,
     create_budget

@@ -1,5 +1,5 @@
-from App.Backend.models import Transaction
-from App.Backend.database import db
+from App.models import Transaction
+from App.database import db
 
 # Add Transaction
 def add_transaction(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
@@ -66,12 +66,3 @@ def update_transaction(id, transactionTitle=None, transactionDesc=None, transact
         db.session.commit()
         return transaction
     return None
-
-# Delete A Transaction
-def delete_transaction(id):
-    transaction = get_transaction(id)
-    if transaction:
-        db.session.delete(transaction)
-        db.session.commit()
-        return True
-    return False
