@@ -31,4 +31,21 @@ def user_tests_command(type):
         sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
     else:
         sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("budget", help="Run Budget Tests")
+@click.argument("type", default="all")
+def budget_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "BudgetIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+@test.command("transaction", help="Run Transaction Tests")
+@click.argument("type", default="all")
+def budget_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "TransactionIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
 app.cli.add_command(test)
