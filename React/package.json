@@ -20,6 +20,7 @@
     "react": "18.3.1",
     "react-native": "^0.76.7",
     "react-native-calendars": "^1.1309.1",
+    "react-native-calender": "^1.0.1",
     "react-native-dotenv": "^3.0.0",
     "react-native-dropdown-picker": "^5.0.0",
     "react-native-paper": "^5.13.1",
