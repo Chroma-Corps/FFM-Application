@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import DateRangeSelector from '../components/DateRangeSelector';
+import FilterTag from '../components/FilterTag';
 
 export default function CreateBudgetsScreen({ navigation }) {
     const [budgetTitle, setBudgetTitle] = useState('');
@@ -17,15 +18,11 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [dateRangePickerVisible, setDateRangePickerVisible] = useState(false);
+    const [budgetType, setBudgetType] = useState('Individual');
 
     const handleAmountChange = (value) => {
         setBudgetAmount(value);
         setRemainingBudgetAmount(value);
-    };
-
-    const handleDateRangeSelect = (start, end) => {
-        setStartDate(start);
-        setEndDate(end);
     };
 
     const createBudget = async () => {
@@ -49,7 +46,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID })
+                body: JSON.stringify({ budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID, budgetType })
             });
 
             if (response.ok) {
@@ -64,13 +61,14 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
     };
 
-
     return (
         <View style={styles.budgetsScreen}>
             <InAppBackground>
                 <View style={styles.headerContainer}>
-                    <BackButton goBack={navigation.goBack} style={styles.backButtonOverride} />
-                    <InAppHeader>Add Budget</InAppHeader>
+                    <InAppHeader>
+                        <BackButton goBack={navigation.goBack} style={styles.backButtonOverride} />
+                        Add Budget
+                    </InAppHeader>
                 </View>
 
                 <Card style={styles.card}>
@@ -88,14 +86,25 @@ export default function CreateBudgetsScreen({ navigation }) {
                         keyboardType="numeric"
                     />
 
-                    {/* <Text style={styles.input}>Start Date: {startDate || 'Not selected'}</Text>
-                    <Text style={styles.input}>End Date: {endDate || 'Not selected'}</Text> */}
-
-                    {/* Calendar Popup Trigger */}
                     <Button mode="outlined" onPress={() => setDateRangePickerVisible(!dateRangePickerVisible)}>
                         Select Period
                     </Button>
 
+                    <View style={styles.budgetTypeContainer}>
+                        <Text style={styles.defaultText}>Select Budget Type:</Text>
+                        <View style={styles.filterTagsContainer}>
+                            <FilterTag
+                                label="Individual"
+                                isSelected={budgetType === 'Individual'}
+                                onPress={() => setBudgetType('Individual')}
+                            />
+                            <FilterTag
+                                label="Family"
+                                isSelected={budgetType === 'Family'}
+                                onPress={() => setBudgetType('Family')}
+                            />
+                        </View>
+                    </View>
                 </Card>
 
                 <Button onPress={createBudget}>Create</Button>
@@ -105,7 +114,8 @@ export default function CreateBudgetsScreen({ navigation }) {
                         <View style={styles.centeredContainer}>
                             <DateRangeSelector
                                 onSave={(start, end) => {
-                                    console.log('Selected Date Range:', start, end);
+                                    setStartDate(start);
+                                    setEndDate(end);
                                     setDateRangePickerVisible(false);
                                 }}
                                 onCancel={() => setDateRangePickerVisible(false)}
@@ -113,13 +123,72 @@ export default function CreateBudgetsScreen({ navigation }) {
                         </View>
                     </View>
                 )}
-
             </InAppBackground>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    defaultText: {
+        fontSize: 20,
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: 'white',
+        lineHeight: 21,
+        marginBottom: 10,
+    },
+
+    headerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        paddingVertical: 5,
+        gap: 10,
+    },
+
+    backButtonOverride: {
+        position: 'relative',
+        top: 'auto',
+        left: 'auto',
+    },
+
+    budgetsScreen: {
+        flex: 1,
+    },
+
+    card: {
+        flex: 1,
+        margin: 10,
+        padding: 25,
+        backgroundColor: '#181818',
+        borderColor: theme.colors.secondary,
+        borderWidth: 2,
+        borderRadius: 10,
+    },
+
+    input: {
+        borderWidth: 2,
+        borderColor: theme.colors.primary,
+        backgroundColor: '#f9f9f9',
+        padding: 12,
+        borderRadius: 8,
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 30,
+    },
+
+    filterTagsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'start',
+        marginVertical: 10,
+    },
+
+    budgetTypeContainer: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#222',
+        borderRadius: 8,
+    },
+
     overlayContainer: {
         position: 'absolute',
         top: 0,
@@ -142,44 +211,5 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         bottom: 0,
-    },
-
-    budgetsScreen: {
-        flex: 1,
-    },
-
-    headerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 60,
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-    },
-
-    backButtonOverride: {
-        position: 'relative',
-        top: 'auto',
-        left: 'auto',
-    },
-
-    card: {
-        flex: 1,
-        margin: 10,
-        padding: 25,
-        backgroundColor: '#181818',
-        borderColor: theme.colors.secondary,
-        borderWidth: 2,
-        borderRadius: 10,
-    },
-
-    input: {
-        borderWidth: 2,
-        borderColor: theme.colors.primary,
-        backgroundColor: '#f9f9f9',
-        padding: 12,
-        borderRadius: 8,
-        fontSize: 16,
-        color: '#333',
-        marginBottom: 30,
     },
 });
