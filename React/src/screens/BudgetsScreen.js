@@ -22,7 +22,8 @@ const dummyBudgets = [
     remainingBudgetAmount: 500,
     budgetAmount: 1000,
     startDate: '2022-01-01',
-    endDate: '2022-01-31'
+    endDate: '2022-01-31',
+    budgetType: 'Individual'
   },
   {
     budgetID: 2,
@@ -30,7 +31,8 @@ const dummyBudgets = [
     remainingBudgetAmount: 1500,
     budgetAmount: 2000,
     startDate: '2022-01-01',
-    endDate: '2022-01-31'
+    endDate: '2022-01-31',
+    budgetType: 'Individual'
   },
   {
     budgetID: 3,
@@ -38,7 +40,8 @@ const dummyBudgets = [
     remainingBudgetAmount: 200,
     budgetAmount: 500,
     startDate: '2022-01-01',
-    endDate: '2022-01-31'
+    endDate: '2022-01-31',
+    budgetType: 'Individual'
   },
   {
     budgetID: 4,
@@ -46,7 +49,8 @@ const dummyBudgets = [
     remainingBudgetAmount: 800,
     budgetAmount: 1200,
     startDate: '2022-01-01',
-    endDate: '2022-01-31'
+    endDate: '2022-01-31',
+    budgetType: 'Family'
   },
   {
     budgetID: 5,
@@ -54,7 +58,8 @@ const dummyBudgets = [
     remainingBudgetAmount: 300,
     budgetAmount: 600,
     startDate: '2022-01-01',
-    endDate: '2022-01-31'
+    endDate: '2022-01-31',
+    budgetType: 'Family'
   },
   {
     budgetID: 6,
@@ -62,11 +67,13 @@ const dummyBudgets = [
     remainingBudgetAmount: 400,
     budgetAmount: 800,
     startDate: '2022-01-01',
-    endDate: '2022-01-31'
+    endDate: '2022-01-31',
+    budgetType: 'Family'
   },
 ];
 
-const filters = ['All', 'Personal', 'Family'];
+
+const filters = ['All', 'Individual', 'Family'];
 
 export default function BudgetsScreen({ navigation }) {
 
@@ -74,8 +81,8 @@ export default function BudgetsScreen({ navigation }) {
   const [selectedFilter, setSelectedFilter] = useState('All');
 
   const filteredBudgets = selectedFilter === 'All'
-    ? data
-    : data.filter((budget) => budget.budgetTitle === selectedFilter);
+    ? dummyBudgets
+    : dummyBudgets.filter((budget) => budget.budgetType === selectedFilter);
 
   const handleFilterPress = (filter) => {
     setSelectedFilter(filter);

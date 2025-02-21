@@ -22,9 +22,9 @@ def initialize():
         return datetime.datetime.strptime(time_str, "%H:%M").time()
 
     # Example Budgets
-    budget1 = create_budget("January Budget", 150.25, 150.25, string_to_date("2025-01-01"), string_to_date("2025-01-31"), bob.id)
-    budget2 = create_budget("February Budget", 50, 50,  string_to_date("2025-02-01"), string_to_date("2025-02-28"), bob.id)
-    budget3 = create_budget("March Budget", 1000, 1000, string_to_date("2025-03-01"), string_to_date("2025-03-31"), alice.id)
+    budget1 = create_budget("January Budget", 150.25, 150.25, string_to_date("2025-01-01"), string_to_date("2025-01-31"), bob.id, "Individual")
+    budget2 = create_budget("February Budget", 50, 50,  string_to_date("2025-02-01"), string_to_date("2025-02-28"), bob.id, "Individual")
+    budget3 = create_budget("March Budget", 1000, 1000, string_to_date("2025-03-01"), string_to_date("2025-03-31"), alice.id, "Individual")
 
 
     # Example Transactions for Bob
