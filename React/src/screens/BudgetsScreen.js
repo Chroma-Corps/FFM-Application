@@ -66,7 +66,7 @@ const dummyBudgets = [
   },
 ];
 
-const filters = ['All', 'Groceries', 'Rent', 'Entertainment'];
+const filters = ['All', 'Personal', 'Family'];
 
 export default function BudgetsScreen({ navigation }) {
 
@@ -74,53 +74,53 @@ export default function BudgetsScreen({ navigation }) {
   const [selectedFilter, setSelectedFilter] = useState('All');
 
   const filteredBudgets = selectedFilter === 'All'
-    ? dummyBudgets
-    : dummyBudgets.filter((budget) => budget.budgetTitle === selectedFilter);
+    ? data
+    : data.filter((budget) => budget.budgetTitle === selectedFilter);
 
   const handleFilterPress = (filter) => {
     setSelectedFilter(filter);
   };
 
-  // const fetchData = async () => {
-  //   try {
-  //     const token = await AsyncStorage.getItem("access_token");
-  //     const userID = await AsyncStorage.getItem("user_id");
+  const fetchData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+      const userID = await AsyncStorage.getItem("user_id");
 
-  //     if (!token) {
-  //       console.error('No Token Found');
-  //       return;
-  //     }
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
 
-  //     const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Authorization': `Bearer ${token}`,
-  //         'Content-Type': 'application/json',
-  //       }
-  //     });
+      const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
 
-  //     if (response.ok) {
-  //       const budgets = await response.json();
-  //       console.log('Fetched Budgets:', budgets);
-  //       setData(budgets);
-  //     } else {
-  //       console.error('Failed To Fetch Budgets:', response.statusText);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error Fetching Budgets:', error);
-  //   }
-  // };
+      if (response.ok) {
+        const budgets = await response.json();
+        console.log('Fetched Budgets:', budgets);
+        setData(budgets);
+      } else {
+        console.error('Failed To Fetch Budgets:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error Fetching Budgets:', error);
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-      // fetchData();
+      fetchData();
     }, [])
   );
 
   const renderData = (item) => {
 
     const color = item.color || '#9ACBD0'; // Default color if not provided
-    const budgetGoal = item.budgetType || 'Save'; // Default budget goal if not provided
+    const budgetGoal = item.budgetType || 'Save'; // Default budget goal type if not provided
     const recomendedAmount = item.budgetRecomendation || '$0.00'; //Default saving/spending recomendation if not provided
 
     return (
@@ -145,6 +145,7 @@ export default function BudgetsScreen({ navigation }) {
               <View style={styles.imageAndInsightsContainer}>
 
                 <View style={styles.imageWrapper}>
+
                   <Image source={require('../assets/default_icon.jpg')} style={styles.image} />
                   <Text style={styles.imageCaption}>Username</Text>
                 </View>
@@ -201,16 +202,6 @@ export default function BudgetsScreen({ navigation }) {
             keyExtractor={item => `${item.budgetID}`}
           />
         )}
-
-        {/* {dummyBudgets.length === 0 ? (
-          <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
-        ) : (
-          <FlatList
-            data={dummyBudgets}
-            renderItem={({ item }) => renderData(item)}
-            keyExtractor={item => `${item.budgetID}`}
-          />
-        )} */}
 
         <PlusFAB onPress={() => navigation.push('CreateBudget')} />
 

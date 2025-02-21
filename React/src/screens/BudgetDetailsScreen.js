@@ -88,37 +88,37 @@ const styles = StyleSheet.create({
         fontSize: 18,
     },
     dateText: {
-          fontSize: 15,
-          fontFamily: theme.fonts.medium.fontFamily,
-          color: theme.colors.description,
-          lineHeight: 21,
-          textAlign: 'center',
-          paddingTop: 10
-      },
-      titleText: {
+        fontSize: 15,
+        fontFamily: theme.fonts.medium.fontFamily,
+        color: theme.colors.description,
+        lineHeight: 21,
+        textAlign: 'center',
+        paddingTop: 10
+    },
+    titleText: {
         fontSize: 25,
         color: theme.colors.surface,
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'center',
-      },
+    },
 
-      descriptionText: {
+    descriptionText: {
         fontSize: 15,
         color: theme.colors.surface,
         fontFamily: theme.fonts.medium.fontFamily,
-      },
-      amountText: {
+    },
+    amountText: {
         fontSize: 20,
         color: theme.colors.secondary,
         fontFamily: theme.fonts.medium.fontFamily,
         textAlign: 'center',
         paddingTop: 20,
-      },
-      amountTextBold: {
+    },
+    amountTextBold: {
         fontSize: 20,
         color: theme.colors.secondary,
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'center',
         paddingTop: 20,
-      },
+    },
 });
