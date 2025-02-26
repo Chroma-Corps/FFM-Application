@@ -45,7 +45,8 @@ export default function App() {
               headerShown: false,
             }}
           >
-            <Stack.Screen name="StartScreen" component={StartScreen} />
+            <Stack.Screen name="Budgets" component={BudgetsScreen} />
+            {/* <Stack.Screen name="StartScreen" component={StartScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
             <Stack.Screen name="Dashboard" component={Dashboard} />
@@ -53,7 +54,7 @@ export default function App() {
             <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
-            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
+            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/> */}
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
           </Stack.Navigator>

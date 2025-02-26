@@ -84,12 +84,12 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
+      const response = await fetch(`${API_URL_LOCAL}/budgets/${1}`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
+        // headers: {
+        //   'Authorization': `Bearer ${token}`,
+        //   'Content-Type': 'application/json',
+        // }
       });
 
       if (response.ok) {
@@ -126,33 +126,35 @@ export default function BudgetsScreen({ navigation }) {
       <TouchableOpacity
         onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
       >
+
         <Card style={styles.card}>
-          <View style={styles.cardContent}>
+          <View style={styles.cardContentContainer}>
 
             <View style={[styles.colorStrip, { backgroundColor: color }]} />
 
             <View style={styles.textContainer}>
-              <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
 
-              <Text style={styles.cardText}>
-                <Text style={{ fontWeight: 'bold' }}>${item.remainingBudgetAmount} </Text>
-                left of ${item.budgetAmount}
-              </Text>
+              <View style={styles.cardTitleContainer}>
+                <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
+              </View>
 
-              <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
+              <View>
+                <Text style={styles.cardText}>
+                  <Text style={{ fontWeight: 'bold' }}>${item.remainingBudgetAmount} </Text>
+                  left of ${item.budgetAmount}
+                </Text>
 
-              <View style={styles.imageAndInsightsContainer}>
-                <View>
-                  <Text style={styles.insightsText}>
-                    -Insights Go Here-
-                  </Text>
-                </View>
+                <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
 
+                <Text style={styles.insightsText}>
+                  -Insights Go Here-
+                </Text>
               </View>
 
             </View>
           </View>
         </Card>
+
       </TouchableOpacity>
     );
   }
@@ -236,7 +238,7 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     marginBottom: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
 
   card: {
@@ -249,7 +251,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  cardContent: {
+  cardContentContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 20,
@@ -260,6 +262,10 @@ const styles = StyleSheet.create({
     height: '100%',
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
+  },
+
+  cardTitleContainer: {
+    flexDirection: 'column',
   },
 
   textContainer: {
@@ -312,7 +318,6 @@ const styles = StyleSheet.create({
   insightsText: {
     textAlign: 'left',
     flexWrap: 'wrap',
-    maxWidth: '70%',
     color: "#fff",
     fontFamily: theme.fonts.medium.fontFamily,
   },
