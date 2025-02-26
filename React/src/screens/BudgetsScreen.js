@@ -1,6 +1,6 @@
 // rfce
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import InAppHeader from '../components/InAppHeader'
 import { Card } from 'react-native-paper';
@@ -23,7 +23,6 @@ const dummyBudgets = [
     budgetAmount: 1000,
     startDate: '2022-01-01',
     endDate: '2022-01-31',
-    budgetType: 'Individual'
   },
   {
     budgetID: 2,
@@ -32,7 +31,6 @@ const dummyBudgets = [
     budgetAmount: 2000,
     startDate: '2022-01-01',
     endDate: '2022-01-31',
-    budgetType: 'Individual'
   },
   {
     budgetID: 3,
@@ -41,7 +39,6 @@ const dummyBudgets = [
     budgetAmount: 500,
     startDate: '2022-01-01',
     endDate: '2022-01-31',
-    budgetType: 'Individual'
   },
   {
     budgetID: 4,
@@ -50,7 +47,6 @@ const dummyBudgets = [
     budgetAmount: 1200,
     startDate: '2022-01-01',
     endDate: '2022-01-31',
-    budgetType: 'Family'
   },
   {
     budgetID: 5,
@@ -59,7 +55,6 @@ const dummyBudgets = [
     budgetAmount: 600,
     startDate: '2022-01-01',
     endDate: '2022-01-31',
-    budgetType: 'Family'
   },
   {
     budgetID: 6,
@@ -68,25 +63,16 @@ const dummyBudgets = [
     budgetAmount: 800,
     startDate: '2022-01-01',
     endDate: '2022-01-31',
-    budgetType: 'Family'
   },
 ];
 
 
-const filters = ['All', 'Individual', 'Family'];
+const filters = ['All', 'Save', 'Expense'];
 
 export default function BudgetsScreen({ navigation }) {
 
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
-
-  const filteredBudgets = selectedFilter === 'All'
-    ? dummyBudgets
-    : dummyBudgets.filter((budget) => budget.budgetType === selectedFilter);
-
-  const handleFilterPress = (filter) => {
-    setSelectedFilter(filter);
-  };
 
   const fetchData = async () => {
     try {
@@ -98,7 +84,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
+      const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -118,6 +104,14 @@ export default function BudgetsScreen({ navigation }) {
     }
   };
 
+  const filteredBudgets = selectedFilter === 'All'
+    ? data
+    : data.filter((budget) => budget.budgetType === selectedFilter);
+
+  const handleFilterPress = (filter) => {
+    setSelectedFilter(filter);
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchData();
@@ -126,9 +120,7 @@ export default function BudgetsScreen({ navigation }) {
 
   const renderData = (item) => {
 
-    const color = item.color || '#9ACBD0'; // Default color if not provided
-    const budgetGoal = item.budgetType || 'Save'; // Default budget goal type if not provided
-    const recomendedAmount = item.budgetRecomendation || '$0.00'; //Default saving/spending recomendation if not provided
+    const color = item.color || '#9ACBD0';
 
     return (
       <TouchableOpacity
@@ -150,18 +142,12 @@ export default function BudgetsScreen({ navigation }) {
               <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
 
               <View style={styles.imageAndInsightsContainer}>
-
-                <View style={styles.imageWrapper}>
-
-                  <Image source={require('../assets/default_icon.jpg')} style={styles.image} />
-                  <Text style={styles.imageCaption}>Username</Text>
-                </View>
-
                 <View>
                   <Text style={styles.insightsText}>
-                    {budgetGoal} up to {recomendedAmount} to stay on budget
+                    -Insights Go Here-
                   </Text>
                 </View>
+
               </View>
 
             </View>
