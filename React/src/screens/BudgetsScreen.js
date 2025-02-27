@@ -1,76 +1,29 @@
 // rfce
 import React, { useState, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import InAppHeader from '../components/InAppHeader'
 import { Card } from 'react-native-paper';
 import { Image } from 'react-native';
-import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
-import { theme } from '../core/theme'
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import InAppHeader from '../components/InAppHeader';
+import { API_URL_LOCAL } from '@env';
+import { theme } from '../core/theme';
+import PlusFAB from '../components/PlusFAB';
 import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
+import ProgressBar from '../components/ProgressBar';
 
-
-// COMMENT: FAILED TO RETRIEVE USER BUDGETS SO I'M USING DUMMY DATA
-const dummyBudgets = [
-  {
-    budgetID: 1,
-    budgetTitle: 'Groceries',
-    remainingBudgetAmount: 500,
-    budgetAmount: 1000,
-    startDate: '2022-01-01',
-    endDate: '2022-01-31',
-  },
-  {
-    budgetID: 2,
-    budgetTitle: 'Rent',
-    remainingBudgetAmount: 1500,
-    budgetAmount: 2000,
-    startDate: '2022-01-01',
-    endDate: '2022-01-31',
-  },
-  {
-    budgetID: 3,
-    budgetTitle: 'Entertainment',
-    remainingBudgetAmount: 200,
-    budgetAmount: 500,
-    startDate: '2022-01-01',
-    endDate: '2022-01-31',
-  },
-  {
-    budgetID: 4,
-    budgetTitle: 'Groceries',
-    remainingBudgetAmount: 800,
-    budgetAmount: 1200,
-    startDate: '2022-01-01',
-    endDate: '2022-01-31',
-  },
-  {
-    budgetID: 5,
-    budgetTitle: 'Rent',
-    remainingBudgetAmount: 300,
-    budgetAmount: 600,
-    startDate: '2022-01-01',
-    endDate: '2022-01-31',
-  },
-  {
-    budgetID: 6,
-    budgetTitle: 'Entertainment',
-    remainingBudgetAmount: 400,
-    budgetAmount: 800,
-    startDate: '2022-01-01',
-    endDate: '2022-01-31',
-  },
+const defaultCategories = [
+  { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
+  { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
+  { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
+  { id: 4, name: 'Category#4', image: require('../assets/default_img.jpg') },
 ];
 
-
-const filters = ['All', 'Save', 'Expense'];
+const filters = ['All', 'Savings', 'Expense'];
 
 export default function BudgetsScreen({ navigation }) {
-
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
 
@@ -119,73 +72,84 @@ export default function BudgetsScreen({ navigation }) {
   );
 
   const renderData = (item) => {
+    const budgetColorTheme = item.color || '#9ACBD0';
 
-    const color = item.color || '#9ACBD0';
+    const renderCategories = (budgetCategories) => {
+      const categoryImages = budgetCategories && budgetCategories.length > 0
+        ? budgetCategories
+        : defaultCategories;
+
+      const displayedCategories = categoryImages.slice(0, 4);
+      const categoryLimit = categoryImages.length > 4;
+
+      return (
+        <View style={styles.categoryList}>
+          {displayedCategories.map((category, index) => (
+            <Image key={category.id || index} source={category.image} style={styles.categoryIcon} />
+          ))}
+          {categoryLimit && <Text style={styles.cardText}>...</Text>}
+        </View>
+      );
+    };
 
     return (
       <TouchableOpacity
         onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
       >
-
-        <Card style={styles.card}>
+        <Card style={[styles.card, { borderColor: budgetColorTheme }]}>
           <View style={styles.cardContentContainer}>
+            <View style={[styles.colorStrip, { backgroundColor: budgetColorTheme }]} />
 
-            <View style={[styles.colorStrip, { backgroundColor: color }]} />
-
-            <View style={styles.textContainer}>
-
-              <View style={styles.cardTitleContainer}>
+            <View style={styles.cardContent}>
+              <View style={styles.cardHeaderContainer}>
                 <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
+                <View>{renderCategories(item.categories)}</View>
               </View>
 
-              <View>
+              <View style={styles.cardDetailsContainer}>
                 <Text style={styles.cardText}>
                   <Text style={{ fontWeight: 'bold' }}>${item.remainingBudgetAmount} </Text>
                   left of ${item.budgetAmount}
                 </Text>
 
-                <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
+                <ProgressBar
+                  startDate={item.startDate}
+                  endDate={item.endDate}
+                  budgetColorTheme={budgetColorTheme}
+                />
 
                 <Text style={styles.insightsText}>
                   -Insights Go Here-
                 </Text>
               </View>
-
             </View>
           </View>
         </Card>
-
       </TouchableOpacity>
     );
-  }
+  };
 
   return (
     <View style={styles.budgetsScreen}>
       <InAppBackground>
-
         <View style={styles.headerContainer}>
-          <InAppHeader>
-            Budgets 🎯
-          </InAppHeader>
+          <InAppHeader>Budgets 🎯</InAppHeader>
           <NotificationBell />
         </View>
 
-        <View>
-          <Text style={styles.descriptionText}>
-            This is your budgeting hub—keep an eye on your spending and stay on track!
-          </Text>
+        <Text style={styles.descriptionText}>
+          This is your budgeting hub—keep an eye on your spending and stay on track!
+        </Text>
 
-          {/* Filter Section */}
-          <View style={styles.filterContainer}>
-            {filters.map((filter) => (
-              <FilterTag
-                key={filter}
-                label={filter}
-                isSelected={selectedFilter === filter}
-                onPress={() => handleFilterPress(filter)}
-              />
-            ))}
-          </View>
+        <View style={styles.filterContainer}>
+          {filters.map((filter) => (
+            <FilterTag
+              key={filter}
+              label={filter}
+              isSelected={selectedFilter === filter}
+              onPress={() => handleFilterPress(filter)}
+            />
+          ))}
         </View>
 
         {filteredBudgets.length === 0 ? (
@@ -199,10 +163,9 @@ export default function BudgetsScreen({ navigation }) {
         )}
 
         <PlusFAB onPress={() => navigation.push('CreateBudget')} />
-
       </InAppBackground>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -245,7 +208,6 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 10,
     backgroundColor: '#181818',
-    borderColor: theme.colors.secondary,
     borderWidth: 2,
     borderRadius: 20,
     overflow: 'hidden',
@@ -257,6 +219,10 @@ const styles = StyleSheet.create({
     gap: 20,
   },
 
+  cardContent: {
+    flex: 1,
+  },
+
   colorStrip: {
     width: 10,
     height: '100%',
@@ -264,12 +230,10 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
   },
 
-  cardTitleContainer: {
-    flexDirection: 'column',
-  },
-
-  textContainer: {
-    flex: 1,
+  cardHeaderContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 
   cardTitle: {
@@ -279,40 +243,25 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  categoryList: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+
+  categoryIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    resizeMode: 'cover',
+  },
+
+  cardDetailsContainer: {
+    gap: 10,
+  },
+
   cardText: {
     color: "#fff",
     fontFamily: theme.fonts.medium.fontFamily,
-  },
-
-  imageAndInsightsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-
-  imageWrapper: {
-    alignItems: 'center',
-  },
-
-  image: {
-    borderRadius: 80,
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
-    marginTop: 10,
-  },
-
-  imageCaption: {
-    fontSize: 8,
-    color: '#888',
-    marginTop: 2,
-  },
-
-  insightsContainer: {
-    flex: 1,
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
   },
 
   insightsText: {
@@ -321,4 +270,4 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontFamily: theme.fonts.medium.fontFamily,
   },
-})
+});

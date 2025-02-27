@@ -19,7 +19,7 @@ def initialize():
     
 
     # Bob's Budgets
-    january_budget = create_budget("January Budget :3", 150.25, string_to_date("2025-01-01"), string_to_date("2025-01-31"), bob.id)
+    january_budget = create_budget("January Budget", 150.25, string_to_date("2025-01-01"), string_to_date("2025-01-31"), bob.id)
     february_budget = create_budget("February Budget", 50, string_to_date("2025-02-01"), string_to_date("2025-02-28"), bob.id)
     march_budget = create_budget("March Budget", 200, string_to_date("2025-03-01"), string_to_date("2025-03-31"), bob.id)
     groceries_budget = create_budget("Groceries", 500, string_to_date("2025-01-01"), string_to_date("2025-06-30"), bob.id)

@@ -6,6 +6,7 @@ export const theme = {
   colors: {
     ...DefaultTheme.colors,
     text: '#000000',
+    textSecondary: '#fff',
     heading: '#333333',
     description: '#666666',
     caption: '#888888',
