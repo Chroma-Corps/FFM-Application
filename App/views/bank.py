@@ -36,6 +36,13 @@ def new_bank():
 @jwt_required()
 def list_user_banks(user_id):
     try:
+        current_user = get_jwt_identity()
+        print(f"Current user: {current_user}")
+
+        if current_user != user_id:
+            return jsonify(error="Unauthorized access"), 401
+
+        # Fetch User Banks
         banks = get_user_banks_json(user_id)
         return jsonify(banks)
     except Exception as e:

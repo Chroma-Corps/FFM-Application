@@ -18,12 +18,14 @@ export default function Dashboard({ navigation }) {
       const token = await AsyncStorage.getItem("access_token");
       const userID = await AsyncStorage.getItem("user_id");
 
+      console.log('userID:', userID);
+      console.log('Token:', token);
+
       if (!token || !userID) {
         console.error('No Token Found');
         return;
       }
-
-      const response = await fetch(`${API_URL_LOCAL}/banks/${userID}`, {
+      const response = await fetch(`https://ffm-application-test.onrender.com/banks/${userID}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -23,7 +23,7 @@ export default function TransactionsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`${API_URL_LOCAL}/transactions/${userID}`, {
+      const response = await fetch(`https://ffm-application-test.onrender.com/transactions/${userID}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

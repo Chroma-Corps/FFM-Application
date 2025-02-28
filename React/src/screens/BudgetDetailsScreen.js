@@ -14,7 +14,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     useEffect(() => {
         const fetchBudgetDetails = async () => {
             try {
-                const response = await fetch(`${API_URL_LOCAL}/budget/${budgetID}`);
+                const response = await fetch(`https://ffm-application-test.onrender.com/budget/${budgetID}`);
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Fetched Budget Details:', data);

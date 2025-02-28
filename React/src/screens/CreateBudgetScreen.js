@@ -35,7 +35,7 @@ export default function CreateBudgetsScreen({navigation}) {
         }
 
         try {
-            const response = await fetch(`${API_URL_LOCAL}/create-budget`, {
+            const response = await fetch(`https://ffm-application-test.onrender.com/create-budget`, {
                 method: 'POST',
                 headers: { 
                     'Authorization': `Bearer ${token}`,

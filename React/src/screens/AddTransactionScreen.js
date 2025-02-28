@@ -35,7 +35,7 @@ export default function AddTransactionScreen({ navigation }) {
                     return;
                 }
 
-                const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
+                const response = await fetch(`https://ffm-application-test.onrender.com/budgets/${userID}`, {
                     method: 'GET',
                     headers: {
                     'Authorization': `Bearer ${token}`,
@@ -69,7 +69,7 @@ export default function AddTransactionScreen({ navigation }) {
             return;
             }
 
-            const response = await fetch(`${API_URL_LOCAL}/add-transaction`, {
+            const response = await fetch(`https://ffm-application-test.onrender.com/add-transaction`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
