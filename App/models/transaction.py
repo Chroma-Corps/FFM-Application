@@ -1,17 +1,10 @@
 import enum
 from App.database import db
+from App.services.currency import CurrencyService
 
 class TransactionType(enum.Enum):
-    INCOME = "income"
-    EXPENSE = "expense"
-
-# class TransactionCategory(enum.Enum):
-#     INCOME = "income"
-#     BILLS = "bills"
-#     TRANSIT = "transit"
-#     GROCERIES = "groceries"
-#     ENTERTAINMENT = "entertainment"
-#     SHOPPING = "shopping"
+    INCOME = "Income"
+    EXPENSE = "Expense"
 
 class Transaction(db.Model):
     __tablename__='transaction'
@@ -25,12 +18,14 @@ class Transaction(db.Model):
     transactionAmount = db.Column(db.Float, nullable=False)
     transactionDate = db.Column(db.Date, nullable=False)
     transactionTime = db.Column(db.Time, nullable=False)
-
-    # Relationships
+    voided = db.Column(db.Boolean, default=False)
     userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
+
+    # Relationships
     budget = db.relationship('Budget', back_populates='transaction')
+    bank = db.relationship('Bank', backref='transactions', lazy=True)
 
     def __init__(self, userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
         self.userID = userID
@@ -45,6 +40,8 @@ class Transaction(db.Model):
         self.bankID = bankID
 
     def get_json(self):
+        amount = CurrencyService.format_currency(self.transactionAmount, self.bank.bankCurrency)
+
         return {
             'userID': self.userID,
             'transactionID': self.transactionID,
@@ -52,13 +49,14 @@ class Transaction(db.Model):
             'transactionDescription': self.transactionDesc,
             'transactionType': self.transactionType.value,
             'transactionCategory': self.transactionCategory,
-            'transactionAmount': self.transactionAmount,
+            'transactionAmount': amount,
             'transactionDate': self.transactionDate.strftime("%a, %d %b %Y"),
             'transactionTime': self.transactionTime.strftime("%H:%M"),
         }
 
     def __str__(self):
-        return f"{self.transactionTitle} ({self.transactionType}): {self.transactionAmount} on {self.transactionDate} at {self.transactionTime}"
+        amount = CurrencyService.format_currency(self.transactionAmount, self.bank.bankCurrency)
+        return f"{self.transactionTitle} ({self.transactionType.value} | {self.transactionCategory}): {amount} on {self.transactionDate} at {self.transactionTime}"
 
     def __repr__(self):
         return (
