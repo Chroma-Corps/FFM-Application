@@ -29,7 +29,6 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-        // Replace With API_URL_DEVICE When Testing Mobile
         const response = await fetch(`https://ffm-application-test.onrender.com/login`, {
           method: 'POST',
           headers: {

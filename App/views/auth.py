@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
-from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies, get_jwt_identity
+from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies, get_jwt_identity, verify_jwt_in_request
 from.index import index_views
 from App.models.user import User
 from App.controllers import (
@@ -23,6 +23,19 @@ def get_user_page():
 @jwt_required()
 def identify_page():
     return
+
+@auth_views.route('/verify-token', methods=['GET'])
+@jwt_required()
+def verify_token():
+    try:
+        verify_jwt_in_request()
+        current_user = get_jwt_identity()
+        print(f"Token is valid, current user: {current_user}")
+        return jsonify(valid=True, user=current_user), 200
+    except Exception as e:
+       print(f"Token verification error: {e}")
+       return jsonify(valid=False, error=str(e)), 401
+
 
 @auth_views.route('/login', methods=['POST'])
 def login_action():
