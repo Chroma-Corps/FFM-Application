@@ -48,7 +48,7 @@ def initialize():
         45.00, 
         transactionDate=string_to_date("2025-01-10"),
         transactionTime=string_to_time("19:00"),
-        budgetID=entertainment_budget.budgetID
+        budgetID=january_budget.budgetID
     )
 
     add_transaction(
@@ -60,7 +60,7 @@ def initialize():
         60.00, 
         transactionDate=string_to_date("2025-02-14"),
         transactionTime=string_to_time("20:00"),
-        budgetID=february_budget.budgetID
+        budgetID=january_budget.budgetID
     )
 
     add_transaction(
@@ -72,7 +72,7 @@ def initialize():
         100.00, 
         transactionDate=string_to_date("2025-03-05"),
         transactionTime=string_to_time("09:00"),
-        budgetID=march_budget.budgetID
+        budgetID=january_budget.budgetID
     )
 
     add_transaction(
@@ -84,7 +84,7 @@ def initialize():
         80.00, 
         transactionDate=string_to_date("2025-03-15"),
         transactionTime=string_to_time("13:00"),
-        budgetID=groceries_budget.budgetID
+        budgetID=january_budget.budgetID
     )
 
     add_transaction(
