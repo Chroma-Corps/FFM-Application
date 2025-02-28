@@ -1,6 +1,7 @@
 import datetime
 from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
+from App.models.bank import Bank
 from App.models.budget import Budget
 from App.models.transaction import Transaction, TransactionType
 
@@ -17,6 +18,44 @@ def string_to_date(date_str):
 
 def string_to_time(time_str):
         return datetime.datetime.strptime(time_str, "%H:%M").time()
+
+def transaction_handler(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID):
+    try: 
+        budget = Budget.query.get(budgetID)
+        if not budget:
+            return None, "Budget Not Found"
+        
+        bank = Bank.query.get(budget.bankID)
+        if not bank:
+            return None, "Bank Not Found"
+
+        # Update Remaining Budget Amount
+        updated_remaining_budget_amount = budget.remainingBudgetAmount - transactionAmount
+        budget.remainingBudgetAmount = updated_remaining_budget_amount
+
+        # Adjust Bank Balance
+        if transactionType == TransactionType.INCOME:
+            bank.balance += transactionAmount
+        elif transactionType == TransactionType.EXPENSE:
+            bank.balance -= transactionAmount
+
+        # Transaction Data
+        return {
+            'userID': userID,
+            'transactionTitle': transactionTitle,
+            'transactionDesc': transactionDesc,
+            'transactionType': transactionType,
+            'transactionCategory': transactionCategory,
+            'transactionAmount': transactionAmount,
+            'transactionDate': transactionDate,
+            'transactionTime': transactionTime,
+            'budgetID': budgetID,
+            'bankID': bank.bankID
+        }, None
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return None, str(e)
 
 @jwt_required()
 @transaction_views.route('/alltransactions', methods=['GET'])
@@ -39,29 +78,19 @@ def new_transaction():
         transactionTime = data.get('transactionTime')
         budgetID = data.get('budgetID')
 
-        if not all([userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime]):
-            return jsonify({"error": "Missing required fields"}), 400
+        if not all([userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID]):
+            return jsonify({"error": "Missing Required Fields"}), 400
 
-        budget = Budget.query.get(data['budgetID'])
-
-        transactionAmount = float(transactionAmount)
-        transactionDate = string_to_date(transactionDate)
-        transactionTime = string_to_time(transactionTime)
-
-        updated_remaining_budget_amount = budget.remainingBudgetAmount - transactionAmount
-        budget.remainingBudgetAmount = updated_remaining_budget_amount
-
-        new_transaction = add_transaction(
-            userID=userID,
-            transactionTitle=transactionTitle,
-            transactionDesc=transactionDesc,
-            transactionType=transactionType,
-            transactionCategory=transactionCategory,
-            transactionAmount=transactionAmount,
-            transactionDate=transactionDate,
-            transactionTime=transactionTime,
-            budgetID=budgetID
+        transaction_data, error_message = transaction_handler(
+            userID, transactionTitle, transactionDesc, transactionType,
+            transactionCategory, float(transactionAmount), string_to_date(transactionDate),
+            string_to_time(transactionTime), budgetID
         )
+
+        if error_message:
+            return jsonify({"error": error_message}), 400
+
+        new_transaction = add_transaction(**transaction_data)
         return jsonify({"message": "Transaction Created Successfully", "transactionID": new_transaction.transactionID}), 201
 
     except Exception as e:
@@ -76,4 +105,4 @@ def list_user_transactions(user_id):
         return jsonify(transactions)
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify(error="Failed to fetch budgets"), 500
+        return jsonify(error="Failed To Fetch Budgets"), 500

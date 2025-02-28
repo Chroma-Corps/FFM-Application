@@ -22,7 +22,7 @@ def list_all_budgets():
         return jsonify(budgets)
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify(error="Failed to fetch budgets"), 500
+        return jsonify(error="Failed To Fetch Budgets"), 500
 
 @budget_views.route('/create-budget', methods=['POST'])
 @jwt_required()
@@ -32,18 +32,21 @@ def new_budget():
         budgetTitle = data.get('budgetTitle')
         budgetAmount = data.get('budgetAmount')
         remainingBudgetAmount = data.get('remainingBudgetAmount')
+        budgetType=data.get('budgetType')
+        budgetCategory=data.get('budgetCategory')
         startDate = data.get('startDate')
         endDate = data.get('endDate')
         userID = data.get('userID')
+        bankID = data.get('bankID')
 
-        if not all([budgetTitle, budgetAmount, startDate, endDate, userID]):
-            return jsonify({"error": "Missing required fields"}), 400
+        if not all([budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID]):
+            return jsonify({"error": "Missing Required Fields"}), 400
 
         startDate = string_to_date(startDate)
         endDate = string_to_date(endDate)
 
-        new_budget = create_budget(budgetTitle=budgetTitle, budgetAmount=budgetAmount, remainingBudgetAmount=remainingBudgetAmount, startDate=startDate, endDate=endDate, userID=userID)
-        return jsonify({"message": "Budget created successfully", "budgetID": new_budget.budgetID}), 201
+        new_budget = create_budget(budgetTitle=budgetTitle, budgetAmount=budgetAmount, remainingBudgetAmount=remainingBudgetAmount, budgetType=budgetType, budgetCategory=budgetCategory, startDate=startDate, endDate=endDate, userID=userID, bankID=bankID)
+        return jsonify({"message": "Budget Created Successfully", "budgetID": new_budget.budgetID}), 201
 
     except Exception as e:
         print(f"Error: {e}")
@@ -57,11 +60,11 @@ def list_user_budgets(user_id):
         return jsonify(budgets)
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify(error="Failed to fetch budgets"), 500
+        return jsonify(error="Failed To Fetch Budgets"), 500
 
 @budget_views.route('/budget/<int:id>', methods=['GET'])
 def get_budget_details(id):
     budget_data = get_budget_json(id)
     if not budget_data:
-        return jsonify({'error': 'Budget not found'}), 404 
+        return jsonify({'error': 'Budget Not Found'}), 404 
     return jsonify(budget_data)

@@ -17,12 +17,12 @@ export default function TransactionsScreen({ navigation }) {
     try {
       const token = await AsyncStorage.getItem("access_token");
       const userID = await AsyncStorage.getItem("user_id");
-      
+
       if (!token) {
         console.error('No Token Found');
         return;
       }
-  
+
       const response = await fetch(`${API_URL_LOCAL}/transactions/${userID}`, {
         method: 'GET',
         headers: {
@@ -58,7 +58,7 @@ export default function TransactionsScreen({ navigation }) {
             <Card style={styles.cardStyle}>
               <View style={styles.cardRow}>
                 <Text style={styles.titleText}>{item.transactionTitle}</Text>
-                <Text style={styles.amountText}>- ${item.transactionAmount}</Text>
+                <Text style={styles.amountText}>- {item.transactionAmount}</Text>
               </View>
             </Card>
           </>

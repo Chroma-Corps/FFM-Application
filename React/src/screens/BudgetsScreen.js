@@ -58,8 +58,8 @@ export default function BudgetsScreen({ navigation }) {
             <Card style={styles.cardStyle}>
               <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
               <Text style={styles.cardText}>
-                <Text style={{fontWeight: 'bold'}}>${item.remainingBudgetAmount} </Text>
-                left of ${item.budgetAmount}
+                <Text style={{fontWeight: 'bold'}}>{item.remainingBudgetAmount} </Text>
+                left of {item.budgetAmount}
               </Text>
               <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
             </Card>

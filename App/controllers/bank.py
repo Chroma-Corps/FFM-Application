@@ -32,7 +32,7 @@ def get_bank_json(id):
     return None
 
 # Get All Banks
-def get_all_budgets():
+def get_all_banks():
     return Bank.query.all()
 
 # Get All Banks (JSON)
