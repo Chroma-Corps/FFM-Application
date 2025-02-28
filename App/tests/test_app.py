@@ -5,7 +5,6 @@ from App.main import create_app
 from App.database import db, create_db
 from App.models import (
     User,
-    TransactionCategory,
     TransactionType
 )
 from App.controllers import (
@@ -247,12 +246,12 @@ class TransactionIntegrationTests(unittest.TestCase):
             "Picnic Party", 
             "Had a small picnic with friends", 
             TransactionType.EXPENSE, 
-            TransactionCategory.BILLS, 
+            "Bills", 
             75.00, 
             transactionDate=string_to_date("2025-02-01"),
             transactionTime=string_to_time("14:30"),
             budgetID=newbudget.budgetID
         )
-        update_transaction(newtransaction.transactionID, None, None, None, TransactionCategory.ENTERTAINMENT, None, None, None, None)
+        update_transaction(newtransaction.transactionID, None, None, None, newtransaction.transactionCategory, None, None, None, None)
         transaction = get_transaction(newtransaction.transactionID)
         assert transaction.transactionCategory.value == "entertainment"

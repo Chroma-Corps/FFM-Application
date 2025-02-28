@@ -1,7 +1,7 @@
 import datetime
 from App.controllers.budget import create_budget
 from App.controllers.transaction import add_transaction
-from App.models.transaction import TransactionCategory, TransactionType
+from App.models.transaction import TransactionType
 from .user import create_user
 from App.database import db
 

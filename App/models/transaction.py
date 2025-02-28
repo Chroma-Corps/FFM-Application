@@ -5,13 +5,13 @@ class TransactionType(enum.Enum):
     INCOME = "income"
     EXPENSE = "expense"
 
-class TransactionCategory(enum.Enum):
-    INCOME = "income"
-    BILLS = "bills"
-    TRANSIT = "transit"
-    GROCERIES = "groceries"
-    ENTERTAINMENT = "entertainment"
-    SHOPPING = "shopping"
+# class TransactionCategory(enum.Enum):
+#     INCOME = "income"
+#     BILLS = "bills"
+#     TRANSIT = "transit"
+#     GROCERIES = "groceries"
+#     ENTERTAINMENT = "entertainment"
+#     SHOPPING = "shopping"
 
 class Transaction(db.Model):
     __tablename__='transaction'
@@ -21,7 +21,7 @@ class Transaction(db.Model):
     transactionTitle = db.Column(db.String(20), nullable=False)
     transactionDesc = db.Column(db.String(120), nullable=True)
     transactionType = db.Column(db.Enum(TransactionType), nullable=False)
-    transactionCategory = db.Column(db.Enum(TransactionCategory), nullable=False)
+    transactionCategory = db.Column(db.String(20), nullable=False)
     transactionAmount = db.Column(db.Float, nullable=False)
     transactionDate = db.Column(db.Date, nullable=False)
     transactionTime = db.Column(db.Time, nullable=False)
@@ -29,9 +29,10 @@ class Transaction(db.Model):
     # Relationships
     userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
+    bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
     budget = db.relationship('Budget', back_populates='transaction')
 
-    def __init__(self, userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
+    def __init__(self, userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
         self.userID = userID
         self.transactionTitle = transactionTitle
         self.transactionDesc = transactionDesc
@@ -41,6 +42,7 @@ class Transaction(db.Model):
         self.transactionDate = transactionDate
         self.transactionTime = transactionTime
         self.budgetID = budgetID
+        self.bankID = bankID
 
     def get_json(self):
         return {
@@ -49,7 +51,7 @@ class Transaction(db.Model):
             'transactionTitle': self.transactionTitle,
             'transactionDescription': self.transactionDesc,
             'transactionType': self.transactionType.value,
-            'transactionCategory': self.transactionCategory.value,
+            'transactionCategory': self.transactionCategory,
             'transactionAmount': self.transactionAmount,
             'transactionDate': self.transactionDate.strftime("%a, %d %b %Y"),
             'transactionTime': self.transactionTime.strftime("%H:%M"),
