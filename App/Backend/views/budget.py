@@ -49,7 +49,7 @@ def new_budget():
         return jsonify({"error": str(e)}), 500
 
 @budget_views.route('/budgets/<int:user_id>', methods=['GET'])
-# @jwt_required()
+@jwt_required()
 def list_user_budgets(user_id):
     try:
         budgets = get_user_budgets_json(user_id)

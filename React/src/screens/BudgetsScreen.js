@@ -37,12 +37,12 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`${API_URL_LOCAL}/budgets/${1}`, {
+      const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
         method: 'GET',
-        // headers: {
-        //   'Authorization': `Bearer ${token}`,
-        //   'Content-Type': 'application/json',
-        // }
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
       });
 
       if (response.ok) {

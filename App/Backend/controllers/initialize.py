@@ -33,7 +33,7 @@ def initialize():
         "Weekly groceries for the family", 
         TransactionType.EXPENSE, 
         TransactionCategory.GROCERIES, 
-        120.50, 
+        5.50, 
         transactionDate=string_to_date("2025-01-05"),
         transactionTime=string_to_time("14:30"),
         budgetID=january_budget.budgetID
@@ -45,7 +45,7 @@ def initialize():
         "Weekend movie with friends", 
         TransactionType.EXPENSE, 
         TransactionCategory.ENTERTAINMENT,
-        45.00, 
+        5.00, 
         transactionDate=string_to_date("2025-01-10"),
         transactionTime=string_to_time("19:00"),
         budgetID=january_budget.budgetID
@@ -57,7 +57,7 @@ def initialize():
         "Family dinner at a restaurant", 
         TransactionType.EXPENSE, 
         TransactionCategory.ENTERTAINMENT, 
-        60.00, 
+        10.00, 
         transactionDate=string_to_date("2025-02-14"),
         transactionTime=string_to_time("20:00"),
         budgetID=january_budget.budgetID
@@ -69,7 +69,7 @@ def initialize():
         "Monthly electricity payment", 
         TransactionType.EXPENSE, 
         TransactionCategory.TRANSIT, 
-        100.00, 
+        5.00, 
         transactionDate=string_to_date("2025-03-05"),
         transactionTime=string_to_time("09:00"),
         budgetID=january_budget.budgetID
@@ -81,7 +81,7 @@ def initialize():
         "Restocking groceries", 
         TransactionType.EXPENSE, 
         TransactionCategory.GROCERIES, 
-        80.00, 
+        5.00, 
         transactionDate=string_to_date("2025-03-15"),
         transactionTime=string_to_time("13:00"),
         budgetID=january_budget.budgetID

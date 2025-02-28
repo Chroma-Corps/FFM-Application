@@ -9,16 +9,17 @@ import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
 import CircleGraph from '../components/CircleGraph';
+import BudgetsScreen from './BudgetsScreen';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
-    // const { budgetID } = route.params;
+    const { budgetID } = route.params;
     const [budgetDetails, setBudgetDetails] = useState(null);
 
 
     useEffect(() => {
         const fetchBudgetDetails = async () => {
             try {
-                const response = await fetch(`${API_URL_DEVICE}/budget/${1}`);
+                const response = await fetch(`${API_URL_DEVICE}/budget/${budgetID}`);
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Fetched Budget Details:', data);
@@ -32,7 +33,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         };
 
         fetchBudgetDetails();
-    }, [1]);
+    }, [budgetID]);
 
     if (!budgetDetails) {
         return <Text>Loading...</Text>;
@@ -55,7 +56,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             <InAppBackground>
-                <BackButton onPress={() => navigation.goBack()} />
+                <BackButton goBack={navigation.goBack} />
                 <EditButton />
 
                 <View style={styles.headerContainer}>
