@@ -41,14 +41,14 @@ def create_app(overrides={}):
     jwt = setup_jwt(app)
     setup_flask_login(app)
     setup_admin(app)
-    @jwt.unauthorized_loader
-    def unauthorized_response(callback):
-        app.logger.error('Unauthorized request - missing or invalid token')
-        return jsonify(error="Unauthorized access"), 401
+    # @jwt.unauthorized_loader
+    # def unauthorized_response(callback):
+    #     app.logger.error('Unauthorized request - missing or invalid token')
+    #     return jsonify(error="Unauthorized access"), 401
 
-    @jwt.invalid_token_loader
-    def invalid_token_response(callback):
-        app.logger.error('Invalid token provided')
-        return jsonify(error="Invalid token"), 422
+    # @jwt.invalid_token_loader
+    # def invalid_token_response(callback):
+    #     app.logger.error('Invalid token provided')
+    #     return jsonify(error="Invalid token"), 422
     app.app_context().push()
     return app
