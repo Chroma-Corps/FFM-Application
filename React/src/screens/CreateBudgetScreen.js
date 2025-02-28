@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
@@ -8,11 +8,12 @@ import { API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
-import DateRangeSelector from '../components/DateRangeSelector';
+import DateSelector from '../components/DateSelector';
 import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
 import { ScreenContainer } from 'react-native-screens';
+import NotificationBell from '../components/NotificationButton';
 
 // Dummy data for bank cards
 const bankCards = [
@@ -23,34 +24,99 @@ const bankCards = [
     { bankID: 5, userID: 105, bankTitle: 'Bank 5', bankCurrency: 'EUR', bankAmount: 1200, remainingBankAmount: 1000 },
 ];
 
+const formatDate = (date) => {
+    const d = new Date(date);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return d.toLocaleDateString('en-US', options);
+};
+
+// Function to calculate the end date based on selected period
+const calculateEndDate = (startDate, duration, selectedPeriod) => {
+    const periodsInDays = {
+        daily: 1,
+        weekly: 7,
+        monthly: 30, // Simplified; could be more precise
+        yearly: 365
+    };
+
+    if (!startDate || !duration || !selectedPeriod) {
+        return null;
+    }
+
+    const start = new Date(startDate); // Ensure startDate is in a valid format
+    if (isNaN(start)) {
+        console.error("Invalid start date.");
+        return null;  // If start date is invalid
+    }
+
+    const daysToAdd = duration * periodsInDays[selectedPeriod];
+
+    // Check if duration is a valid number
+    if (isNaN(daysToAdd)) {
+        console.error("Invalid duration");
+        return null;
+    }
+
+    // Add the days to the start date
+    start.setDate(start.getDate() + daysToAdd);
+
+    return start;
+};
+
 export default function CreateBudgetsScreen({ navigation }) {
+
+    //Budget Details
     const [budgetTitle, setBudgetTitle] = useState('');
     const [budgetAmount, setBudgetAmount] = useState('');
-    const [remainingBudgetAmount, setRemainingBudgetAmount] = useState('');
+    const [budgetType, setBudgetType] = useState('');
     const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [budgetType, setBudgetType] = useState('Individual');
-    const [periodSelectionPickerVisible, setPeriodSelectionPickerVisible] = useState(false);
-    const [dateRangePickerVisible, setDateRangePickerVisible] = useState(false);
+    const [endDate, setEndDate] = useState(null);
+
+    const [duration, setDuration] = useState(''); // To help with calclation of end date
+
+    //Pop-up Triggers
+    const [selectedPeriod, setSelectedPeriod] = useState(null);
+    const [showPeriodPopup, setShowPeriodPopup] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+
+    // Recalculate end date when any of the dependencies change
+    useEffect(() => {
+        const newEndDate = calculateEndDate(startDate, duration, selectedPeriod);
+        setEndDate(newEndDate);
+    }, [startDate, duration, selectedPeriod]);
+
+    const displayPeriod = () => {
+        const formattedStart = formatDate(startDate);
+        const formattedEnd = endDate ? formatDate(endDate) : '';
+
+        console.log('Formatted Start:', formattedStart);
+        console.log('Formatted End:', formattedEnd);
+
+        return `${formattedStart} - ${formattedEnd}`;
+    };
 
     const handleAmountChange = (value) => {
         setBudgetAmount(value);
-        setRemainingBudgetAmount(value);
     };
 
-    const handleSave = (startDate, endDate) => {
-        console.log("Start Date:", startDate);
-        console.log("End Date:", endDate);
-
-        setStartDate(startDate);
-        setEndDate(endDate);
-        // setDateRangePickerVisible(false);
+    const handlePeriodFocus = () => {
+        if (!selectedPeriod) {
+            setShowPeriodPopup(true);
+        }
     };
 
-    const handleCancel = () => {
-        setDateRangePickerVisible(false);
-        setPeriodSelectionPickerVisible(false);
+    const handleShowDatePicker = () => {
+        setShowDatePicker(true);
+    };
+
+    const handleDateSave = (date) => {
+        setStartDate(date);
+        setShowDatePicker(false);
+    };
+
+    const handleDateCancel = () => {
+        setShowDatePicker(false);
     };
 
     const renderBankCard = ({ item }) => (
@@ -101,24 +167,23 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
     };
 
-
-
     return (
         <View style={styles.createBudgetScreen}>
             <InAppBackground>
 
-                {dateRangePickerVisible && (
-                    <DateRangeSelector
-                        periodSelectionPickerVisible={periodSelectionPickerVisible}
-                        setPeriodSelectionPickerVisible={setPeriodSelectionPickerVisible}
-                        onSave={handleSave}
-                        onCancel={handleCancel}
+                {showPeriodPopup && (
+                    <PeriodSelectionPopup
+                        setShowPeriodPopup={setShowPeriodPopup}
+                        setSelectedPeriod={setSelectedPeriod}
                     />
                 )}
 
-
-                {periodSelectionPickerVisible && (
-                    <PeriodSelectionPopup setPeriodSelectionPickerVisible={setPeriodSelectionPickerVisible} />
+                {showDatePicker && (
+                    <DateSelector
+                        showDatePicker={showDatePicker}
+                        onSave={handleDateSave}
+                        onCancel={handleDateCancel}
+                    />
                 )}
 
                 <View style={styles.screenContainer}>
@@ -151,22 +216,42 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         style={[styles.input, styles.shortInput]}
                                         keyboardType="numeric"
                                     />
-                                    <Text style={styles.slashText}>/</Text>
 
                                     <Text style={styles.slashText}>/</Text>
 
-                                    <ButtonSmall label="Period" onPress={() => {
-                                        setPeriodSelectionPickerVisible(true);
-                                        setDateRangePickerVisible(false);
-                                    }} />
+                                    <TextInput
+                                        placeholder="0"
+                                        value={duration}
+                                        onChangeText={setDuration}
+                                        style={[styles.input, styles.shortInput]}
+                                        keyboardType="numeric"
+                                    />
+
+                                    <Text style={styles.slashText}>/</Text>
+
+                                    <TextInput
+                                        placeholder="Period"
+                                        value={selectedPeriod || ''}
+                                        onFocus={handlePeriodFocus}
+                                        editable={false}
+                                        style={[styles.input, styles.shortInput]}
+                                    />
+
+
                                 </View>
 
                                 <Text style={styles.defaultText}>Starting:</Text>
 
-                                <ButtonSmall label="Select Date" onPress={() => {
-                                    setDateRangePickerVisible(true);
-                                    setPeriodSelectionPickerVisible(false);
-                                }} />
+                                <ButtonSmall
+                                    label={startDate ? new Date(startDate).toLocaleDateString() : 'Select Date'}
+                                    onPress={handleShowDatePicker}
+                                    mode="contained"
+                                    style={styles.dateButton}
+                                />
+
+                                <Text style={[styles.defaultText, { marginTop: 10 }]}>Budget Period</Text>
+                                <Text style={{ color: '#fff' }}>{displayPeriod()}</Text>
+
                             </View>
 
                             <View style={styles.cardBottomHalfContainer}>
@@ -182,7 +267,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         contentContainerStyle={styles.scrollContainer}
                                     />
 
-                                    <Text style={styles.defaultText}>Budget Type:</Text>
+                                    <Text style={[styles.defaultText, { marginBottom: 0 }]}>Budget Type:</Text>
 
                                     <View style={styles.filterTagsContainer}>
                                         <FilterTag
@@ -221,7 +306,7 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.bold.fontFamily,
         color: 'white',
         lineHeight: 21,
-        marginBottom: 10,
+        marginBottom: 5,
     },
 
     headerContainer: {
@@ -271,8 +356,8 @@ const styles = StyleSheet.create({
     },
 
     focused: {
-        borderBottomWidth: 2, // Bold underline when focused
-        borderBottomColor: '#000', // Bold underline color
+        borderBottomWidth: 2,
+        borderBottomColor: '#000',
     },
 
     budgetAmountContainer: {
@@ -289,9 +374,9 @@ const styles = StyleSheet.create({
     },
 
     shortInput: {
-        width: 80,  // Adjust width for a more compact look
+        width: 80,
         textAlign: 'center',
-        borderBottomWidth: 1.5,  // Thinner underline
+        borderBottomWidth: 1.5,
         borderBottomColor: '#fff',
     },
 
@@ -313,40 +398,39 @@ const styles = StyleSheet.create({
     },
 
     scrollContainer: {
-        paddingVertical: 10, // Optional: to give some space at the top and bottom
-        alignItems: 'center',  // Optional: to center the bank cards vertically within the scrollview
+        marginBottom: 5,
+        marginBottom: 10,
     },
+
     bankCard: {
-        backgroundColor: '#333', // Card background color
-        padding: 20,  // Padding inside the card
-        borderRadius: 8, // Rounded corners
-        marginHorizontal: 10, // Spacing between cards
-        width: 150, // Width of each bank card
-        alignItems: 'center', // Center content inside the card
-        justifyContent: 'center', // Center content inside the card
+        backgroundColor: '#333',
+        padding: 20,
+        borderRadius: 8,
+        marginHorizontal: 10,
+        width: 150,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 
     bankCardTitle: {
-        color: '#fff', // Text color for bank title
-        fontSize: 18, // Adjust the text size
+        color: '#fff',
+        fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 5,
     },
 
     bankCardAmount: {
-        color: '#fff', // Text color for the amount
-        fontSize: 16, // Adjust the text size
+        color: '#fff',
+        fontSize: 16,
         marginBottom: 5,
     },
     bankCardRemaining: {
-        color: '#fff', // Text color for the remaining balance
-        fontSize: 14, // Adjust the text size
+        color: '#fff',
+        fontSize: 14,
     },
 
     filterTagsContainer: {
         flexDirection: 'row',
         justifyContent: 'start',
-        marginVertical: 10,
     },
 
     overlayContainer: {

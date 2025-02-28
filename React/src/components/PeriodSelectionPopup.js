@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, TouchableOpacity, Modal, Text, StyleSheet } from 'react-native';
-import { theme } from '../core/theme';  // Assuming you have a theme.js for styling
+import { theme } from '../core/theme';
 
-const PeriodSelectionPopup = ({ setPeriodSelectionPickerVisible, setSelectedPeriod }) => {
+const PeriodSelectionPopup = ({ setShowPeriodPopup, setSelectedPeriod }) => {
 
+    // Handle period selection
     const handlePeriodSelect = (period) => {
         setSelectedPeriod(period);
-        setPeriodSelectionPickerVisible(false); // Close the modal after selection
+        console.log('Selected Period:', period);
+        setShowPeriodPopup(false);
     };
 
     return (
@@ -14,7 +16,8 @@ const PeriodSelectionPopup = ({ setPeriodSelectionPickerVisible, setSelectedPeri
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>Select Period</Text>
-                    {/* Period selection buttons */}
+
+
                     <TouchableOpacity onPress={() => handlePeriodSelect('Daily')} style={styles.optionButton}>
                         <Text style={styles.optionText}>Daily</Text>
                     </TouchableOpacity>
@@ -28,8 +31,8 @@ const PeriodSelectionPopup = ({ setPeriodSelectionPickerVisible, setSelectedPeri
                         <Text style={styles.optionText}>Yearly</Text>
                     </TouchableOpacity>
 
-                    {/* Close button */}
-                    <TouchableOpacity onPress={() => setPeriodSelectionPickerVisible(false)} style={styles.closeButton}>
+
+                    <TouchableOpacity onPress={() => setShowPeriodPopup(false)} style={styles.closeButton}>
                         <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
                 </View>
