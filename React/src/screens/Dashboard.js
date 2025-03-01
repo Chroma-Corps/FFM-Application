@@ -31,7 +31,6 @@ export default function Dashboard({ navigation }) {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched Banks:', data);
         setBanks(data);
       } else {
         console.error('Failed To Fetch Banks:', response.statusText);
@@ -49,9 +48,9 @@ export default function Dashboard({ navigation }) {
     }, [])
   );
 
-  const handleAddBank = () => {
-    navigation.navigate('AddBank');
-  };
+  // const handleAddBank = () => {
+  //   navigation.navigate('AddBank');
+  // };
 
   const handleLogout = () => {
     navigation.reset({
@@ -79,16 +78,16 @@ export default function Dashboard({ navigation }) {
         ) : banks.length === 0 ? (
           <Text style={styles.defaultText}>You Have No Banks Added Yet!</Text>
         ) : (
-          <View style={styles.bankListContainer}>
+          <View style={styles.bankItemContainer}>
             <FlatList
               data={banks}
               renderItem={renderBankItem}
-              keyExtractor={(item) => item?.bankID ? item.bankID.toString() : `${item.bankTitle}`}
+              keyExtractor={(item) => item?.bankID}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.flatListContainer}
             />
-            <Button mode="contained" onPress={handleAddBank} style={styles.addButton}>+</Button>
+            <Button mode="contained" style={styles.addButton}>+</Button>
           </View>
         )}
         <View style={styles.buttonContainer}>
@@ -121,8 +120,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 150,
     marginRight: 10,
-    paddingVertical: 10,
     marginBottom: 10,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    margin: 5,
+    padding: 15,
+    borderRadius: 5, 
   },
 
   bankTitle: {
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
   },
 
-  bankListContainer: {
+  bankItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,

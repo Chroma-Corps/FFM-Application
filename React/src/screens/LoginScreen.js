@@ -44,9 +44,6 @@ export default function LoginScreen({ navigation }) {
 
         if (response.ok) {
           await AsyncStorage.setItem('access_token', data.access_token);
-
-          console.log('Login Successful:', data)
-
           navigation.reset({
             index: 0,
             routes: [{ name: 'Home' }],

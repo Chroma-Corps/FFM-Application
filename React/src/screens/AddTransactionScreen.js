@@ -75,11 +75,11 @@ export default function AddTransactionScreen({ navigation }) {
                 body: JSON.stringify({
                     transactionTitle,
                     transactionDesc,
-                    transactionType,
-                    transactionCategory,
-                    transactionAmount,
-                    transactionDate,
-                    transactionTime,
+                    transactionType: transactionType.trim().toUpperCase(),
+                    transactionCategory: transactionCategory.trim().toUpperCase(),
+                    transactionAmount: transactionAmount.trim(),
+                    transactionDate: transactionDate.trim(),
+                    transactionTime: transactionTime.trim(),
                     budgetID: selectedBudget,
                 }),
             });
@@ -110,12 +110,12 @@ export default function AddTransactionScreen({ navigation }) {
                             key={type}
                             style={[
                                 styles.radioButton,
-                                transactionType === type.toUpperCase() && styles.radioSelected,
+                                transactionType === type && styles.radioSelected,
                             ]}
-                            onPress={() => setTransactionType(type.toUpperCase())}
+                            onPress={() => setTransactionType(type)}
                         >
-                            <Text style={transactionType === type.toUpperCase() ? styles.radioTextSelected : styles.radioText}>
-                                {type.toUpperCase()}
+                            <Text style={transactionType === type ? styles.radioTextSelected : styles.radioText}>
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
                             </Text>
                         </TouchableOpacity>
                     ))}

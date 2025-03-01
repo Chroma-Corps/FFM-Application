@@ -31,7 +31,6 @@ export default function BudgetsScreen({ navigation }) {
     
         if (response.ok) {
           const budgets = await response.json();
-          console.log('Fetched Budgets:', budgets);
           setData(budgets);
         } else {
           console.error('Failed To Fetch Budgets:', response.statusText);

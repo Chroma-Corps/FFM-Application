@@ -31,7 +31,6 @@ export default function TransactionsScreen({ navigation }) {
   
       if (response.ok) {
         const transactions = await response.json();
-        console.log('Fetched Transactions:', transactions);
         setData(transactions);
       } else {
         console.error('Failed To Fetch Transactions:', response.statusText);

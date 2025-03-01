@@ -43,13 +43,13 @@ export default function CreateBudgetsScreen({navigation}) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    bankID, 
-                    budgetTitle, 
-                    budgetAmount, 
-                    budgetType, 
-                    budgetCategory, 
-                    startDate, 
-                    endDate
+                    bankID,
+                    budgetTitle,
+                    budgetAmount: budgetAmount.trim(),
+                    budgetType: budgetType.trim().toUpperCase(),
+                    budgetCategory: budgetCategory.trim().toUpperCase(),
+                    startDate: startDate.trim(),
+                    endDate: endDate.trim()
                 })
             });
 
