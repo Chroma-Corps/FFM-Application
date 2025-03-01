@@ -17,6 +17,7 @@ import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
 import AddTransactionScreen from './src/screens/AddTransactionScreen'
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
 import BudgetDetailsScreen from './src/screens/BudgetDetailsScreen'
+import TransactionsScreen from './src/screens/TransactionsScreen'
 
 
 const Stack = createStackNavigator()
@@ -40,7 +41,7 @@ export default function App() {
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="StartScreen"
+            initialRouteName="TransactionsScreen"
             screenOptions={{
               headerShown: false,
             }}
@@ -52,6 +53,7 @@ export default function App() {
             <Stack.Screen name="Budgets" component={BudgetsScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
+            <Stack.Screen name="TransactionsScreen" component={TransactionsScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
 

@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, 
+         Text, 
+         StyleSheet, 
+         TextInput, 
+         TouchableOpacity,
+         Pressable,
+         Platform } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import InAppBackground from '../components/InAppBackground';
@@ -12,6 +18,9 @@ import TransactionCategories from '../constants/TransactionCategories';
 import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 
+//Testing date/timer feature
+import DateTimePicker from "@react-native-community/datetimepicker";
+
 export default function AddTransactionScreen({ navigation }) {
     const [transactionTitle, setTransactionTitle] = useState('');
     const [transactionDesc, setTransactionDesc] = useState('');
@@ -23,6 +32,61 @@ export default function AddTransactionScreen({ navigation }) {
     const [open, setOpen] = useState(false);
     const [selectedBudget, setSelectedBudget] = useState(null);
     const [budgets, setBudgets] = useState(null);
+
+    //Testing date/timer feature
+    const [date, setDate] = useState(new Date());
+    const [showPicker, setShowPicker] = useState(false);
+
+    const [time, setTime] = useState(new Date());
+    const [showTimePicker, setShowTimePicker] = useState(false);
+
+    const toggleDatepicker = () => {
+        setShowPicker(!showPicker);
+    };
+
+    const onChange = ({ type }, selectedDate) =>{
+        if (type == "set") {
+            const currentDate = selectedDate;
+            setDate(currentDate);
+
+            if (Platform.OS === "android") {
+                toggleDatepicker();
+                setTransactionDate(currentDate.toDateString());
+            }
+        } else {
+            toggleDatepicker();
+        }
+    };
+
+    const confirmIOSDate = () => {
+        setTransactionDate(date.toDateString());
+        toggleDatepicker();
+    }
+
+
+
+    const toggleTimepicker = () => {
+        setShowTimePicker(!showTimePicker);
+    };
+    
+    const onTimeChange = ({ type }, selectedTime) => {
+        if (type === "set") {
+            const currentTime = selectedTime;
+            setTime(currentTime);
+    
+            if (Platform.OS === "android") {
+                toggleTimepicker();
+                setTransactionTime(currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+            }
+        } else {
+            toggleTimepicker();
+        }
+    };
+    
+    const confirmIOSTime = () => {
+        setTransactionTime(time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+        toggleTimepicker();
+    };
 
     useEffect(() => {
         const fetchBudgets = async () => {
@@ -158,18 +222,125 @@ export default function AddTransactionScreen({ navigation }) {
                     style={styles.input}
                     keyboardType="numeric"
                 />
-                <TextInput
-                    placeholder="Date (YYYY-MM-DD)"
-                    value={transactionDate}
-                    onChangeText={setTransactionDate}
-                    style={styles.input}
-                />
-                <TextInput
-                    placeholder="Time (HH:MM)"
-                    value={transactionTime}
-                    onChangeText={setTransactionTime}
-                    style={styles.input}
-                />
+
+                
+
+
+
+
+
+
+
+
+                
+                {showPicker && (
+                    <DateTimePicker
+                        mode="date"
+                        display="spinner"
+                        value={date}
+                        onChange={onChange}
+                        style={styles.datePicker}
+                    />
+                )}
+                
+                {showPicker && Platform.OS === "ios" && 
+                (
+                    <View 
+                        style={{ flexDirection: "row",
+                            justifyContent: "space-around" }}>
+                        <TouchableOpacity style={[
+                            styles.button,
+                            styles.pickerButton,
+                            { backgroundColor: '#181818' },
+                        ]}
+                        onPress={toggleDatepicker}
+                        >
+                            <Text>Cancel</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={[
+                            styles.button,
+                            styles.pickerButton,
+                            { backgroundColor: '#181818' },
+                        ]}
+                        onPress={confirmIOSDate}
+                        >
+                            <Text>Confirm</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {!showPicker && (
+                    <Pressable
+                        onPress={toggleDatepicker}
+                    >
+                        <TextInput
+                            placeholder="Date (YYYY-MM-DD)"
+                            value={transactionDate}
+                            onChangeText={setTransactionDate}
+                            style={styles.input}
+                            editable={false}
+                            onPressIn={toggleDatepicker}
+                        />
+                    </Pressable>
+                )}
+                
+
+
+
+
+
+
+
+
+                {showTimePicker && (
+                    <DateTimePicker
+                        mode="time"
+                        display="spinner"
+                        value={time}
+                        onChange={onTimeChange}
+                        style={styles.datePicker}
+                    />
+                )}
+
+                {showTimePicker && Platform.OS === "ios" && (
+                    <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                        <TouchableOpacity
+                            style={[styles.button, styles.pickerButton, { backgroundColor: '#181818' }]}
+                            onPress={toggleTimepicker}
+                        >
+                            <Text>Cancel</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.button, styles.pickerButton, { backgroundColor: '#181818' }]}
+                            onPress={confirmIOSTime}
+                        >
+                            <Text>Confirm</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
+                {!showTimePicker && (
+                    <Pressable onPress={toggleTimepicker}>
+                        <TextInput
+                            placeholder="Time (HH:MM AM/PM)"
+                            value={transactionTime}
+                            onChangeText={setTransactionTime}
+                            style={styles.input}
+                            editable={false}
+                            onPressIn={toggleTimepicker}
+                        />
+                    </Pressable>
+                )}
+
+
+
+
+
+
+
+
                 <View style={styles.container}>
                     <DropDownPicker
                         open={open}
@@ -271,5 +442,14 @@ export default function AddTransactionScreen({ navigation }) {
             backgroundColor: '#f9f9f9',
             borderColor: theme.colors.secondary,
             borderWidth: 2,
+          },
+
+          datePicker: {
+            height: 120,
+            margin: -10,
+            backgroundColor: '#ffffff',
+          },
+          pickerButton: {
+            paddingHorizontal: 20,
           },
     });
