@@ -17,14 +17,12 @@ export default function BudgetsScreen({ navigation }) {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("access_token");
-        const userID = await AsyncStorage.getItem("user_id");
-        
         if (!token) {
           console.error('No Token Found');
           return;
         }
     
-        const response = await fetch(`https://ffm-application-test.onrender.com/budgets/${userID}`, {
+        const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,

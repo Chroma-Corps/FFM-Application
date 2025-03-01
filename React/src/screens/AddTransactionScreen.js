@@ -28,14 +28,13 @@ export default function AddTransactionScreen({ navigation }) {
         const fetchBudgets = async () => {
             try {
                 const token = await AsyncStorage.getItem('access_token');
-                const userID = await AsyncStorage.getItem('user_id');
 
-                if (!token || !userID) {
-                    console.error('No Token or UserID Found');
+                if (!token) {
+                    console.error('No Token Found');
                     return;
                 }
 
-                const response = await fetch(`https://ffm-application-test.onrender.com/budgets/${userID}`, {
+                const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
                     method: 'GET',
                     headers: {
                     'Authorization': `Bearer ${token}`,
@@ -62,11 +61,10 @@ export default function AddTransactionScreen({ navigation }) {
     const addTransaction = async () => {
         try {
             const token = await AsyncStorage.getItem('access_token');
-            const userID = await AsyncStorage.getItem('user_id');
 
-            if (!token || !userID) {
-            console.error('Missing required data');
-            return;
+            if (!token) {
+                console.error('Missing required data');
+                return;
             }
 
             const response = await fetch(`https://ffm-application-test.onrender.com/add-transaction`, {
@@ -75,17 +73,17 @@ export default function AddTransactionScreen({ navigation }) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                userID,
-                transactionTitle,
-                transactionDesc,
-                transactionType,
-                transactionCategory,
-                transactionAmount,
-                transactionDate,
-                transactionTime,
-                budgetID: selectedBudget,
-            }),
+                body: JSON.stringify({
+                    userID,
+                    transactionTitle,
+                    transactionDesc,
+                    transactionType,
+                    transactionCategory,
+                    transactionAmount,
+                    transactionDate,
+                    transactionTime,
+                    budgetID: selectedBudget,
+                }),
             });
 
             const data = await response.json();

@@ -19,7 +19,6 @@ from flask_jwt_extended import (
 
 from App.controllers import (
     setup_jwt,
-    setup_flask_login,
     add_auth_context
 )
 
@@ -39,7 +38,6 @@ def create_app(overrides={}):
     add_views(app)
     init_db(app)
     jwt = setup_jwt(app)
-    setup_flask_login(app)
     setup_admin(app)
     # @jwt.unauthorized_loader
     # def unauthorized_response(callback):

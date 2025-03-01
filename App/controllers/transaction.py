@@ -40,6 +40,13 @@ def get_transaction(id):
 def get_all_transactions():
     return Transaction.query.all()
 
+# Get Budget By ID (JSON)
+def get_transaction_json(id):
+    transaction = Transaction.query.get(id)
+    if transaction:
+        return transaction.get_json()
+    return None
+
 # Get All Transactions (JSON)
 def get_all_transactions_json():
     transactions = Transaction.query.all()

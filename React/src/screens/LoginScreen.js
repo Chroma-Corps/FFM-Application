@@ -44,7 +44,6 @@ export default function LoginScreen({ navigation }) {
 
         if (response.ok) {
           await AsyncStorage.setItem('access_token', data.token);
-          await AsyncStorage.setItem('user_id', data.userID);
 
           console.log('Login Successful:', data)
 

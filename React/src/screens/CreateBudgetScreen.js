@@ -22,10 +22,9 @@ export default function CreateBudgetsScreen({navigation}) {
 
     const createBudget = async () => {
         const token = await AsyncStorage.getItem("access_token");
-        const userID = await AsyncStorage.getItem('user_id');
 
-        if (!token || !userID) {
-            console.error('No Token or UserID Found');
+        if (!token) {
+            console.error('No Token Found');
             return;
           }
 

@@ -1,6 +1,7 @@
 import enum
 from App.database import db
 from App.services.currency import CurrencyService
+from App.services.datetime import convert_to_date
 
 class BudgetType(enum.Enum):
     SAVINGS = "Savings"
@@ -31,8 +32,8 @@ class Budget(db.Model):
         self.remainingBudgetAmount = remainingBudgetAmount
         self.budgetType = budgetType
         self.budgetCategory = budgetCategory
-        self.startDate = startDate
-        self.endDate = endDate
+        self.startDate = convert_to_date(startDate)
+        self.endDate = convert_to_date(endDate)
         self.userID = userID
         self.bankID = bankID
 

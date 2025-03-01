@@ -13,12 +13,6 @@ def initialize():
     bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
     alice = create_user('Alice Wonderland','alice@mail.com', 'alicepass')
 
-    def string_to_date(date_str):
-        return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
-
-    def string_to_time(time_str):
-        return datetime.datetime.strptime(time_str, "%H:%M").time()
-
     bob_bank = create_bank(bob.id, "Bob's Savings", "ttd", 5000.00)
     alice_bank = create_bank(alice.id, "Alice's Checking", "usd", 1500.00)
 
@@ -27,8 +21,8 @@ def initialize():
         budgetAmount=150.25, 
         budgetType=BudgetType.EXPENSE,
         budgetCategory="grocercies",
-        startDate=string_to_date("2025-01-01"),
-        endDate=string_to_date("2025-01-31"),
+        startDate="2025-01-01",
+        endDate="2025-01-31",
         userID=bob.id,
         bankID=bob_bank.bankID
     )
@@ -38,8 +32,8 @@ def initialize():
         budgetAmount=50,
         budgetType=BudgetType.SAVINGS,
         budgetCategory=None,
-        startDate=string_to_date("2025-02-01"),
-        endDate=string_to_date("2025-02-28"),
+        startDate="2025-02-01",
+        endDate="2025-02-28",
         userID=bob.id,
         bankID=bob_bank.bankID
     )
@@ -49,8 +43,8 @@ def initialize():
         budgetAmount=1000,
         budgetType=BudgetType.EXPENSE,
         budgetCategory="shopping",
-        startDate=string_to_date("2025-03-01"),
-        endDate=string_to_date("2025-03-31"),
+        startDate="2025-03-01",
+        endDate="2025-03-31",
         userID=alice.id,
         bankID=alice_bank.bankID
     )
@@ -62,7 +56,7 @@ def initialize():
         transactionType=TransactionType.INCOME,
         transactionCategory="income",
         transactionAmount=500.00,
-        transactionDate=string_to_date("2025-01-25"),
-        transactionTime=string_to_time("11:30"),
+        transactionDate="2025-01-25",
+        transactionTime="11:30",
         budgetID=budget2.budgetID
     )

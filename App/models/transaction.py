@@ -1,6 +1,7 @@
 import enum
 from App.database import db
 from App.services.currency import CurrencyService
+from App.services.datetime import convert_to_date, convert_to_time
 
 class TransactionType(enum.Enum):
     INCOME = "Income"
@@ -34,8 +35,8 @@ class Transaction(db.Model):
         self.transactionType = transactionType
         self.transactionCategory = transactionCategory
         self.transactionAmount = transactionAmount
-        self.transactionDate = transactionDate
-        self.transactionTime = transactionTime
+        self.transactionDate = convert_to_date(transactionDate)
+        self.transactionTime = convert_to_time(transactionTime)
         self.budgetID = budgetID
         self.bankID = bankID
 
