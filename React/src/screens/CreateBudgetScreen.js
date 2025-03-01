@@ -14,6 +14,9 @@ export default function CreateBudgetsScreen({navigation}) {
     const [remainingBudgetAmount, setRemainingBudgetAmount] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [bankID, setBankID] = useState('');
+    const [budgetCategory, setBudgetCategory] = useState('');
+    const [budgetType, setBudgetType] = useState('');
     const handleAmountChange = (value) => {
         setBudgetAmount(value);
         setRemainingBudgetAmount(value);
@@ -39,18 +42,29 @@ export default function CreateBudgetsScreen({navigation}) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID })
+                body: JSON.stringify({
+                    bankID, 
+                    budgetTitle, 
+                    budgetAmount, 
+                    budgetType, 
+                    budgetCategory, 
+                    startDate, 
+                    endDate
+                })
             });
-            
+
+            const data = await response.json();
+
             if (response.ok) {
-                Alert.alert('Success', 'Budget created successfully');
+                alert(data.message);
                 navigation.goBack();
             } else {
-                Alert.alert('Error', 'Failed to create budget');
+                alert(data.error);
+                console.error(data.error);
             }
         } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'Something went wrong');
+            console.error(error.message);
+            alert('An Error Occurred: ' + error.message);
         }
     };
 
@@ -63,6 +77,9 @@ export default function CreateBudgetsScreen({navigation}) {
                     <TextInput placeholder="Amount" value={budgetAmount} onChangeText={handleAmountChange} style={styles.input} keyboardType="numeric" />
                     <TextInput placeholder="Start Date" value={startDate} onChangeText={setStartDate} style={styles.input} />
                     <TextInput placeholder="End Date" value={endDate} onChangeText={setEndDate} style={styles.input} />
+                    <TextInput placeholder="Budget Type" value={budgetType} onChangeText={setBudgetType} style={styles.input} />
+                    <TextInput placeholder="Budget Category" value={budgetCategory} onChangeText={setBudgetCategory} style={styles.input} />
+                    <TextInput placeholder="BankID" value={bankID} onChangeText={setBankID} style={styles.input} keyboardType="numeric"/>
                 </Card>
                 <BackButton goBack={navigation.goBack} />
                 <Button onPress={createBudget}>Create</Button>

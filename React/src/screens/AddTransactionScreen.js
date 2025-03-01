@@ -73,7 +73,6 @@ export default function AddTransactionScreen({ navigation }) {
                 'Content-Type': 'application/json',
             },
                 body: JSON.stringify({
-                    userID,
                     transactionTitle,
                     transactionDesc,
                     transactionType,
@@ -94,7 +93,8 @@ export default function AddTransactionScreen({ navigation }) {
             alert(data.error)
             }
         } catch (error) {
-            alert(data.error)
+            console.error(error.message);
+            alert('An Error Occurred: ' + error.message);
         }
     };
 
@@ -110,12 +110,12 @@ export default function AddTransactionScreen({ navigation }) {
                             key={type}
                             style={[
                                 styles.radioButton,
-                                transactionType === type && styles.radioSelected,
+                                transactionType === type.toUpperCase() && styles.radioSelected,
                             ]}
-                            onPress={() => setTransactionType(type)}
+                            onPress={() => setTransactionType(type.toUpperCase())}
                         >
-                            <Text style={transactionType === type ? styles.radioTextSelected : styles.radioText}>
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                            <Text style={transactionType === type.toUpperCase() ? styles.radioTextSelected : styles.radioText}>
+                                {type.toUpperCase()}
                             </Text>
                         </TouchableOpacity>
                     ))}

@@ -79,7 +79,9 @@ def new_transaction():
             return jsonify({"error": error_message}), 400
 
         new_transaction = add_transaction(**transaction_data)
-        return jsonify({"message": "Transaction Created Successfully", "transactionID": new_transaction.transactionID}), 201
+        if new_transaction is None:
+            return jsonify({"error": "Failed To Add Transaction"}), 500
+        return jsonify({"message": "Transaction Added Successfully", "transactionID": new_transaction.transactionID}), 201
 
     except Exception as e:
         print(f"Error: {e}")

@@ -29,6 +29,9 @@ def new_budget():
             return jsonify({"error": "Missing Required Fields"}), 400
 
         new_budget = create_budget(budgetTitle=budgetTitle, budgetAmount=budgetAmount, budgetType=budgetType, budgetCategory=budgetCategory, startDate=startDate, endDate=endDate, userID=userID, bankID=bankID)
+
+        if new_budget is None:
+            return jsonify({"error": "Failed To Create Budget"}), 500
         return jsonify({"message": "Budget Created Successfully", "budgetID": new_budget.budgetID}), 201
 
     except Exception as e:
