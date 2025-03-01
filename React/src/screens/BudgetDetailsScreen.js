@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import InAppHeader from '../components/InAppHeader'
 import PlusFAB from '../components/PlusFAB';
 import { theme } from '../core/theme'

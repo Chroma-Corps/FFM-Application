@@ -9,7 +9,6 @@ import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 import { emailValidator } from '../helpers/emailValidator'
 import { passwordValidator } from '../helpers/passwordValidator'
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -41,9 +40,10 @@ export default function LoginScreen({ navigation }) {
         })
 
         const data = await response.json()
+        console.log(data)
 
         if (response.ok) {
-          await AsyncStorage.setItem('access_token', data.token);
+          await AsyncStorage.setItem('access_token', data.access_token);
 
           console.log('Login Successful:', data)
 
@@ -52,8 +52,8 @@ export default function LoginScreen({ navigation }) {
             routes: [{ name: 'Home' }],
           })
         } else {
-          console.error('Login Failed:', data.message)
-          alert(data.message)
+          console.error('Login Failed:', data.error)
+          alert(data.error)
         }
     } catch(error) {
       console.error('Error Loggin In', error)

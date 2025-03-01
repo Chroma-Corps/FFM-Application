@@ -6,7 +6,6 @@ import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
 import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

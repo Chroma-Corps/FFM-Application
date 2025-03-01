@@ -5,7 +5,6 @@ import Background from '../components/Background'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import { useFocusEffect } from '@react-navigation/native';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../core/theme';
 
