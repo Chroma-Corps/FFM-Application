@@ -9,7 +9,6 @@ import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 import { emailValidator } from '../helpers/emailValidator'
 import { passwordValidator } from '../helpers/passwordValidator'
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
@@ -29,8 +28,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-        // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_LOCAL}/login`, {
+        const response = await fetch(`https://ffm-application-test.onrender.com/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -42,20 +40,17 @@ export default function LoginScreen({ navigation }) {
         })
 
         const data = await response.json()
+        console.log(data)
 
         if (response.ok) {
-          AsyncStorage.setItem('access_token', data.token);
-          AsyncStorage.setItem('user_id', data.userID);
-
-          console.log('Login Successful:', data)
-
+          await AsyncStorage.setItem('access_token', data.access_token);
           navigation.reset({
             index: 0,
             routes: [{ name: 'Home' }],
           })
         } else {
-          console.error('Login Failed:', data.message)
-          alert(data.message)
+          console.error('Login Failed:', data.error)
+          alert(data.error)
         }
     } catch(error) {
       console.error('Error Loggin In', error)

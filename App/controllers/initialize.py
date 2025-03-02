@@ -1,53 +1,62 @@
 import datetime
+from App.controllers.bank import create_bank
 from App.controllers.budget import create_budget
 from App.controllers.transaction import add_transaction
-from App.models.transaction import TransactionCategory, TransactionType
-from .user import create_user
+from App.controllers.user import create_user
 from App.database import db
-
+from App.models.budget import BudgetType
+from App.models.transaction import TransactionType
 
 def initialize():
     db.drop_all()
     db.create_all()
-    # bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
-    # alice = create_user('Alice Wonderland','alice@mail.com', 'alicepass')
-    # create_user('Trudy TruffleHat','trudy@mail.com', 'trudypass')
-    # create_user('Rick Rickson','rick@mail.com', 'rickpass')
-    # create_user('Jane Doe','jane@mail.com', 'janepass')
+    bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
+    alice = create_user('Alice Wonderland','alice@mail.com', 'alicepass')
 
-    # def string_to_date(date_str):
-    #     return datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+    bob_bank = create_bank(bob.id, "Bob's Savings", "ttd", 5000.00)
+    alice_bank = create_bank(alice.id, "Alice's Checking", "usd", 1500.00)
 
-    # def string_to_time(time_str):
-    #     return datetime.datetime.strptime(time_str, "%H:%M").time()
+    budget1 = create_budget (
+        budgetTitle="January Budget", 
+        budgetAmount=150.25, 
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory="grocercies",
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userID=bob.id,
+        bankID=bob_bank.bankID
+    )
 
-    # # Example Budgets
-    # budget1 = create_budget("January Budget", 150.25, 150.25, string_to_date("2025-01-01"), string_to_date("2025-01-31"), bob.id)
-    # budget2 = create_budget("February Budget", 50, 50,  string_to_date("2025-02-01"), string_to_date("2025-02-28"), bob.id)
-    # budget3 = create_budget("March Budget", 1000, 1000, string_to_date("2025-03-01"), string_to_date("2025-03-31"), alice.id)
+    budget2 = create_budget( 
+        budgetTitle="February Budget",
+        budgetAmount=50,
+        budgetType=BudgetType.SAVINGS,
+        budgetCategory=None,
+        startDate="2025-02-01",
+        endDate="2025-02-28",
+        userID=bob.id,
+        bankID=bob_bank.bankID
+    )
 
+    budget3 = create_budget (
+        budgetTitle="March Budget",
+        budgetAmount=1000,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory="shopping",
+        startDate="2025-03-01",
+        endDate="2025-03-31",
+        userID=alice.id,
+        bankID=alice_bank.bankID
+    )
 
-    # # Example Transactions for Bob
-    # add_transaction(
-    #     bob.id, 
-    #     "Grocery Shopping", 
-    #     "Weekly groceries for the family", 
-    #     TransactionType.EXPENSE, 
-    #     TransactionCategory.GROCERIES, 
-    #     120.50, 
-    #     transactionDate=string_to_date("2025-01-05"),
-    #     transactionTime=string_to_time("14:30"),
-    #     budgetID=budget1.budgetID
-    # )
-
-    # add_transaction(
-    #     bob.id, 
-    #     "Movie Tickets", 
-    #     "Weekend movie with friends", 
-    #     TransactionType.EXPENSE, 
-    #     TransactionCategory.ENTERTAINMENT,
-    #     45.00, 
-    #     transactionDate=string_to_date("2025-01-10"),
-    #     transactionTime=string_to_time("19:00"),
-    #     budgetID=budget1.budgetID
-    # )
+    transaction = add_transaction (
+        userID=bob.id,
+        transactionTitle="Bank Deposit",
+        transactionDesc="Deposited money into my savings account",
+        transactionType=TransactionType.INCOME,
+        transactionCategory="income",
+        transactionAmount=500.00,
+        transactionDate="2025-01-25",
+        transactionTime="11:30",
+        budgetID=budget2.budgetID
+    )

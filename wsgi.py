@@ -48,4 +48,12 @@ def budget_tests_command(type):
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
+@test.command("bank", help="Run Bank Tests")
+@click.argument("type", default="all")
+def budget_tests_command(type):
+    if type == "int":
+        sys.exit(pytest.main(["-k", "BankIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
 app.cli.add_command(test)

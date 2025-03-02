@@ -1,12 +1,35 @@
-from App.models import Budget
+from App.models import Budget, BudgetType
 from App.database import db
+from App.services.category import CategoryService
 
 # Create A New Budget
-def create_budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID):
-    new_budget = Budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID)
-    db.session.add(new_budget)
-    db.session.commit()
-    return new_budget
+def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID):
+    try: 
+        if budgetCategory is not None:
+            selectedCategory = CategoryService.get_category(budgetCategory)
+        else:
+            selectedCategory = None
+
+        new_budget = Budget (
+            budgetTitle=budgetTitle,
+            budgetAmount=budgetAmount,
+            remainingBudgetAmount=budgetAmount,
+            budgetType=budgetType,
+            budgetCategory=selectedCategory,
+            startDate=startDate,
+            endDate=endDate,
+            userID=userID,
+            bankID=bankID
+        )
+
+        db.session.add(new_budget)
+        db.session.commit()
+        return new_budget
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Create Budget: {e}")
+        return None
 
 # Get Budget By ID
 def get_budget(id):
@@ -40,18 +63,25 @@ def get_user_budgets_json(user_id):
     return budgets
 
 # Update Existing Budget
-def update_budget(id, budgetTitle=None, budgetAmount=None, startDate=None, endDate=None):
-    budget = get_budget(id)
+def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None, budgetCategory=None, startDate=None, endDate=None, bankID=None):
+    budget = get_budget(budgetID)
     if budget:
         if budgetTitle:
             budget.budgetTitle = budgetTitle
-        if budgetAmount:
+        if budgetAmount is not None:
             budget.budgetAmount = budgetAmount
+            budget.remainingBudgetAmount = budgetAmount
+        if budgetType:
+            budget.budgetType = budgetType
+        if budgetCategory:
+            budget.budgetCategory = CategoryService.get_category(budgetCategory)
         if startDate:
             budget.startDate = startDate
         if endDate:
             budget.endDate = endDate
-        db.session.add(budget)
+        if bankID:
+            budget.bankID = bankID
+
         db.session.commit()
         return budget
     return None

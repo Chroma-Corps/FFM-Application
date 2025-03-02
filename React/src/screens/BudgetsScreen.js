@@ -6,7 +6,6 @@ import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
 import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -17,14 +16,12 @@ export default function BudgetsScreen({ navigation }) {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem("access_token");
-        const userID = await AsyncStorage.getItem("user_id");
-        
         if (!token) {
           console.error('No Token Found');
           return;
         }
     
-        const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
+        const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -34,7 +31,6 @@ export default function BudgetsScreen({ navigation }) {
     
         if (response.ok) {
           const budgets = await response.json();
-          console.log('Fetched Budgets:', budgets);
           setData(budgets);
         } else {
           console.error('Failed To Fetch Budgets:', response.statusText);
@@ -58,8 +54,8 @@ export default function BudgetsScreen({ navigation }) {
             <Card style={styles.cardStyle}>
               <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
               <Text style={styles.cardText}>
-                <Text style={{fontWeight: 'bold'}}>${item.remainingBudgetAmount} </Text>
-                left of ${item.budgetAmount}
+                <Text style={{fontWeight: 'bold'}}>{item.remainingBudgetAmount} </Text>
+                left of {item.budgetAmount}
               </Text>
               <Text style={styles.cardText}>{item.startDate} to {item.endDate}</Text>
             </Card>
