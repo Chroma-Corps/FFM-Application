@@ -251,7 +251,7 @@ export default function AddTransactionScreen({ navigation }) {
                         <TouchableOpacity style={[
                             styles.button,
                             styles.pickerButton,
-                            { backgroundColor: '#181818' },
+                            { backgroundColor: '#ffffff' },
                         ]}
                         onPress={toggleDatepicker}
                         >
@@ -261,7 +261,7 @@ export default function AddTransactionScreen({ navigation }) {
                         <TouchableOpacity style={[
                             styles.button,
                             styles.pickerButton,
-                            { backgroundColor: '#181818' },
+                            { backgroundColor: '#ffffff' },
                         ]}
                         onPress={confirmIOSDate}
                         >
@@ -451,5 +451,6 @@ export default function AddTransactionScreen({ navigation }) {
           },
           pickerButton: {
             paddingHorizontal: 20,
+            paddingVertical: 10,
           },
     });

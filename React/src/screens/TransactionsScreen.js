@@ -9,9 +9,11 @@ import InAppBackground from '../components/InAppBackground';
 import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import MonthFilter from '../components/MonthFilter';
 
 export default function TransactionsScreen({ navigation }) {
   const [data, setData] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // Default the current month
 
   const fetchData = async () => {
     try {
@@ -49,6 +51,11 @@ export default function TransactionsScreen({ navigation }) {
     }, [])
   );
 
+  //Filter transactions based on month selected 
+  const filteredTransactions = data.filter(
+    (transaction) => new Date(transaction.transactionDate).getMonth() === selectedMonth
+  );
+
   const renderData = (item) => {
       return (
           <>
@@ -69,6 +76,11 @@ export default function TransactionsScreen({ navigation }) {
     <View style={styles.transactionsScreen}>
       <InAppBackground>
         <InAppHeader>Transactions</InAppHeader>
+
+        {/* Horizontal filter */}
+        <MonthFilter selectedMonth={selectedMonth} onSelectMonth={setSelectedMonth} />
+
+
         {data.length === 0 ? (
           <Text style={styles.defaultText}>You Have No Transactions Yet!</Text>
         ) : (
