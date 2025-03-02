@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 
 const months = [
+  { id: "all", name: "All" },
   { id: 0, name: "Jan" },
   { id: 1, name: "Feb" },
   { id: 2, name: "Mar" },
