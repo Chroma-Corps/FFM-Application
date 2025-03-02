@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 
-export default function CreateBudgetsScreen({navigation}) {
+export default function CreateBudgetsScreen({ navigation }) {
     const [budgetTitle, setBudgetTitle] = useState('');
     const [budgetAmount, setBudgetAmount] = useState('');
     const [remainingBudgetAmount, setRemainingBudgetAmount] = useState('');
@@ -18,7 +18,7 @@ export default function CreateBudgetsScreen({navigation}) {
     const handleAmountChange = (value) => {
         setBudgetAmount(value);
         setRemainingBudgetAmount(value);
-      };
+    };
 
     const createBudget = async () => {
         const token = await AsyncStorage.getItem("access_token");
@@ -27,7 +27,7 @@ export default function CreateBudgetsScreen({navigation}) {
         if (!token || !userID) {
             console.error('No Token or UserID Found');
             return;
-          }
+        }
 
         if (!budgetTitle || !startDate || !endDate) {
             Alert.alert('Error', 'Please fill in all fields');
@@ -35,15 +35,15 @@ export default function CreateBudgetsScreen({navigation}) {
         }
 
         try {
-            const response = await fetch(`${API_URL_DEVICE}/create-budget`, {
+            const response = await fetch(`${API_URL_LOCAL}/create-budget`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID })
             });
-            
+
             if (response.ok) {
                 Alert.alert('Success', 'Budget created successfully');
                 navigation.goBack();

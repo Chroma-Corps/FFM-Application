@@ -1,5 +1,6 @@
 from App.Backend.models import Transaction
 from App.Backend.database import db
+from App.Backend.models.budget import Budget
 
 # Add Transaction
 def add_transaction(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
@@ -15,6 +16,14 @@ def add_transaction(userID, transactionTitle, transactionDesc, transactionType, 
         budgetID=budgetID
     )
     db.session.add(new_transaction)
+
+    # Update budget's remaining amount if tied to a budget
+    if budgetID:
+        budget = Budget.query.get(budgetID)
+        if budget:
+            budget.remainingBudgetAmount -= transactionAmount
+
+
     db.session.commit()
     return new_transaction
 

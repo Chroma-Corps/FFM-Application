@@ -1,9 +1,8 @@
 from App.Backend.models import Budget
 from App.Backend.database import db
 
-# Create A New Budget
-def create_budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID):
-    new_budget = Budget(budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID)
+def create_budget(budgetTitle, budgetAmount, startDate, endDate, userID):
+    new_budget = Budget(budgetTitle, budgetAmount, startDate, endDate, userID)
     db.session.add(new_budget)
     db.session.commit()
     return new_budget
