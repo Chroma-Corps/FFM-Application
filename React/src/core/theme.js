@@ -17,9 +17,10 @@ export const theme = {
 
   fonts: {
     ...DefaultTheme.fonts,
-    light: { fontFamily: 'Quicksand-Light', fontWeight: 'normal' },
-    regular: { fontFamily: 'Quicksand-Regular', fontWeight: 'normal' },
-    medium: { fontFamily: 'Quicksand-Medium', fontWeight: 'normal' },
-    bold: { fontFamily: 'Quicksand-Bold', fontWeight: 'normal' },
+    light: { fontFamily: 'Quicksand-Light', fontWeight: '300' },
+    regular: { fontFamily: 'Quicksand-Regular', fontWeight: '400' },
+    medium: { fontFamily: 'Quicksand-Medium', fontWeight: '500' }, 
+    bold: { fontFamily: 'Quicksand-Bold', fontWeight: '700' },
   },
+  
 }

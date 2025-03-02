@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { TouchableOpacity, StyleSheet, View } from 'react-native'
-import { Text, Card } from 'react-native-paper'
+import { Text } from 'react-native-paper'
 import Background from '../components/Background'
 import Header from '../components/Header'
 import Button from '../components/Button'
@@ -24,11 +24,6 @@ export default function LoginScreen({ navigation }) {
       setPassword({ ...password, error: passwordError })
       return
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
-  }
 
     setLoading(true)
 
@@ -63,25 +58,19 @@ export default function LoginScreen({ navigation }) {
     } finally {
       setLoading(false)
     }
+  }
 
   const onSocialGooglePressed = () => {
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
-  }
-
-  const onSocialFacebookPressed = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
+      routes: [{ name: 'Home' }],
     })
   }
 
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
-      <Header>Welcome back.</Header>
+      <Header>Nice To See You Again!</Header>
       <TextInput
         label="Email"
         returnKeyType="next"
@@ -107,54 +96,17 @@ export default function LoginScreen({ navigation }) {
             <TouchableOpacity
               onPress={() => navigation.navigate('ResetPasswordScreen')}
             >
-              <Text style={styles.forgot}>Forgot your password?</Text>
+              <Text style={styles.link}>Forgot Password?</Text>
             </TouchableOpacity>
           </View>
 
-          <Button
-            mode="contained"
-            onPress={onLoginPressed}
-            style={{ backgroundColor: theme.colors.secondary }}
-            labelStyle={{ color: theme.colors.text, fontFamily: theme.fonts.bold.fontFamily }}
-          >
-            Login
-          </Button>
-
-          <Text style={styles.orText}>- or login with -</Text>
-
-          <Button
-            mode="contained"
-            style={styles.socialButton}
-            labelStyle={[
-              styles.buttonLabel,
-              { fontFamily: theme.fonts.bold.fontFamily, color: theme.colors.text }
-            ]}
-            icon="google" //thnx to react-native-vector-icons hehe
-          >
-            Google
-          </Button>
-
-          <Button
-            mode="contained"
-            style={styles.socialButton}
-            labelStyle={[
-              styles.buttonLabel,
-              { fontFamily: theme.fonts.bold.fontFamily, color: theme.colors.text }
-            ]}
-            icon="facebook" //thnx to react-native-vector-icons hehe
-          >
-            Facebook
-          </Button>
-
-          <View style={styles.dottedLine} />
-
-        </Card.Content>
-      </Card>
-
-      <View style={[styles.row, { marginTop: 30 }]}>
-        <Text style={[styles.forgot, { color: theme.colors.description }]}>Don’t have an account? </Text>
+          <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
+          <Text style={styles.orText}>- Or Login With -</Text>
+          <Button mode="outlined" icon="google">Google</Button>
+      <View style={[styles.row, { marginTop: 50 }]}>
+        <Text style={styles.signUpLabel}>Don't Have An Account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('RegisterScreen')}>
-          <Text style={styles.link}>Sign up</Text>
+          <Text style={styles.link}>Sign Up!</Text>
         </TouchableOpacity>
       </View>
 
@@ -163,31 +115,6 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    padding: 10,
-    borderRadius: 10,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    backgroundColor: '#f2f2f2', // Slightly darker card background
-  },
-
-  cardDescription: {
-    textAlign: 'center',
-    fontFamily: theme.fonts.medium.fontFamily,
-    marginBottom: 10,
-    fontWeight: 'bold',
-    color: theme.colors.description,
-  },
-
-  header: {
-    fontSize: 60,
-    fontFamily: theme.fonts.bold.fontFamily, // Use custom font
-    color: theme.colors.heading,
-    paddingVertical: 10,
-  },
 
   input: {
     fontFamily: theme.fonts.regular.fontFamily,
@@ -198,38 +125,15 @@ const styles = StyleSheet.create({
 
   forgotPassword: {
     width: '100%',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
     marginBottom: 16,
   },
 
   orText: {
     textAlign: 'center',
     marginVertical: 12,
-    fontFamily: theme.fonts.medium.fontFamily,
-    fontWeight: 'bold',
-  },
-
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-
-  socialButton: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: '#D0D0D0',
-  },
-
-  buttonLabel: {
-    fontWeight: 'bold',
-  },
-
-  dottedLine: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.text,
-    borderStyle: 'dotted',
-    marginVertical: 20,
+    fontFamily: theme.fonts.light.fontFamily,
+    color: theme.colors.text
   },
 
   row: {
@@ -239,17 +143,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  forgot: {
-    fontFamily: theme.fonts.medium.fontFamily,
-    textDecorationLine: 'underline',
-    fontSize: 13,
-    fontWeight: 'bold',
+  signUpLabel: {
+    fontFamily: theme.fonts.regular.fontFamily,
+    fontSize: 15,
     color: theme.colors.text,
   },
 
   link: {
-    fontFamily: theme.fonts.medium.fontFamily,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.primary,
+    textDecorationLine: 'underline',
   },
 })

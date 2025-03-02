@@ -29,11 +29,11 @@ const styles = StyleSheet.create({
     width: '100%',
     marginVertical: 10,
     paddingVertical: 2,
-    borderRadius: 8
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary
   },
   text: {
-    fontFamily: theme.fonts.medium.fontFamily,
-    fontWeight: 'bold',
+    fontFamily: theme.fonts.bold.fontFamily,
     fontSize: 15,
     lineHeight: 26,
   },
