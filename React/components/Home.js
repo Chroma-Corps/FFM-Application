@@ -2,7 +2,6 @@
 import React, {useState, useEffect} from 'react';
 import {View, Text, StyleSheet, FlatList} from 'react-native';
 import {Card, FAB} from 'react-native-paper';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 
 function home() {
 
@@ -10,8 +9,7 @@ function home() {
 
     const fetchData = async () => {
       try {
-        // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_DEVICE}/allusers`, { method: 'GET' });
+        const response = await fetch(`https://ffm-application-test.onrender.com/allusers`, { method: 'GET' });
         if (response.ok) {
           const users = await response.json();
           console.log('Fetched Users:', users);
