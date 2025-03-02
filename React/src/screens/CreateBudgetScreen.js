@@ -101,9 +101,7 @@ export default function CreateBudgetsScreen({ navigation }) {
     };
 
     const handlePeriodFocus = () => {
-        if (!selectedPeriod) {
             setShowPeriodPopup(true);
-        }
     };
 
     const handleShowDatePicker = () => {
@@ -200,43 +198,41 @@ export default function CreateBudgetsScreen({ navigation }) {
                         <Card style={styles.card}>
                             <View style={styles.cardTopHalfContainer}>
                                 <TextInput
+                                    placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                     placeholder="Enter Title"
                                     value={budgetTitle}
                                     onChangeText={setBudgetTitle}
-                                    onFocus={() => setIsFocused(true)}
-                                    onBlur={() => setIsFocused(false)}
-                                    style={[styles.input, isFocused ? styles.focused : null]}
+                                    style={[styles.input, styles.defaultText, isFocused ? styles.focused : null]}
                                 />
 
                                 <View style={styles.budgetAmountContainer}>
                                     <TextInput
+                                        placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                         placeholder="$0.00"
                                         value={budgetAmount}
                                         onChangeText={handleAmountChange}
-                                        style={[styles.input, styles.shortInput]}
+                                        style={[styles.input, styles.shortInput, styles.defaultText]}
                                         keyboardType="numeric"
                                     />
 
                                     <Text style={styles.slashText}>/</Text>
 
                                     <TextInput
+                                        placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                         placeholder="0"
                                         value={duration}
                                         onChangeText={setDuration}
-                                        style={[styles.input, styles.shortInput]}
+                                        style={[styles.input, styles.shortInput, styles.defaultText]}
                                         keyboardType="numeric"
                                     />
 
                                     <Text style={styles.slashText}>/</Text>
 
-                                    <TextInput
-                                        placeholder="Period"
-                                        value={selectedPeriod || ''}
-                                        onFocus={handlePeriodFocus}
-                                        editable={false}
-                                        style={[styles.input, styles.shortInput]}
-                                    />
-
+                                    <TouchableOpacity onPress={handlePeriodFocus}>
+                                        <Text style={[selectedPeriod ? styles.selectedPeriod : styles.selectedPeriod]}>
+                                            {selectedPeriod || "Period"}
+                                        </Text>
+                                    </TouchableOpacity>
 
                                 </View>
 
@@ -309,6 +305,22 @@ const styles = StyleSheet.create({
         marginBottom: 5,
     },
 
+    selectedPeriod: {
+        fontSize: 20,
+        width: 80,
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: 'white',
+        textAlign: 'center',
+        borderBottomWidth: 1.5,
+        borderBottomColor: '#fff',
+        backgroundColor: 'transparent',
+        paddingVertical: 8,
+        marginBottom: 13,
+        color: '#fff',
+        borderWidth: 0,
+        textAlign: 'center',
+    },
+
     headerContainer: {
         flex: 1,
         flexDirection: 'coloumn',
@@ -323,7 +335,6 @@ const styles = StyleSheet.create({
     },
 
     card: {
-        flex: 1,
         margin: 10,
         marginTop: 10,
         padding: 20,
@@ -334,13 +345,12 @@ const styles = StyleSheet.create({
     },
 
     cardTopHalfContainer: {
-        maxWidth: '60%',
+        maxWidth: '100%',
         alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
         flexDirection: 'column',
-
     },
 
     input: {
