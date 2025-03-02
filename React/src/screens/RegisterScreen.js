@@ -11,7 +11,6 @@ import { theme } from '../core/theme'
 import { emailValidator } from '../helpers/emailValidator'
 import { passwordValidator } from '../helpers/passwordValidator'
 import { nameValidator } from '../helpers/nameValidator'
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: '', error: '' })
@@ -33,8 +32,7 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true)
 
     try {
-      // Replace With API_URL_DEVICE When Testing Mobile
-      const response = await fetch(`${API_URL_LOCAL}/register`, {
+      const response = await fetch(`https://ffm-application-test.onrender.com/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +50,7 @@ export default function RegisterScreen({ navigation }) {
         console.log('Registration Successful:', data)
         navigation.reset({
           index: 0,
-          routes: [{ name: 'Dashboard' }],
+          routes: [{ name: 'LoginScreen' }],
         })
       } else {
         console.error('Registration Failed:', data.message)

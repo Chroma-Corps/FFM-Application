@@ -3,6 +3,7 @@ import { PaperProvider, Provider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import { theme } from './src/core/theme'
+import PlusFAB from './src/components/PlusFAB'
 import { useFonts } from 'expo-font'
 import {
   StartScreen,
@@ -11,6 +12,11 @@ import {
   ResetPasswordScreen,
   Dashboard,
 } from './src/screens'
+import BudgetsScreen from './src/screens/BudgetsScreen'
+import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
+import AddTransactionScreen from './src/screens/AddTransactionScreen'
+import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
+import BudgetDetailsScreen from './src/screens/BudgetDetailsScreen'
 
 
 const Stack = createStackNavigator()
@@ -31,51 +37,28 @@ export default function App() {
 
   return (
     <Provider theme={theme}>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="StartScreen"
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="StartScreen" component={StartScreen} />
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-          <Stack.Screen name="Dashboard" component={Dashboard} />
-          <Stack.Screen
-            name="ResetPasswordScreen"
-            component={ResetPasswordScreen}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <PaperProvider theme={theme}>
+        <NavigationContainer>
+          <Stack.Navigator
+            initialRouteName="StartScreen"
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="StartScreen" component={StartScreen} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+            <Stack.Screen name="Dashboard" component={Dashboard} />
+            <Stack.Screen name="Budgets" component={BudgetsScreen} />
+            <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
+            <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
+            <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
+            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen}/>
+
+            <Stack.Screen name="Home" component={BottomTabsNavigator} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </PaperProvider>
     </Provider>
   )
 }
-
-
-
-// https://reactnative.dev/docs/getting-started
-// https://callstack.github.io/react-native-paper/
-
-// import { StatusBar } from 'expo-status-bar';
-// import { StyleSheet, Text, View } from 'react-native';
-// import Home from './components/Home';
-
-// export default function App() {
-
-//   const name = "Powered by Chroma Corps"
-
-//   return (
-//     <View style={styles.container}>
-//       <Home name = {name}/>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#e6e6fa',
-//     justifyContent: 'center'
-//   },
-// });
