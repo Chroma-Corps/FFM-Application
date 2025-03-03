@@ -19,6 +19,7 @@ import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 import { ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
+import BankAccountCard from '../components/BankAccountCard';
 
 
 
@@ -37,6 +38,17 @@ export default function AddTransactionScreen({ navigation }) {
     const [open, setOpen] = useState(false);
     const [selectedBudget, setSelectedBudget] = useState(null);
     const [budgets, setBudgets] = useState(null);
+
+
+
+    const [bankAccounts, setBankAccounts] = useState([
+        { id: 1, title: "Main Account", balance: 2500.75, currency: "$", color: "#3498db" },
+        { id: 2, title: "Savings", balance: 5000.50, currency: "$", color: "#27ae60" },
+        { id: 3, title: "Business", balance: 1200.30, currency: "$", color: "#f39c12" },
+      ]);
+
+    const [selectedBank, setSelectedBank] = useState(null);
+    const selectBank = (id) => setSelectedBank(id);
 
 
     //Date/Time Spinner
@@ -277,6 +289,21 @@ export default function AddTransactionScreen({ navigation }) {
                                     </Text>
                                 </TouchableOpacity>
                             ))}
+                        </View>
+
+
+                        <View>
+                            <Text style={styles.sectionTitle}>Select Bank Account</Text>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.bankContainer}>
+                                {bankAccounts.map((account) => (
+                                <BankAccountCard
+                                    key={account.id}
+                                    account={account}
+                                    isSelected={selectedBank === account.id}
+                                    onSelect={selectBank}
+                                />
+                                ))}
+                            </ScrollView>
                         </View>
 
 
@@ -591,5 +618,9 @@ export default function AddTransactionScreen({ navigation }) {
             color: "green",
             marginTop: 5,
             fontWeight: "bold",
+          },
+          bankContainer: {
+            flexDirection: "row",
+            marginVertical: 10,
           },
     });
