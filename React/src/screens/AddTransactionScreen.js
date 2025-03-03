@@ -236,8 +236,12 @@ export default function AddTransactionScreen({ navigation }) {
         <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
+            keyboardVerticalOffset={100}
         >
-        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}>
+        <ScrollView 
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+        >
             <View style={styles.screen}>
                 <InAppBackground>
                     <InAppHeader>Add Transaction</InAppHeader>
@@ -448,14 +452,15 @@ export default function AddTransactionScreen({ navigation }) {
                             </TouchableOpacity>
 
                             {selectedFile && (
-                             <View style={styles.filePreview}>
-                                <Text style={styles.fileName}>{selectedFile.name}</Text>
-                                <Text style={styles.fileAttached}>✅ Document Attached</Text>
-                            </View>
+                                <View style={styles.filePreview}>
+                                    <Icon name="file-document-outline" size={20} color="gray" />
+                                    <Text style={styles.fileName}>{selectedFile.name}</Text>
+                                    <TouchableOpacity onPress={() => setSelectedFile(null)}>
+                                        <Icon name="close-circle" size={18} color="red" />
+                                    </TouchableOpacity>
+                                </View>
                             )}
                         </View>
-
-
 
                     </Card>
                     <BackButton goBack={navigation.goBack} />
@@ -599,17 +604,19 @@ export default function AddTransactionScreen({ navigation }) {
           },
           
           filePreview: {
-            marginTop: 10,
-            padding: 10,
-            backgroundColor: "#e8f5e9", // Light green to indicate success
-            borderRadius: 5,
+            flexDirection: "row",
             alignItems: "center",
+            backgroundColor: "#e8f5e9",
+            padding: 10,
+            borderRadius: 5,
+            marginTop: 10,
           },
           
           fileName: {
             fontSize: 14,
+            marginLeft: 8,
             color: theme.colors.text,
-            fontWeight: "bold",
+            flex: 1,
           },
           
           fileAttached: {
