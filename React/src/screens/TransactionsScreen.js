@@ -26,8 +26,10 @@ export default function TransactionsScreen({ navigation }) {
 
     { id: 1, transactionTitle: "Groceries", transactionAmount: 50, transactionType: "expense", transactionDate: "2025-02-25", transactionTime: "14:30", transactionCategory: "Food" },
     { id: 2, transactionTitle: "Salary", transactionAmount: 1000, transactionType: "income", transactionDate: "2025-02-20", transactionTime: "09:00", transactionCategory: "Salary" },
-    { id: 3, transactionTitle: "Transport", transactionAmount: 20, transactionType: "expense", transactionDate: "2025-03-01", transactionTime: "18:00", transactionCategory: "Transport" },
+    { id: 3, transactionTitle: "Transport", transactionAmount: 20, transactionType: "expense", transactionDate: "2025-03-02", transactionTime: "18:00", transactionCategory: "Transport" },
     { id: 4, transactionTitle: "Entertainment", transactionAmount: 20, transactionType: "expense", transactionDate: "2024-12-25", transactionTime: "20:00", transactionCategory: "Leisure" },
+    { id: 5, transactionTitle: "Groceries", transactionAmount: 60, transactionType: "expense", transactionDate: "2025-03-25", transactionTime: "14:30", transactionCategory: "Food" },
+    { id: 6, transactionTitle: "Wedding Clothes", transactionAmount: 100, transactionType: "expense", transactionDate: "2025-03-25", transactionTime: "16:30", transactionCategory: "Shopping" },
 
   ]);
 
@@ -36,12 +38,12 @@ export default function TransactionsScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const totalExpenses = data
-  .filter((t) => new Date(t.transactionDate).getMonth() === selectedMonth && t.transactionType === "expense")
-  .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
+    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "expense")
+    .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
 
   const totalIncome = data
-  .filter((t) => new Date(t.transactionDate).getMonth() === selectedMonth && t.transactionType === "income")
-  .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
+    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "income")
+    .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);    
 
 
   const fetchData = async () => {
@@ -267,12 +269,12 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
-    width: 70, // Adjust width
-    height: "80%", // Keep it aligned vertically
-    marginVertical: 10, // Adds space between items
+    width: 70,
+    height: "80%", 
+    marginVertical: 10, 
     borderRadius: 10,
-    padding: 10, // Adjust padding
-    marginRight: 10, // Moves the icon slightly left from the edge
+    padding: 10,
+    marginRight: 10, 
   },
   amountContainer: {
     flexDirection: "row",
@@ -315,11 +317,11 @@ const styles = StyleSheet.create({
   },
   dateHeader: {
     fontSize: 14,
-    fontWeight: "500", // Less bold
+    fontWeight: "500",
     paddingVertical: 4,
     paddingHorizontal: 10,
-    backgroundColor: "#f5f5f5",
-    color: "#666", // Subtle gray
+    backgroundColor: '#181818',
+    color: "#666",
     borderRadius: 5,
     marginTop: 10,
   },
