@@ -25,9 +25,11 @@ const bankCards = [
 ];
 
 const formatDate = (date) => {
-    const d = new Date(date);
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return d.toLocaleDateString('en-US', options);
+    console.log('Date before split:', date);  // Log the value of date
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    const [year, month, day] = date.split("-");
+    return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
 };
 
 // Function to calculate the end date based on selected period
@@ -35,32 +37,47 @@ const calculateEndDate = (startDate, duration, selectedPeriod) => {
     const periodsInDays = {
         daily: 1,
         weekly: 7,
-        monthly: 30, // Simplified; could be more precise
+        monthly: 30,
         yearly: 365
     };
 
     if (!startDate || !duration || !selectedPeriod) {
+        console.error("Missing required parameters.");
         return null;
     }
 
-    const start = new Date(startDate); // Ensure startDate is in a valid format
-    if (isNaN(start)) {
+    console.log('Duration:', duration);
+    console.log('Start Date:', startDate);
+    console.log('Selected Period:', selectedPeriod);
+
+    const start = new Date(startDate);
+
+    if (isNaN(start.getTime())) {
         console.error("Invalid start date.");
-        return null;  // If start date is invalid
+        return null;
     }
 
-    const daysToAdd = duration * periodsInDays[selectedPeriod];
+    const periodInDays = periodsInDays[selectedPeriod.toLowerCase()];
+    if (typeof periodInDays === 'undefined') {
+        console.error("Invalid selected period.");
+        return null;
+    }
 
-    // Check if duration is a valid number
-    if (isNaN(daysToAdd)) {
+    console.log('Period in Days:', periodInDays);
+
+    if (isNaN(duration)) {
         console.error("Invalid duration");
         return null;
     }
 
-    // Add the days to the start date
+    const daysToAdd = duration * periodInDays;
+
+    console.log('Days to Add:', daysToAdd);
+
     start.setDate(start.getDate() + daysToAdd);
 
-    return start;
+    const formattedEndDate = start.toISOString().split('T')[0];  // Format to YYYY-MM-DD
+    return formattedEndDate;
 };
 
 export default function CreateBudgetsScreen({ navigation }) {
@@ -80,15 +97,29 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
 
-    // Recalculate end date when any of the dependencies change
     useEffect(() => {
-        const newEndDate = calculateEndDate(startDate, duration, selectedPeriod);
-        setEndDate(newEndDate);
+        if (startDate && duration && selectedPeriod) {
+            const newEndDate = calculateEndDate(startDate, duration, selectedPeriod);
+            setEndDate(newEndDate);
+        }
     }, [startDate, duration, selectedPeriod]);
 
-    const displayPeriod = () => {
+    const displayPeriodSelected = (period) => {
+        let formattedPeriod = period;
+
+        if (period === 'Daily') formattedPeriod = 'Day(s)';
+        if (period === 'Weekly') formattedPeriod = 'Week(s)';
+        if (period === 'Monthly') formattedPeriod = 'Month(s)';
+        if (period === 'Yearly') formattedPeriod = 'Year(s)';
+
+        return formattedPeriod;
+    };
+
+    const displayBudgetPeriod = () => {
+        if (!startDate || !endDate) return '--';
+
         const formattedStart = formatDate(startDate);
-        const formattedEnd = endDate ? formatDate(endDate) : '';
+        const formattedEnd = formatDate(endDate);
 
         console.log('Formatted Start:', formattedStart);
         console.log('Formatted End:', formattedEnd);
@@ -101,7 +132,7 @@ export default function CreateBudgetsScreen({ navigation }) {
     };
 
     const handlePeriodFocus = () => {
-            setShowPeriodPopup(true);
+        setShowPeriodPopup(true);
     };
 
     const handleShowDatePicker = () => {
@@ -229,8 +260,10 @@ export default function CreateBudgetsScreen({ navigation }) {
                                     <Text style={styles.slashText}>/</Text>
 
                                     <TouchableOpacity onPress={handlePeriodFocus}>
-                                        <Text style={[selectedPeriod ? styles.selectedPeriod : styles.selectedPeriod]}>
-                                            {selectedPeriod || "Period"}
+                                        <Text style={[
+                                            selectedPeriod ? { ...styles.selectedPeriod, color: '#fff' } : styles.selectedPeriod
+                                        ]}>
+                                            {displayPeriodSelected(selectedPeriod) || "Period"}
                                         </Text>
                                     </TouchableOpacity>
 
@@ -239,14 +272,15 @@ export default function CreateBudgetsScreen({ navigation }) {
                                 <Text style={styles.defaultText}>Starting:</Text>
 
                                 <ButtonSmall
-                                    label={startDate ? new Date(startDate).toLocaleDateString() : 'Select Date'}
+                                    label={startDate ? `${startDate.split('-')[2]}-${startDate.split('-')[1]}-${startDate.split('-')[0]}` : 'Select Date'}
                                     onPress={handleShowDatePicker}
                                     mode="contained"
                                     style={styles.dateButton}
                                 />
 
+
                                 <Text style={[styles.defaultText, { marginTop: 10 }]}>Budget Period</Text>
-                                <Text style={{ color: '#fff' }}>{displayPeriod()}</Text>
+                                <Text style={[styles.defaultText, { fontSize: 16, color: theme.colors.primary }]}>{displayBudgetPeriod()}</Text>
 
                             </View>
 
@@ -309,14 +343,13 @@ const styles = StyleSheet.create({
         fontSize: 20,
         width: 80,
         fontFamily: theme.fonts.bold.fontFamily,
-        color: 'white',
+        color: 'rgba(255, 255, 255, 0.25)',
         textAlign: 'center',
         borderBottomWidth: 1.5,
         borderBottomColor: '#fff',
         backgroundColor: 'transparent',
         paddingVertical: 8,
         marginBottom: 13,
-        color: '#fff',
         borderWidth: 0,
         textAlign: 'center',
     },

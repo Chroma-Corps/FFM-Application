@@ -2,12 +2,11 @@ import React from 'react';
 import { View, TouchableOpacity, Modal, Text, StyleSheet } from 'react-native';
 import { theme } from '../core/theme';
 
-const PeriodSelectionPopup = ({ setShowPeriodPopup, setSelectedPeriod }) => {
+const PeriodSelectionPopup = ({ setShowPeriodPopup, setSelectedPeriod, onPeriodSelect }) => {
 
     // Handle period selection
     const handlePeriodSelect = (period) => {
         setSelectedPeriod(period);
-        console.log('Selected Period:', period);
         setShowPeriodPopup(false);
     };
 
