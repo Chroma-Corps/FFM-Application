@@ -237,7 +237,7 @@ export default function AddTransactionScreen({ navigation }) {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
         >
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}>
             <View style={styles.screen}>
                 <InAppBackground>
                     <InAppHeader>Add Transaction</InAppHeader>
@@ -313,7 +313,7 @@ export default function AddTransactionScreen({ navigation }) {
                             value={transactionAmount}
                             onChangeText={setTransactionAmount} // No formatting while typing
                             onBlur={() => setTransactionAmount(formatCurrency(transactionAmount))} // Format when input loses focus
-                            style={styles.input}
+                            style={styles.inputAmount}
                             keyboardType="numeric"
                             returnKeyType="done"
                         />
@@ -334,26 +334,25 @@ export default function AddTransactionScreen({ navigation }) {
                         {showPicker && Platform.OS === "ios" && 
                         (
                             <View 
-                                style={{ flexDirection: "row",
-                                    justifyContent: "space-around" }}>
+                                style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
                                 <TouchableOpacity style={[
                                     styles.button,
                                     styles.pickerButton,
-                                    { backgroundColor: '#ffffff' },
+                                    { backgroundColor: theme.colors.primary },
                                 ]}
                                 onPress={toggleDatepicker}
                                 >
-                                    <Text>Cancel</Text>
+                                    <Text style={{color: "white"}}>Cancel</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity style={[
                                     styles.button,
                                     styles.pickerButton,
-                                    { backgroundColor: '#ffffff' },
+                                    { backgroundColor: theme.colors.primary },
                                 ]}
                                 onPress={confirmIOSDate}
                                 >
-                                    <Text>Confirm</Text>
+                                    <Text style={{color: "white"}}>Confirm</Text>
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -386,19 +385,19 @@ export default function AddTransactionScreen({ navigation }) {
                         )}
 
                         {showTimePicker && Platform.OS === "ios" && (
-                            <View style={{ flexDirection: "row", justifyContent: "space-around" }}>
+                            <View style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
                                 <TouchableOpacity
-                                    style={[styles.button, styles.pickerButton, { backgroundColor: '#181818' }]}
+                                    style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
                                     onPress={toggleTimepicker}
                                 >
-                                    <Text>Cancel</Text>
+                                    <Text style={{color: "white"}}>Cancel</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity
-                                    style={[styles.button, styles.pickerButton, { backgroundColor: '#181818' }]}
+                                    style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
                                     onPress={confirmIOSTime}
                                 >
-                                    <Text>Confirm</Text>
+                                    <Text style={{color: "white"}}>Confirm</Text>
                                 </TouchableOpacity>
                             </View>
                         )}
@@ -460,9 +459,7 @@ export default function AddTransactionScreen({ navigation }) {
 
                     </Card>
                     <BackButton goBack={navigation.goBack} />
-                    <Button onPress={addTransaction} style={styles.button}>
-                        Add
-                    </Button>
+                    <Button onPress={addTransaction} style={styles.button}>Add</Button>
                 </InAppBackground>
             </View>
         </ScrollView>
@@ -544,12 +541,14 @@ export default function AddTransactionScreen({ navigation }) {
 
           datePicker: {
             height: 120,
-            margin: -10,
+            margin: 5,
             backgroundColor: '#ffffff',
           },
           pickerButton: {
+            backgroundColor: theme.colors.primary,
+            paddingVertical: 8,
             paddingHorizontal: 20,
-            paddingVertical: 10,
+            borderRadius: 5,
           },
 
           categoryContainer: {
@@ -622,5 +621,19 @@ export default function AddTransactionScreen({ navigation }) {
           bankContainer: {
             flexDirection: "row",
             marginVertical: 10,
+          },
+          inputAmount: {
+            width: "75%",  // Reduce width
+            alignSelf: "center",  // Center the input
+            borderWidth: 2,
+            borderColor: theme.colors.primary,
+            backgroundColor: "#fff",
+            padding: 10,
+            borderRadius: 8,
+            fontSize: 18,
+            color: "#333",
+            fontWeight: "bold",
+            textAlign: "right",
+            marginBottom: 15,
           },
     });
