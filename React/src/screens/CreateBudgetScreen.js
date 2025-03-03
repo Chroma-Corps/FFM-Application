@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import Button from '../components/Button';
@@ -24,8 +24,21 @@ const bankCards = [
     { bankID: 5, userID: 105, bankTitle: 'Bank 5', bankCurrency: 'EUR', bankAmount: 1200, remainingBankAmount: 1000 },
 ];
 
+//Dummy data for caegories
+const categories = [
+    { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
+    { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
+    { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
+    { id: 4, name: 'Category#4', image: require('../assets/default_img.jpg') },
+    { id: 5, name: 'Category#5', image: require('../assets/default_img.jpg') },
+    { id: 6, name: 'Category#6', image: require('../assets/default_img.jpg') },
+    { id: 7, name: 'Category#7', image: require('../assets/default_img.jpg') },
+    { id: 8, name: 'Category#8', image: require('../assets/default_img.jpg') },
+    { id: 9, name: 'Category#9', image: require('../assets/default_img.jpg') },
+    { id: 10, name: 'Category#10', image: require('../assets/default_img.jpg') },
+];
+
 const formatDate = (date) => {
-    console.log('Date before split:', date);  // Log the value of date
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     const [year, month, day] = date.split("-");
@@ -46,10 +59,6 @@ const calculateEndDate = (startDate, duration, selectedPeriod) => {
         return null;
     }
 
-    console.log('Duration:', duration);
-    console.log('Start Date:', startDate);
-    console.log('Selected Period:', selectedPeriod);
-
     const start = new Date(startDate);
 
     if (isNaN(start.getTime())) {
@@ -63,16 +72,12 @@ const calculateEndDate = (startDate, duration, selectedPeriod) => {
         return null;
     }
 
-    console.log('Period in Days:', periodInDays);
-
     if (isNaN(duration)) {
         console.error("Invalid duration");
         return null;
     }
 
     const daysToAdd = duration * periodInDays;
-
-    console.log('Days to Add:', daysToAdd);
 
     start.setDate(start.getDate() + daysToAdd);
 
@@ -81,6 +86,8 @@ const calculateEndDate = (startDate, duration, selectedPeriod) => {
 };
 
 export default function CreateBudgetsScreen({ navigation }) {
+    // Fallback to default categories if categories is empty or undefined
+    const categoryData = Array.isArray(categories) && categories.length > 0 ? categories : defaultCategories;
 
     //Budget Details
     const [budgetTitle, setBudgetTitle] = useState('');
@@ -88,6 +95,7 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [budgetType, setBudgetType] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState(null);
+    const [selectedBankID, setSelectedBankID] = useState(null);
 
     const [duration, setDuration] = useState(''); // To help with calclation of end date
 
@@ -121,9 +129,6 @@ export default function CreateBudgetsScreen({ navigation }) {
         const formattedStart = formatDate(startDate);
         const formattedEnd = formatDate(endDate);
 
-        console.log('Formatted Start:', formattedStart);
-        console.log('Formatted End:', formattedEnd);
-
         return `${formattedStart} - ${formattedEnd}`;
     };
 
@@ -149,7 +154,16 @@ export default function CreateBudgetsScreen({ navigation }) {
     };
 
     const renderBankCard = ({ item }) => (
-        <TouchableOpacity style={styles.bankCard}>
+        <TouchableOpacity
+            style={[
+                styles.bankCard,
+                selectedBankID === item.bankID && styles.selectedCard
+            ]}
+            onPress={() => {
+                setSelectedBankID(item.bankID);
+                console.log('Selected Bank ID:', item.bankID);
+            }}
+        >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
             <Text style={styles.bankCardAmount}>
                 {item.bankCurrency} {item.bankAmount.toFixed(2)}
@@ -157,6 +171,18 @@ export default function CreateBudgetsScreen({ navigation }) {
             <Text style={styles.bankCardRemaining}>
                 Remaining: {item.bankCurrency} {item.remainingBankAmount.toFixed(2)}
             </Text>
+        </TouchableOpacity>
+
+
+    );
+
+    const renderCategoryItem = ({ item }) => (
+        <TouchableOpacity style={styles.categoryItem}>
+            <Image
+                source={typeof item.image === 'string' ? { uri: item.image } : item.image}
+                style={styles.categoryImage}
+            />
+            <Text style={styles.categoryText}>{item.name}</Text>
         </TouchableOpacity>
     );
 
@@ -169,10 +195,12 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
         }
 
-        if (!budgetTitle || !startDate || !endDate) {
-            Alert.alert('Error', 'Please fill in all fields');
+        if (!budgetTitle || !startDate || !endDate || !selectedBankID) {
+            Alert.alert('Error', 'Please fill in all fields and select a bank');
             return;
         }
+
+        console.log('Creating budget with bankID:', selectedBankID); // Testing Bank selection before making the API call
 
         try {
             const response = await fetch(`${API_URL_DEVICE}/create-budget`, {
@@ -181,7 +209,16 @@ export default function CreateBudgetsScreen({ navigation }) {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ budgetTitle, budgetAmount, remainingBudgetAmount, startDate, endDate, userID, budgetType })
+                body: JSON.stringify({
+                    budgetTitle,
+                    budgetAmount,
+                    remainingBudgetAmount,
+                    startDate,
+                    endDate,
+                    userID,
+                    budgetType,
+                    bankID: selectedBankID
+                })
             });
 
             if (response.ok) {
@@ -195,6 +232,7 @@ export default function CreateBudgetsScreen({ navigation }) {
             Alert.alert('Error', 'Something went wrong');
         }
     };
+
 
     return (
         <View style={styles.createBudgetScreen}>
@@ -312,7 +350,16 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         />
                                     </View>
 
-                                    <Text style={styles.defaultText}>Select Budget Category:</Text>
+                                    <Text style={[styles.defaultText, { marginTop: 8 }]}>Select Budget Category:</Text>
+
+                                    <FlatList
+                                        data={categoryData}
+                                        renderItem={renderCategoryItem}
+                                        keyExtractor={(item) => item.id.toString()}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={styles.scrollContainer}
+                                    />
                                 </View>
 
                                 <Button mode="outlined" onPress={createBudget}>Create</Button>
@@ -370,7 +417,7 @@ const styles = StyleSheet.create({
     card: {
         margin: 10,
         marginTop: 10,
-        padding: 20,
+        padding: 10,
         backgroundColor: '#181818',
         borderColor: theme.colors.secondary,
         borderWidth: 2,
@@ -447,7 +494,7 @@ const styles = StyleSheet.create({
 
     bankCard: {
         backgroundColor: '#333',
-        padding: 20,
+        padding: 10,
         borderRadius: 8,
         marginHorizontal: 10,
         width: 150,
@@ -455,25 +502,56 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
+    selectedCard: {
+        borderColor: theme.colors.secondary,
+        borderWidth: 3,
+    },
+
     bankCardTitle: {
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
+        fontFamily: theme.fonts.bold.fontFamily,
+        textAlign: 'center',
     },
 
     bankCardAmount: {
         color: '#fff',
         fontSize: 16,
+        fontFamily: theme.fonts.medium.fontFamily,
         marginBottom: 5,
+        textAlign: 'center',
     },
+
     bankCardRemaining: {
         color: '#fff',
         fontSize: 14,
+        fontFamily: theme.fonts.medium.fontFamily,
+        textAlign: 'center',
     },
 
     filterTagsContainer: {
         flexDirection: 'row',
         justifyContent: 'start',
+    },
+
+    categoryItem: {
+        alignItems: 'center',
+        marginRight: 15,
+    },
+
+    categoryImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 30,
+        resizeMode: 'cover',
+    },
+
+    categoryText: {
+        marginTop: 5,
+        color: '#fff',
+        fontSize: 12,
+        textAlign: 'center',
     },
 
     overlayContainer: {
