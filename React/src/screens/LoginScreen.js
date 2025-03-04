@@ -28,31 +28,33 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-        const response = await fetch(`https://ffm-application-test.onrender.com/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.value,
-            password: password.value,
-          }),
+      const response = await fetch(`https://ffm-application-test.onrender.com/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value,
+        }),
+      })
+
+      const data = await response.json()
+      console.log(data)
+
+      if (response.ok) {
+        await AsyncStorage.setItem('access_token', data.access_token);
+        console.log('Login Successful:', data)
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
         })
-
-        const data = await response.json()
-        console.log(data)
-
-        if (response.ok) {
-          await AsyncStorage.setItem('access_token', data.access_token);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          })
-        } else {
-          console.error('Login Failed:', data.error)
-          alert(data.error)
-        }
-    } catch(error) {
+      } else {
+        console.error('Login Failed:', data.error)
+        alert(data.error)
+      }
+    } catch (error) {
       console.error('Error Loggin In', error)
       alert('An Error Occurred, Please Try Again Later')
     } finally {
