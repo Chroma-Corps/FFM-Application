@@ -1,10 +1,6 @@
-const TransactionCategories = {
-    INCOME: "income",
-    BILLS: "bills",
-    TRANSIT: "transit",
-    GROCERIES: "groceries",
-    ENTERTAINMENT: "entertainment",
-    SHOPPING: "shopping",
-};
-
-export default TransactionCategories;
+const TransactionCategories = [
+    "Food", "Transport", "Shopping", "Salary", "Entertainment",
+    "Bills", "Healthcare", "Education", "Misc"
+  ];
+  
+  export default TransactionCategories;
