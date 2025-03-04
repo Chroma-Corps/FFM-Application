@@ -58,5 +58,6 @@ def initialize():
         transactionAmount=500.00,
         transactionDate="2025-01-25",
         transactionTime="11:30",
-        budgetID=budget2.budgetID
+        budgetID=budget2.budgetID,
+        bankID=bob_bank.bankID
     )
