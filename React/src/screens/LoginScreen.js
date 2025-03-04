@@ -29,35 +29,35 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-        // Replace With API_URL_DEVICE When Testing Mobile
-        const response = await fetch(`${API_URL_DEVICE}/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.value,
-            password: password.value,
-          }),
+      // Replace With API_URL_DEVICE When Testing Mobile
+      const response = await fetch(`${API_URL_LOCAL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        AsyncStorage.setItem('access_token', data.token);
+        AsyncStorage.setItem('user_id', data.userID);
+
+        console.log('Login Successful:', data)
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Home' }],
         })
-
-        const data = await response.json()
-
-        if (response.ok) {
-          AsyncStorage.setItem('access_token', data.token);
-          AsyncStorage.setItem('user_id', data.userID);
-
-          console.log('Login Successful:', data)
-
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Home' }],
-          })
-        } else {
-          console.error('Login Failed:', data.message)
-          alert(data.message)
-        }
-    } catch(error) {
+      } else {
+        console.error('Login Failed:', data.message)
+        alert(data.message)
+      }
+    } catch (error) {
       console.error('Error Loggin In', error)
       alert('An Error Occurred, Please Try Again Later')
     } finally {

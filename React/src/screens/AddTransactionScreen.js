@@ -9,7 +9,6 @@ import { View,
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Button from '../components/Button';
@@ -92,14 +91,13 @@ export default function AddTransactionScreen({ navigation }) {
         const fetchBudgets = async () => {
             try {
                 const token = await AsyncStorage.getItem('access_token');
-                const userID = await AsyncStorage.getItem('user_id');
 
-                if (!token || !userID) {
-                    console.error('No Token or UserID Found');
+                if (!token) {
+                    console.error('No Token Found');
                     return;
                 }
 
-                const response = await fetch(`${API_URL_DEVICE}/budgets/${userID}`, {
+                const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
                     method: 'GET',
                     headers: {
                     'Authorization': `Bearer ${token}`,
@@ -126,30 +124,28 @@ export default function AddTransactionScreen({ navigation }) {
     const addTransaction = async () => {
         try {
             const token = await AsyncStorage.getItem('access_token');
-            const userID = await AsyncStorage.getItem('user_id');
 
-            if (!token || !userID) {
-            console.error('Missing required data');
-            return;
+            if (!token) {
+                console.error('Missing required data');
+                return;
             }
 
-            const response = await fetch(`${API_URL_DEVICE}/add-transaction`, {
+            const response = await fetch(`https://ffm-application-test.onrender.com/add-transaction`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                userID,
-                transactionTitle,
-                transactionDesc,
-                transactionType,
-                transactionCategory,
-                transactionAmount,
-                transactionDate,
-                transactionTime,
-                budgetID: selectedBudget,
-            }),
+                body: JSON.stringify({
+                    transactionTitle,
+                    transactionDesc,
+                    transactionType: transactionType.trim().toUpperCase(),
+                    transactionCategory: transactionCategory.trim().toUpperCase(),
+                    transactionAmount: transactionAmount.trim(),
+                    transactionDate: transactionDate.trim(),
+                    transactionTime: transactionTime.trim(),
+                    budgetID: selectedBudget,
+                }),
             });
 
             const data = await response.json();
@@ -161,7 +157,8 @@ export default function AddTransactionScreen({ navigation }) {
             alert(data.error)
             }
         } catch (error) {
-            alert(data.error)
+            console.error(error.message);
+            alert('An Error Occurred: ' + error.message);
         }
     };
 
