@@ -12,7 +12,6 @@ import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
 import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MonthFilter from '../components/MonthFilter';
@@ -26,8 +25,10 @@ export default function TransactionsScreen({ navigation }) {
 
     { id: 1, transactionTitle: "Groceries", transactionAmount: 50, transactionType: "expense", transactionDate: "2025-02-25", transactionTime: "14:30", transactionCategory: "Food" },
     { id: 2, transactionTitle: "Salary", transactionAmount: 1000, transactionType: "income", transactionDate: "2025-02-20", transactionTime: "09:00", transactionCategory: "Salary" },
-    { id: 3, transactionTitle: "Transport", transactionAmount: 20, transactionType: "expense", transactionDate: "2025-03-01", transactionTime: "18:00", transactionCategory: "Transport" },
+    { id: 3, transactionTitle: "Transport", transactionAmount: 20, transactionType: "expense", transactionDate: "2025-03-02", transactionTime: "18:00", transactionCategory: "Transport" },
     { id: 4, transactionTitle: "Entertainment", transactionAmount: 20, transactionType: "expense", transactionDate: "2024-12-25", transactionTime: "20:00", transactionCategory: "Leisure" },
+    { id: 5, transactionTitle: "Groceries", transactionAmount: 60, transactionType: "expense", transactionDate: "2025-03-25", transactionTime: "14:30", transactionCategory: "Food" },
+    { id: 6, transactionTitle: "Wedding Clothes", transactionAmount: 100, transactionType: "expense", transactionDate: "2025-03-25", transactionTime: "16:30", transactionCategory: "Shopping" },
 
   ]);
 
@@ -36,25 +37,24 @@ export default function TransactionsScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const totalExpenses = data
-  .filter((t) => new Date(t.transactionDate).getMonth() === selectedMonth && t.transactionType === "expense")
-  .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
+    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "expense")
+    .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
 
   const totalIncome = data
-  .filter((t) => new Date(t.transactionDate).getMonth() === selectedMonth && t.transactionType === "income")
-  .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
+    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "income")
+    .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);    
 
 
   const fetchData = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
-      const userID = await AsyncStorage.getItem("user_id");
-      
+
       if (!token) {
         console.error('No Token Found');
         return;
       }
-  
-      const response = await fetch(`${API_URL_DEVICE}/transactions/${userID}`, {
+
+      const response = await fetch(`https://ffm-application-test.onrender.com/transactions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -64,7 +64,6 @@ export default function TransactionsScreen({ navigation }) {
   
       if (response.ok) {
         const transactions = await response.json();
-        console.log('Fetched Transactions:', transactions);
         setData(transactions);
       } else {
         console.error('Failed To Fetch Transactions:', response.statusText);
@@ -79,7 +78,6 @@ export default function TransactionsScreen({ navigation }) {
         fetchData();
     }, [])
   );
-
   //Filter transactions based on 1) month selected, 2)Title, 3) Category 
   const filteredTransactions = data.filter((transaction) => {
     const transactionMonth = new Date(transaction.transactionDate).getMonth();
@@ -267,12 +265,12 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     justifyContent: "center",
     alignItems: "center",
-    width: 70, // Adjust width
-    height: "80%", // Keep it aligned vertically
-    marginVertical: 10, // Adds space between items
+    width: 70,
+    height: "80%", 
+    marginVertical: 10, 
     borderRadius: 10,
-    padding: 10, // Adjust padding
-    marginRight: 10, // Moves the icon slightly left from the edge
+    padding: 10,
+    marginRight: 10, 
   },
   amountContainer: {
     flexDirection: "row",
@@ -315,11 +313,11 @@ const styles = StyleSheet.create({
   },
   dateHeader: {
     fontSize: 14,
-    fontWeight: "500", // Less bold
+    fontWeight: "500",
     paddingVertical: 4,
     paddingHorizontal: 10,
-    backgroundColor: "#f5f5f5",
-    color: "#666", // Subtle gray
+    backgroundColor: '#181818',
+    color: "#666",
     borderRadius: 5,
     marginTop: 10,
   },
