@@ -6,10 +6,10 @@ const FilterTag = ({ label, shape = "rectangular", onPress, isSelected }) => {
 
     const getTagStyle = () => {
         if (label === "Savings" && isSelected) {
-            return { backgroundColor: 'green', borderColor: 'green' };
+            return { backgroundColor: '#81C784', borderColor: '#81C784' };
         }
         if (label === "Expense" && isSelected) {
-            return { backgroundColor: 'red', borderColor: 'darkred' };
+            return { backgroundColor: '#E57373', borderColor: '#E57373' };
         }
         return {};
     };
