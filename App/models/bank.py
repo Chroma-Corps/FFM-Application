@@ -25,6 +25,7 @@ class Bank(db.Model):
 
         return {
             'userID': self.userID,
+            'BankID': self.bankID,
             'bankTitle': self.bankTitle,
             'bankCurrency': self.bankCurrency,
             'bankAmount': balance,

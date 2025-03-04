@@ -51,6 +51,10 @@ def get_user_transactions_json(user_id):
     transactions = [transactions.get_json() for transactions in transactions]
     return transactions
 
+def get_transactions_by_budget(budgetID):
+    transactions = Transaction.query.filter_by(budgetID=budgetID).all()
+    return [transaction.get_json() for transaction in transactions]
+
 # Update Existing Transaction
 def update_transaction(id, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory=None, transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None):
     transaction = get_transaction(id)

@@ -51,8 +51,7 @@ class Budget(db.Model):
             'startDate': self.startDate.strftime("%a, %d %b %Y"),
             'endDate': self.endDate.strftime("%a, %d %b %Y"),
             'userID': self.userID,
-            'bankID': self.bankID,
-            'transactions': [transaction.get_json() for transaction in self.transaction]
+            'bankID': self.bankID
         }
 
     def __str__(self):

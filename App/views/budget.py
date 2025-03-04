@@ -6,7 +6,8 @@ import datetime
 from App.controllers import (
     get_user_budgets_json,
     get_budget_json,
-    create_budget
+    create_budget,
+    get_transactions_by_budget
 )
 
 budget_views = Blueprint('budget_views', __name__)
@@ -57,3 +58,11 @@ def get_budget_details(budgetID):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify(error="Failed To Fetch Budget"), 500
+    
+@budget_views.route('/budget/<int:budgetID>/transactions', methods=['GET'])
+def get_budget_transactions(budgetID):
+    try:
+        transactions = get_transactions_by_budget(budgetID)
+        return jsonify(transactions)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
