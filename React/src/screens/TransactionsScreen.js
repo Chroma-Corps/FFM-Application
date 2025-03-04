@@ -6,7 +6,6 @@ import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
 import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_LOCAL, API_URL_DEVICE } from '@env';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -16,14 +15,13 @@ export default function TransactionsScreen({ navigation }) {
   const fetchData = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
-      const userID = await AsyncStorage.getItem("user_id");
-      
+
       if (!token) {
         console.error('No Token Found');
         return;
       }
-  
-      const response = await fetch(`${API_URL_DEVICE}/transactions/${userID}`, {
+
+      const response = await fetch(`https://ffm-application-test.onrender.com/transactions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -33,7 +31,6 @@ export default function TransactionsScreen({ navigation }) {
   
       if (response.ok) {
         const transactions = await response.json();
-        console.log('Fetched Transactions:', transactions);
         setData(transactions);
       } else {
         console.error('Failed To Fetch Transactions:', response.statusText);
@@ -58,7 +55,7 @@ export default function TransactionsScreen({ navigation }) {
             <Card style={styles.cardStyle}>
               <View style={styles.cardRow}>
                 <Text style={styles.titleText}>{item.transactionTitle}</Text>
-                <Text style={styles.amountText}>- ${item.transactionAmount}</Text>
+                <Text style={styles.amountText}>- {item.transactionAmount}</Text>
               </View>
             </Card>
           </>
