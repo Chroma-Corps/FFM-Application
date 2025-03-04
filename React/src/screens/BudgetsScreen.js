@@ -37,7 +37,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
+      const response = await fetch(`https://ffm-application-midterm.onrender.com/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

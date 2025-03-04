@@ -21,7 +21,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('https://ffm-application-test.onrender.com/banks', {
+      const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

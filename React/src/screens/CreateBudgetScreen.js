@@ -155,8 +155,8 @@ export default function CreateBudgetsScreen({ navigation }) {
                 selectedBankID === item.bankID && styles.selectedCard
             ]}
             onPress={() => {
-                setSelectedBankID(1); // Replace With item.bankID - JaleneA
-                console.log('Selected Bank ID:', item.bankID); // Need To Include bankID In Bank's get_json() - JaleneA
+                setSelectedBankID(item.bankID);
+                console.log('Selected Bank ID:', item.bankID);
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
@@ -195,7 +195,7 @@ export default function CreateBudgetsScreen({ navigation }) {
         console.log('Creating budget with bankID:', selectedBankID); // Testing Bank selection before making the API call
 
         try {
-            const response = await fetch(`https://ffm-application-test.onrender.com/create-budget`, {
+            const response = await fetch(`https://ffm-application-midterm.onrender.com/create-budget`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -235,7 +235,7 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('https://ffm-application-test.onrender.com/banks', {
+          const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,

@@ -3,7 +3,7 @@ from App.database import db
 from App.models.budget import Budget
 
 # Add Transaction
-def add_transaction(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None):
+def add_transaction(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
     new_transaction = Transaction(
         userID=userID,
         transactionTitle=transactionTitle,
@@ -13,7 +13,8 @@ def add_transaction(userID, transactionTitle, transactionDesc, transactionType, 
         transactionAmount=transactionAmount,
         transactionDate=transactionDate,
         transactionTime=transactionTime,
-        budgetID=budgetID
+        budgetID=budgetID,
+        bankID=bankID
     )
     db.session.add(new_transaction)
 

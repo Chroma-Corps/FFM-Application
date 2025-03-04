@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-      const response = await fetch(`https://ffm-application-test.onrender.com/login`, {
+      const response = await fetch(`https://ffm-application-midterm.onrender.com/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

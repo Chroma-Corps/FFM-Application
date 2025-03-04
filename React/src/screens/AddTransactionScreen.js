@@ -154,8 +154,8 @@ export default function AddTransactionScreen({ navigation }) {
                 selectedBankID === item.bankID && styles.selectedCard
             ]}
             onPress={() => {
-                setSelectedBankID(item.bankID); // Replace With item.bankID - JaleneA
-                console.log('Selected Bank ID:', item.bankID); // Need To Include bankID In Bank's get_json() - JaleneA
+                setSelectedBankID(item.bankID);
+                console.log('Selected Bank ID:', item.bankID);
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
@@ -215,7 +215,7 @@ export default function AddTransactionScreen({ navigation }) {
                     return;
                 }
 
-                const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
+                const response = await fetch(`https://ffm-application-midterm.onrender.com/budgets`, {
                     method: 'GET',
                     headers: {
                     'Authorization': `Bearer ${token}`,
@@ -248,7 +248,7 @@ export default function AddTransactionScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('https://ffm-application-test.onrender.com/banks', {
+          const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -285,7 +285,7 @@ export default function AddTransactionScreen({ navigation }) {
                 return;
             }
 
-            const response = await fetch(`https://ffm-application-test.onrender.com/add-transaction`, {
+            const response = await fetch(`https://ffm-application-midterm.onrender.com/add-transaction`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
