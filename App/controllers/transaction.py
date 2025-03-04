@@ -31,6 +31,13 @@ def add_transaction(userID, transactionTitle, transactionDesc, transactionType, 
 def get_transaction(id):
     return Transaction.query.get(id)
 
+# Get Transaction By ID (JSON)
+def get_transaction_json(id):
+    transaction = Transaction.query.get(id)
+    if transaction:
+        return transaction.get_json()
+    return None
+
 # Get All Transactions
 def get_all_transactions():
     return Transaction.query.all()
