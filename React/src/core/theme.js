@@ -14,6 +14,7 @@ export const theme = {
     secondary: '#9ACBD0',
     error: '#F13A59',
     surface: '#F2EFE7',
+    background: '#181818',
   },
 
   fonts: {

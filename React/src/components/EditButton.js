@@ -17,12 +17,12 @@ export default function EditButton() {
 const styles = StyleSheet.create({
     container: {
         position: 'absolute',
-        top: 12 + getStatusBarHeight(),
-        right: 10, // Changed from left to right
+        top: 15 + getStatusBarHeight(),
+        right: 15, // Changed from left to right
     },
     image: {
-        width: 35,
-        height: 35,
+        width: 26,
+        height: 26,
     },
     imageColor: {
         tintColor: theme.colors.surface,

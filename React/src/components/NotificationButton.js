@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
 
     modalTitle: {
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: theme.fonts.bold.fontFamily,
         marginBottom: 10,
     },
 
@@ -80,6 +80,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#555",
         textAlign: "center",
+        fontFamily: theme.fonts.regular.fontFamily,
     },
 
     closeButton: {
@@ -92,7 +93,7 @@ const styles = StyleSheet.create({
 
     closeButtonText: {
         color: "white",
-        fontWeight: "bold",
+        fontFamily: theme.fonts.bold.fontFamily,
     },
 });
 

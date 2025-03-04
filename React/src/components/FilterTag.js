@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
     text: {
         color: "#000",
         fontFamily: theme.fonts.bold.fontFamily,
-        fontWeight: "bold",
         textAlign: "center",
     },
 

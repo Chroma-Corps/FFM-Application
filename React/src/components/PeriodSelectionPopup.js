@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
 
     modalContent: {
         width: 300,
-        backgroundColor: "white",
+        backgroundColor: theme.colors.background,
         padding: 20,
         borderRadius: 10,
         alignItems: "center",
@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
 
     modalTitle: {
         fontSize: 18,
-        fontWeight: "bold",
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: theme.colors.textSecondary,
         marginBottom: 10,
     },
 
@@ -66,16 +67,17 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 12,
         marginVertical: 5,
-        backgroundColor: theme.colors.secondary,
-        borderRadius: 5,
+        borderWidth: 2,
+        borderColor: theme.colors.secondary,
+        borderRadius: 15,
         justifyContent: 'center',
         alignItems: 'center',
     },
 
     optionText: {
         fontSize: 16,
-        fontFamily: theme.fonts.medium.fontFamily,
-        color: theme.colors.text,
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: theme.colors.textSecondary,
     },
 
     closeButton: {
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
 
     closeButtonText: {
         color: "white",
-        fontWeight: "bold",
+        fontFamily: theme.fonts.bold.fontFamily
     },
 });
 

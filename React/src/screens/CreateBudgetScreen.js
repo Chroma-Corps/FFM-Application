@@ -1,28 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
-import { API_URL_DEVICE } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import DateSelector from '../components/DateSelector';
 import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
-import { ScreenContainer } from 'react-native-screens';
-import NotificationBell from '../components/NotificationButton';
-
-// Dummy data for bank cards
-const bankCards = [
-    { bankID: 1, userID: 101, bankTitle: 'Bank 1', bankCurrency: 'USD', bankAmount: 1500, remainingBankAmount: 1200 },
-    { bankID: 2, userID: 102, bankTitle: 'Bank 2', bankCurrency: 'EUR', bankAmount: 2000, remainingBankAmount: 1700 },
-    { bankID: 3, userID: 103, bankTitle: 'Bank 3', bankCurrency: 'GBP', bankAmount: 2500, remainingBankAmount: 2300 },
-    { bankID: 4, userID: 104, bankTitle: 'Bank 4', bankCurrency: 'USD', bankAmount: 3000, remainingBankAmount: 2900 },
-    { bankID: 5, userID: 105, bankTitle: 'Bank 5', bankCurrency: 'EUR', bankAmount: 1200, remainingBankAmount: 1000 },
-];
 
 //Dummy data for caegories
 const categories = [
@@ -37,6 +26,8 @@ const categories = [
     { id: 9, name: 'Category#9', image: require('../assets/default_img.jpg') },
     { id: 10, name: 'Category#10', image: require('../assets/default_img.jpg') },
 ];
+
+// Need An API route To Get Categories From Flask Backend - JaleneA
 
 const formatDate = (date) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -93,6 +84,7 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [budgetTitle, setBudgetTitle] = useState('');
     const [budgetAmount, setBudgetAmount] = useState('');
     const [budgetType, setBudgetType] = useState('');
+    const [budgetCategory, setBudgetCategory] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState(null);
     const [selectedBankID, setSelectedBankID] = useState(null);
@@ -104,6 +96,9 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [showPeriodPopup, setShowPeriodPopup] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+
+    const [banks, setBanks] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (startDate && duration && selectedPeriod) {
@@ -160,20 +155,18 @@ export default function CreateBudgetsScreen({ navigation }) {
                 selectedBankID === item.bankID && styles.selectedCard
             ]}
             onPress={() => {
-                setSelectedBankID(item.bankID);
-                console.log('Selected Bank ID:', item.bankID);
+                setSelectedBankID(1); // Replace With item.bankID - JaleneA
+                console.log('Selected Bank ID:', item.bankID); // Need To Include bankID In Bank's get_json() - JaleneA
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
             <Text style={styles.bankCardAmount}>
-                {item.bankCurrency} {item.bankAmount.toFixed(2)}
+                {item.bankCurrency} {item.bankAmount}
             </Text>
             <Text style={styles.bankCardRemaining}>
-                Remaining: {item.bankCurrency} {item.remainingBankAmount.toFixed(2)}
+                Remaining: {item.bankCurrency} {item.remainingBankAmount}
             </Text>
         </TouchableOpacity>
-
-
     );
 
     const renderCategoryItem = ({ item }) => (
@@ -187,57 +180,92 @@ export default function CreateBudgetsScreen({ navigation }) {
     );
 
     const createBudget = async () => {
-        const token = await AsyncStorage.getItem('token');
-        const userID = await AsyncStorage.getItem('userID');
+        const token = await AsyncStorage.getItem('access_token');
 
-        if (!token || !userID) {
-            console.error('No Token or UserID Found');
+        if (!token) {
+            console.error('No Token Found');
             return;
         }
 
         if (!budgetTitle || !startDate || !endDate || !selectedBankID) {
-            Alert.alert('Error', 'Please fill in all fields and select a bank');
+            Alert.alert('Error', 'Please Fill In All Fields');
             return;
         }
 
         console.log('Creating budget with bankID:', selectedBankID); // Testing Bank selection before making the API call
 
         try {
-            const response = await fetch(`${API_URL_DEVICE}/create-budget`, {
+            const response = await fetch(`https://ffm-application-test.onrender.com/create-budget`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    budgetTitle,
-                    budgetAmount,
-                    remainingBudgetAmount,
-                    startDate,
-                    endDate,
-                    userID,
-                    budgetType,
-                    bankID: selectedBankID
+                    bankID: selectedBankID,
+                    budgetTitle: budgetTitle.trim(),
+                    budgetAmount: budgetAmount,
+                    budgetType: budgetType.toUpperCase(),
+                    budgetCategory: "BILLS", // To Implementat - JaleneA
+                    startDate: startDate,
+                    endDate: endDate,
                 })
             });
 
             if (response.ok) {
-                Alert.alert('Success', 'Budget created successfully');
+                Alert.alert('Success', 'Budget Created Successfully');
                 navigation.goBack();
             } else {
-                Alert.alert('Error', 'Failed to create budget');
+                Alert.alert('Error', 'Failed To Create Budget');
+                console.error(response.statusText);
             }
         } catch (error) {
             console.error(error);
-            Alert.alert('Error', 'Something went wrong');
+            Alert.alert('Error', 'Something Went Wrong');
         }
     };
 
+    const fetchBanks = async () => {
+        try {
+          setLoading(true);
+          const token = await AsyncStorage.getItem("access_token");
+    
+          if (!token) {
+            console.error('No Token Found');
+            return;
+          }
+    
+          const response = await fetch('https://ffm-application-test.onrender.com/banks', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+    
+          if (response.ok) {
+            const data = await response.json();
+            setBanks(data);
+          } else {
+            console.error('Failed To Fetch Banks:', response.statusText);
+          }
+        } catch (error) {
+          console.error("Error Fetching Banks:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      useFocusEffect(
+        useCallback(() => {
+          fetchBanks();
+        }, [])
+      );
 
     return (
         <View style={styles.createBudgetScreen}>
             <InAppBackground>
-
+            <BackButton goBack={navigation.goBack} />
                 {showPeriodPopup && (
                     <PeriodSelectionPopup
                         setShowPeriodPopup={setShowPeriodPopup}
@@ -255,16 +283,13 @@ export default function CreateBudgetsScreen({ navigation }) {
 
                 <View style={styles.screenContainer}>
                     <View style={styles.headerContainer}>
-                        <View>
-                            <BackButton goBack={navigation.goBack} />
-                        </View>
                         <View style={styles.cardTitle}>
                             <InAppHeader>Add Budget</InAppHeader>
                         </View>
                     </View>
 
                     <View>
-                        <Card style={styles.card}>
+                        <View style={styles.card}>
                             <View style={styles.cardTopHalfContainer}>
                                 <TextInput
                                     placeholderTextColor="rgba(255, 255, 255, 0.25)"
@@ -326,14 +351,21 @@ export default function CreateBudgetsScreen({ navigation }) {
                                 <View style={styles.budgetPropertiesContainer}>
                                     <Text style={styles.defaultText}>Select Bank:</Text>
 
+                                    {loading ? (
+                                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                                        ) : banks.length === 0 ? (
+                                        <Text style={styles.defaultText}>You Have No Banks</Text>
+                                        ) : (
+
                                     <FlatList
-                                        data={bankCards}
+                                        data={banks}
                                         renderItem={renderBankCard}
-                                        keyExtractor={(item) => item.bankID.toString()}
+                                        keyExtractor={(item) => item?.bankID}
                                         horizontal
                                         showsHorizontalScrollIndicator={false}
                                         contentContainerStyle={styles.scrollContainer}
                                     />
+                                        )}
 
                                     <Text style={[styles.defaultText, { marginBottom: 0 }]}>Budget Type:</Text>
 
@@ -364,14 +396,13 @@ export default function CreateBudgetsScreen({ navigation }) {
 
                                 <Button mode="outlined" onPress={createBudget}>Create</Button>
                             </View>
-                        </Card>
+                        </View>
                     </View>
                 </View>
             </InAppBackground>
         </View>
     );
 }
-
 
 const styles = StyleSheet.create({
     createBudgetScreen: {
@@ -404,7 +435,6 @@ const styles = StyleSheet.create({
     headerContainer: {
         flex: 1,
         flexDirection: 'coloumn',
-        gap: 50
     },
 
     cardTitle: {
@@ -418,9 +448,6 @@ const styles = StyleSheet.create({
         margin: 10,
         marginTop: 10,
         padding: 10,
-        backgroundColor: '#181818',
-        borderColor: theme.colors.secondary,
-        borderWidth: 2,
         borderRadius: 10,
     },
 

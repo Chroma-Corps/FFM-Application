@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import InAppHeader from '../components/InAppHeader'
 import PlusFAB from '../components/PlusFAB';
 import { theme } from '../core/theme'
@@ -13,10 +13,11 @@ import BudgetsScreen from './BudgetsScreen';
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
     const [budgetDetails, setBudgetDetails] = useState(null);
-
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchBudgetDetails = async () => {
+            // To Give The Application Less Work, I Want To Make A Separate Route To Fetch The Transactions Of A Budget, Instead Of Having It In The JSON (BudgetTranctions) - JaleneA
             try {
                 const response = await fetch(`https://ffm-application-test.onrender.com/budget/${budgetID}`);
                 if (response.ok) {
@@ -27,18 +28,31 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                 }
             } catch (error) {
                 console.error('Error fetching budget details:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchBudgetDetails();
     }, [budgetID]);
 
+    if (loading) {
+        return (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
+        );
+      }
+    
     if (!budgetDetails) {
-        return <Text>Loading...</Text>;
+        return (
+            <View style={styles.centered}>
+            <Text>No Budget Details Available</Text>
+            </View>
+        );
     }
 
     const renderTransaction = ({ item }) => {
-        console.log('Transaction Item:', item);
         return (
             <View style={styles.transactionCard}>
                 <Text style={styles.transactionTitle}>{item.transactionTitle}</Text>
@@ -56,14 +70,13 @@ export default function BudgetDetailsScreen({ navigation, route }) {
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
                 <EditButton />
-
                 <View style={styles.headerContainer}>
 
                     <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
 
                     <Text style={styles.amountText}>
-                        <Text style={styles.amountTextBold}>${budgetDetails.remainingBudgetAmount} </Text>
-                        left of ${budgetDetails.budgetAmount}
+                        <Text style={styles.amountTextBold}>{budgetDetails.remainingBudgetAmount} </Text>
+                        left of {budgetDetails.budgetAmount}
                     </Text>
 
                     <View style={styles.progressBarContainer}>
@@ -81,19 +94,15 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                 </View>
 
                 <View style={styles.graphContainer}>
-
-                    <CircleGraph transactions={budgetDetails.transactions} />
-
-                    <View styles={styles.graphKey}>
+                    {/* <CircleGraph transactions={budgetDetails.transactions} /> */}
+                    <View style={styles.graphKey}>
                         <Text style={styles.descriptionText}>Graph Key Goes Here</Text>
                     </View>
                 </View>
 
 
                 <View style={styles.transactionsActivityContainer}>
-                    <View style={styles.dashLines} />
-
-                    <Text style={[styles.titleText, { color: theme.colors.textSecondary }]}>Transactions Activity</Text>
+                    <Text style={[styles.descriptionText, { color: theme.colors.textSecondary }]}>Transactions Activity</Text>
 
                     <View style={styles.transactionsContainer}>
                         <FlatList
@@ -117,23 +126,23 @@ const styles = StyleSheet.create({
         flex: 1
     },
 
-    dashLines: {
-        borderWidth: 2,
-        borderColor: 'white',
-        borderStyle: 'dashed',
-        width: '100%',
-        marginVertical: 10,
+    centered: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: '#181818'
     },
 
     headerContainer: {
-        backgroundColor: theme.colors.primary,
-        padding: 16,
-        marginBottom: 12,
+        borderColor: theme.colors.primary,
+        padding: 15,
+        marginTop: 30,
+        borderBottomWidth: 5,
     },
 
     titleText: {
         fontSize: 25,
-        color: theme.colors.text,
+        color: "#fff",
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'flex-start',
     },
@@ -145,8 +154,8 @@ const styles = StyleSheet.create({
     },
 
     amountText: {
-        fontSize: 20,
-        color: theme.colors.text,
+        fontSize: 15,
+        color: theme.colors.description,
         fontFamily: theme.fonts.medium.fontFamily,
         textAlign: 'flex-start',
         paddingTop: 10,
@@ -154,15 +163,15 @@ const styles = StyleSheet.create({
     },
 
     amountTextBold: {
-        fontSize: 20,
-        color: theme.colors.text,
+        fontSize: 15,
+        color: theme.colors.description,
         fontFamily: theme.fonts.bold.fontFamily,
-        textAlign: 'flex-start',
+        textAlign: 'center',
         paddingTop: 20,
     },
 
     graphContainer: {
-        flexDirection: 'row',
+        // flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,
@@ -181,16 +190,15 @@ const styles = StyleSheet.create({
     transactionCard: {
         padding: 15,
         marginVertical: 20,
-        borderBottomWidth: 2,
-        borderTopWidth: 2,
+        borderBottomWidth: 1,
+        borderTopWidth: 1,
         borderColor: theme.colors.surface,
-        borderRadius: 20,
     },
 
     transactionTitle: {
         color: theme.colors.primary,
         fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 18,
+        fontSize: 20,
     },
     dateText: {
         fontSize: 15,

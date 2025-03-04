@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     },
 
     progressBarContainer: {
-        height: 15,
+        height: 20,
         width: '100%',
         backgroundColor: '#E0E0E0',
         borderRadius: 10,
@@ -65,10 +65,9 @@ const styles = StyleSheet.create({
     },
 
     progressBarPercent: {
-        color: theme.colors.text,
+        color: theme.colors.description,
         fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 15,
-        fontWeight: 'bold',
+        fontSize: 12,
     },
 
     datesContainer: {
@@ -82,7 +81,6 @@ const styles = StyleSheet.create({
         color: theme.colors.textSecondary,
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 12,
-        fontWeight: 'bold',
     },
 })
 

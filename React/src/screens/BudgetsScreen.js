@@ -1,20 +1,19 @@
 // rfce
 import React, { useState, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
 import { Image } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import InAppHeader from '../components/InAppHeader';
-import { API_URL_LOCAL } from '@env';
 import { theme } from '../core/theme';
 import PlusFAB from '../components/PlusFAB';
 import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
 import ProgressBar from '../components/ProgressBar';
 
-const defaultCategories = [
+const defaultCategories = [ //To Replace With API Route Fetch - JaleneA
   { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
   { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
   { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
@@ -26,18 +25,19 @@ const filters = ['All', 'Savings', 'Expense'];
 export default function BudgetsScreen({ navigation }) {
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
+  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const token = await AsyncStorage.getItem("access_token");
-      const userID = await AsyncStorage.getItem("user_id");
 
       if (!token) {
         console.error('No Token Found');
         return;
       }
 
-      const response = await fetch(`${API_URL_LOCAL}/budgets/${userID}`, {
+      const response = await fetch(`https://ffm-application-test.onrender.com/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -54,6 +54,8 @@ export default function BudgetsScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error Fetching Budgets:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -108,8 +110,8 @@ export default function BudgetsScreen({ navigation }) {
 
               <View style={styles.cardDetailsContainer}>
                 <Text style={styles.cardText}>
-                  <Text style={{ fontWeight: 'bold' }}>${item.remainingBudgetAmount} </Text>
-                  left of ${item.budgetAmount}
+                  <Text style={{ fontWeight: 'bold' }}>{item.remainingBudgetAmount} </Text>
+                  left of {item.budgetAmount}
                 </Text>
 
                 <ProgressBar
@@ -119,7 +121,7 @@ export default function BudgetsScreen({ navigation }) {
                 />
 
                 <Text style={styles.insightsText}>
-                  -Insights Go Here-
+                  ~ Insights Go Here ~
                 </Text>
               </View>
             </View>
@@ -133,7 +135,7 @@ export default function BudgetsScreen({ navigation }) {
     <View style={styles.budgetsScreen}>
       <InAppBackground>
         <View style={styles.headerContainer}>
-          <InAppHeader>Budgets 🎯</InAppHeader>
+          <InAppHeader>Budgets</InAppHeader>
           <NotificationBell />
         </View>
 
@@ -152,15 +154,17 @@ export default function BudgetsScreen({ navigation }) {
           ))}
         </View>
 
-        {filteredBudgets.length === 0 ? (
+          {loading ? (
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          ) : filteredBudgets.length === 0 ? (
           <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
-        ) : (
-          <FlatList
-            data={filteredBudgets}
-            renderItem={({ item }) => renderData(item)}
-            keyExtractor={item => `${item.budgetID}`}
-          />
-        )}
+          ) : (
+            <FlatList
+              data={filteredBudgets}
+              renderItem={({ item }) => renderData(item)}
+              keyExtractor={item => `${item.budgetID}`}
+            />
+          )}
 
         <PlusFAB onPress={() => navigation.push('CreateBudget')} />
       </InAppBackground>
@@ -268,6 +272,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     flexWrap: 'wrap',
     color: "#fff",
+    fontSize: 12,
     fontFamily: theme.fonts.medium.fontFamily,
   },
 });

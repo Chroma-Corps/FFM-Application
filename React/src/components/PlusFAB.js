@@ -6,10 +6,10 @@ import { theme } from '../core/theme'
 export default function PlusFAB({style, onPress}) {
     return (
         <FAB 
-            style={[styles.fab, style, {backgroundColor: theme.colors.secondary}]} 
+            style={[styles.fab, style, {backgroundColor: "#fff"}]} 
             icon="plus"
             onPress={onPress}
-            color={theme.colors.primary}
+            color={theme.colors.secondary}
         />
     )
 }
@@ -20,5 +20,7 @@ const styles = StyleSheet.create({
         right: 16,
         bottom: 16,
         margin: 16,
+        borderWidth: 3,
+        borderColor: theme.colors.primary
     },
 })
