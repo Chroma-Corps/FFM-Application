@@ -62,10 +62,17 @@ export default function LoginScreen({ navigation }) {
     }
   }
 
+  const onSocialGooglePressed = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Home' }],
+    })
+  }
+
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
-      <Header>Welcome back.</Header>
+      <Header>Nice To See You Again!</Header>
       <TextInput
         label="Email"
         returnKeyType="next"
@@ -87,42 +94,67 @@ export default function LoginScreen({ navigation }) {
         errorText={password.error}
         secureTextEntry
       />
-      <View style={styles.forgotPassword}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ResetPasswordScreen')}
-        >
-          <Text style={styles.forgot}>Forgot your password?</Text>
-        </TouchableOpacity>
-      </View>
-      <Button mode="contained" onPress={onLoginPressed} loading={loading}>
-        Login
-      </Button>
-      <View style={styles.row}>
-        <Text>Don't have an account? </Text>
+          <View style={styles.forgotPassword}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('ResetPasswordScreen')}
+            >
+              <Text style={styles.link}>Forgot Password?</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
+          <Text style={styles.orText}>- Or Login With -</Text>
+          <Button mode="outlined" icon="google">Google</Button>
+      <View style={[styles.row, { marginTop: 50 }]}>
+        <Text style={styles.signUpLabel}>Don't Have An Account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('RegisterScreen')}>
-          <Text style={styles.link}>Sign up</Text>
+          <Text style={styles.link}>Sign Up!</Text>
         </TouchableOpacity>
       </View>
+
     </Background>
   )
 }
 
 const styles = StyleSheet.create({
+
+  input: {
+    fontFamily: theme.fonts.regular.fontFamily,
+    color: theme.colors.text,
+    backgroundColor: 'transparent',
+    marginBottom: 12,
+  },
+
   forgotPassword: {
     width: '100%',
     alignItems: 'flex-end',
-    marginBottom: 24,
+    marginBottom: 16,
   },
+
+  orText: {
+    textAlign: 'center',
+    marginVertical: 12,
+    fontFamily: theme.fonts.light.fontFamily,
+    color: theme.colors.text
+  },
+
   row: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     marginTop: 4,
+    justifyContent: 'center',
   },
-  forgot: {
-    fontSize: 13,
-    color: theme.colors.secondary,
+
+  signUpLabel: {
+    fontFamily: theme.fonts.regular.fontFamily,
+    fontSize: 15,
+    color: theme.colors.text,
   },
+
   link: {
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.primary,
+    textDecorationLine: 'underline',
   },
 })

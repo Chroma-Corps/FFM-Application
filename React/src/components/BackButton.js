@@ -25,6 +25,6 @@ const styles = StyleSheet.create({
     height: 35,
   },
   imageColor: {
-    tintColor: theme.colors.surface,
+    tintColor: theme.colors.heading,
   },
 })
