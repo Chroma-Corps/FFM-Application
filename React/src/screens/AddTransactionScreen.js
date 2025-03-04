@@ -518,7 +518,7 @@ export default function AddTransactionScreen({ navigation }) {
                 </View>
 
             </View>
-            <Button onPress={addTransaction} style={styles.button}>Add</Button>
+            <Button mode="outlined" onPress={addTransaction}>Add</Button>
         </InAppBackground>
     </View>
     );

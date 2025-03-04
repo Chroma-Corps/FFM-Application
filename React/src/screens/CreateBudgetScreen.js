@@ -394,7 +394,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                     />
                                 </View>
 
-                                <Button onPress={createBudget}>Create</Button>
+                                <Button mode="outlined" onPress={createBudget}>Create</Button>
                             </View>
                         </View>
                     </View>
