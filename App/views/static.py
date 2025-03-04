@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from services.category import CategoryService
+from App.services.category import CategoryService
 
 static_views = Blueprint('static_views', __name__)
 
