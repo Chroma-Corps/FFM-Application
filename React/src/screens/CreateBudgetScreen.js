@@ -394,7 +394,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                     />
                                 </View>
 
-                                <Button mode="outlined" onPress={createBudget}>Create</Button>
+                                <Button onPress={createBudget}>Create</Button>
                             </View>
                         </View>
                     </View>
@@ -537,7 +537,6 @@ const styles = StyleSheet.create({
     bankCardTitle: {
         color: '#fff',
         fontSize: 18,
-        fontWeight: 'bold',
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'center',
     },

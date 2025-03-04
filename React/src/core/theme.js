@@ -15,6 +15,8 @@ export const theme = {
     error: '#F13A59',
     surface: '#F2EFE7',
     background: '#181818',
+    expense: '#E57373',
+    income: '#81C784'
   },
 
   fonts: {

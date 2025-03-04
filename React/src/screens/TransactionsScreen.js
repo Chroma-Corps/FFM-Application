@@ -21,28 +21,21 @@ import { ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 
 export default function TransactionsScreen({ navigation }) {
 
-  const [data, setData] = useState([
-
-    { id: 1, transactionTitle: "Groceries", transactionAmount: 50, transactionType: "expense", transactionDate: "2025-02-25", transactionTime: "14:30", transactionCategory: "Food" },
-    { id: 2, transactionTitle: "Salary", transactionAmount: 1000, transactionType: "income", transactionDate: "2025-02-20", transactionTime: "09:00", transactionCategory: "Salary" },
-    { id: 3, transactionTitle: "Transport", transactionAmount: 20, transactionType: "expense", transactionDate: "2025-03-02", transactionTime: "18:00", transactionCategory: "Transport" },
-    { id: 4, transactionTitle: "Entertainment", transactionAmount: 20, transactionType: "expense", transactionDate: "2024-12-25", transactionTime: "20:00", transactionCategory: "Leisure" },
-    { id: 5, transactionTitle: "Groceries", transactionAmount: 60, transactionType: "expense", transactionDate: "2025-03-25", transactionTime: "14:30", transactionCategory: "Food" },
-    { id: 6, transactionTitle: "Wedding Clothes", transactionAmount: 100, transactionType: "expense", transactionDate: "2025-03-25", transactionTime: "16:30", transactionCategory: "Shopping" },
-
-  ]);
-
-
+  const [data, setData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth()); // Default the current month
   const [searchQuery, setSearchQuery] = useState("");
+  const parseCurrency = (amount) => {
+    if (!amount) return 0;
+    return parseFloat(amount.replace(/[^0-9.]/g, "")) || 0;
+  };
 
   const totalExpenses = data
-    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "expense")
-    .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);
+    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "Expense")
+    .reduce((sum, t) => sum + parseCurrency(t.transactionAmount), 0);
 
   const totalIncome = data
-    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "income")
-    .reduce((sum, t) => sum + parseFloat(t.transactionAmount), 0);    
+    .filter((t) => (selectedMonth === "all" || new Date(t.transactionDate).getMonth() === selectedMonth) && t.transactionType === "Income")
+    .reduce((sum, t) => sum + parseCurrency(t.transactionAmount), 0);
 
 
   const fetchData = async () => {
@@ -64,6 +57,7 @@ export default function TransactionsScreen({ navigation }) {
   
       if (response.ok) {
         const transactions = await response.json();
+        console.log(transactions);
         setData(transactions);
       } else {
         console.error('Failed To Fetch Transactions:', response.statusText);
@@ -111,7 +105,7 @@ export default function TransactionsScreen({ navigation }) {
         { text: "Cancel", style: "cancel" },
         { text: "Delete", style: "destructive", 
           onPress: () => {
-            setData(data.filter((item) => item.id !== transactionID));
+            setData(data.filter((item) => item.transactionID !== transactionID));
             Alert.alert("Succss", "Transaction deleted successfully.");
 
             },
@@ -122,24 +116,25 @@ export default function TransactionsScreen({ navigation }) {
 
   //Edit Transaction 
   const editTransaction = (transactionID) => {
-    navigation.push("AddTransaction", { transactionID });
+    // navigation.push("AddTransaction", { transactionID });
   };
 
   const renderData = ({ item }) => {
     const isExpense = item.transactionType === "expense";
   
     return (
+    <View>
       <Swipeable
         renderRightActions={() => (
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => deleteTransaction(item.id)}
+            onPress={() => deleteTransaction(item.transactionID)}
           >
             <Icon name="trash-can-outline" size={24} color="white" />
           </TouchableOpacity>
         )}
       >
-        <TouchableOpacity onPress={() => editTransaction(item.id)}>
+        <TouchableOpacity onPress={() => editTransaction(item.transactionID)}>
           <Card style={styles.cardStyle}>
             <View style={styles.cardRow}>
               <Text style={styles.titleText}>{item.transactionTitle}</Text>
@@ -147,18 +142,19 @@ export default function TransactionsScreen({ navigation }) {
                 <Icon
                   name={isExpense ? "arrow-down" : "arrow-up"}
                   size={18}
-                  color={isExpense ? "red" : "green"}
+                  color={isExpense ? theme.colors.expense : theme.colors.income}
                 />
-                <Text style={[styles.amountText, { color: isExpense ? "red" : "green" }]}>
-                  ${item.transactionAmount}
+                {/* Ensure this is inside a <Text> component */}
+                <Text style={[styles.amountText, { color: isExpense ? theme.colors.expense : theme.colors.income }]}>
+                  {item.transactionAmount}
                 </Text>
               </View>
             </View>
-            <Text style={styles.dateText}>{item.transactionCategory}</Text>
             <Text style={styles.timeText}>{item.transactionTime}</Text> 
           </Card>
         </TouchableOpacity>
       </Swipeable>
+    </View>
     );
   };
 
@@ -184,8 +180,7 @@ export default function TransactionsScreen({ navigation }) {
               {/* Transactions Search Bar : Title/ Category */}
               <TextInput
                 style={styles.searchBar}
-                placeholder="Search transactions..."
-                placeholderTextColor="#888"
+                placeholder="Search Transactions"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
@@ -231,11 +226,10 @@ const styles = StyleSheet.create({
 
     cardStyle: {
       margin: 10,
-      padding: 25,
+      padding: 20,
       backgroundColor: '#181818',
       borderColor: theme.colors.secondary,
-      borderWidth: 2,
-      borderRadius: 30,
+      borderWidth: 1,
     },
     cardRow: {
       flexDirection: 'row',
@@ -252,17 +246,9 @@ const styles = StyleSheet.create({
       color: theme.colors.surface,
       fontFamily: theme.fonts.bold.fontFamily,
     },
-    dateText: {
-      fontSize: 15,
-      fontFamily: theme.fonts.medium.fontFamily,
-      color: theme.colors.description,
-      lineHeight: 21,
-      textAlign: 'center',
-      paddingTop: 10
-  },
 
   deleteButton: {
-    backgroundColor: "red",
+    backgroundColor: theme.colors.error,
     justifyContent: "center",
     alignItems: "center",
     width: 70,
@@ -279,9 +265,9 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 12,
-    color: "#666",
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.description,
     textAlign: "right",
-    marginTop: 5,
     marginRight: 10,
   },
   searchBar: {
@@ -295,30 +281,26 @@ const styles = StyleSheet.create({
   summaryContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
-    backgroundColor: "#f8f8f8",
-    marginHorizontal: 10,
-    borderRadius: 8,
-    marginTop: 10,
+    padding: 20,
+    marginTop: 5,
   },
   expenseText: {
-    color: "red",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: theme.colors.expense,
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily
   },
   incomeText: {
-    color: "green",
-    fontSize: 16,
-    fontWeight: "bold",
+    color: theme.colors.income,
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily
   },
   dateHeader: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.description,
     paddingVertical: 4,
     paddingHorizontal: 10,
-    backgroundColor: '#181818',
-    color: "#666",
-    borderRadius: 5,
     marginTop: 10,
+    textAlign: "center"
   },
 })

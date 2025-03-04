@@ -6,13 +6,13 @@ const BankAccountCard = ({ account, isSelected, onSelect }) => {
     return (
       <TouchableOpacity
         style={[styles.card, isSelected && styles.selectedCard]}
-        onPress={() => onSelect(account.id)}
+        onPress={() => onSelect(account.bankID)}
       >
         <View style={[styles.colorBar, { backgroundColor: account.color }]} />
         <View style={styles.cardContent}>
           <Text style={styles.accountTitle}>{account.title}</Text>
           <Text style={styles.balance}>
-            {account.currency} {account.balance.toFixed(2)}
+            {account.currency} {account.balance}
           </Text>
         </View>
       </TouchableOpacity>
@@ -27,7 +27,6 @@ const BankAccountCard = ({ account, isSelected, onSelect }) => {
       borderRadius: 12,
       padding: 10,
       marginHorizontal: 5,
-      backgroundColor: "#fff",
       alignItems: "center",
       shadowColor: "#000",
       shadowOpacity: 0.1,

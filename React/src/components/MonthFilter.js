@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
+import { theme } from '../core/theme'
 
 const months = [
   { id: "all", name: "All" },
@@ -63,19 +64,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 15,
     marginHorizontal: 5,
-    borderRadius: 20,
+    borderRadius: 10,
     backgroundColor: "#f0f0f0",
   },
   selectedMonthButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor: theme.colors.primary,
   },
   monthText: {
     fontSize: 14,
-    color: "#333",
+    fontFamily: theme.fonts.medium.fontFamily,
   },
   selectedMonthText: {
     color: "white",
-    fontWeight: "bold",
+    fontFamily: theme.fonts.bold.fontFamily,
   },
 });
 
