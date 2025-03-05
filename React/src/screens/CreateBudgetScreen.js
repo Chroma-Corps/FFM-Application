@@ -14,21 +14,18 @@ import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
 
 //Dummy data for caegories
-const categories = [
-    { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
-    { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
-    { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
-    { id: 4, name: 'Category#4', image: require('../assets/default_img.jpg') },
-    { id: 5, name: 'Category#5', image: require('../assets/default_img.jpg') },
-    { id: 6, name: 'Category#6', image: require('../assets/default_img.jpg') },
-    { id: 7, name: 'Category#7', image: require('../assets/default_img.jpg') },
-    { id: 8, name: 'Category#8', image: require('../assets/default_img.jpg') },
-    { id: 9, name: 'Category#9', image: require('../assets/default_img.jpg') },
-    { id: 10, name: 'Category#10', image: require('../assets/default_img.jpg') },
-];
-
-// Need An API route To Get Categories From Flask Backend - JaleneA
-
+// const categories = [
+//     { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
+//     { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
+//     { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
+//     { id: 4, name: 'Category#4', image: require('../assets/default_img.jpg') },
+//     { id: 5, name: 'Category#5', image: require('../assets/default_img.jpg') },
+//     { id: 6, name: 'Category#6', image: require('../assets/default_img.jpg') },
+//     { id: 7, name: 'Category#7', image: require('../assets/default_img.jpg') },
+//     { id: 8, name: 'Category#8', image: require('../assets/default_img.jpg') },
+//     { id: 9, name: 'Category#9', image: require('../assets/default_img.jpg') },
+//     { id: 10, name: 'Category#10', image: require('../assets/default_img.jpg') },
+// ];
 const formatDate = (date) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -78,7 +75,7 @@ const calculateEndDate = (startDate, duration, selectedPeriod) => {
 
 export default function CreateBudgetsScreen({ navigation }) {
     // Fallback to default categories if categories is empty or undefined
-    const categoryData = Array.isArray(categories) && categories.length > 0 ? categories : defaultCategories;
+    // const categoryData = Array.isArray(categories) && categories.length > 0 ? categories : defaultCategories;
 
     //Budget Details
     const [budgetTitle, setBudgetTitle] = useState('');
@@ -88,7 +85,7 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState(null);
     const [selectedBankID, setSelectedBankID] = useState(null);
-
+    const [categories, setCategories] = useState([]);
     const [duration, setDuration] = useState(''); // To help with calclation of end date
 
     //Pop-up Triggers
@@ -99,6 +96,31 @@ export default function CreateBudgetsScreen({ navigation }) {
 
     const [banks, setBanks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const categoryImages = {
+        bills: require('../assets/icons/bills.png'),
+        entertainment: require('../assets/icons/entertainment.png'),
+        groceries: require('../assets/icons/groceries.png'),
+        income: require('../assets/icons/income.png'),
+        shopping: require('../assets/icons/shopping.png'),
+        transit: require('../assets/icons/transit.png')
+      };
+
+      useEffect(() => {
+        fetch('https://ffm-application-midterm.onrender.com/ffm/categories')
+            .then(response => response.json())
+            .then(data => {
+                const categoryArray = Object.entries(data).map(([key, value], index) => {
+                    const categoryName = value.toLowerCase();
+                    return {
+                        id: index + 1,
+                        name: value,
+                        image: categoryImages[categoryName] || require('../assets/default_img.jpg')  // FallBack
+                    };
+                });
+                setCategories(categoryArray);
+            })
+            .catch(error => console.error('Error Fetching categories:', error));
+    }, []);
 
     useEffect(() => {
         if (startDate && duration && selectedPeriod) {
@@ -125,6 +147,10 @@ export default function CreateBudgetsScreen({ navigation }) {
         const formattedEnd = formatDate(endDate);
 
         return `${formattedStart} - ${formattedEnd}`;
+    };
+
+    const handleCategorySelect = (category) => {
+        setBudgetCategory(category.name);
     };
 
     const handleAmountChange = (value) => {
@@ -160,24 +186,25 @@ export default function CreateBudgetsScreen({ navigation }) {
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
-            <Text style={styles.bankCardAmount}>
-                {item.bankCurrency} {item.bankAmount}
-            </Text>
-            <Text style={styles.bankCardRemaining}>
-                Remaining: {item.bankCurrency} {item.remainingBankAmount}
-            </Text>
+            <Text style={styles.bankCardAmount}>{item.bankAmount}</Text>
         </TouchableOpacity>
     );
 
-    const renderCategoryItem = ({ item }) => (
-        <TouchableOpacity style={styles.categoryItem}>
-            <Image
-                source={typeof item.image === 'string' ? { uri: item.image } : item.image}
-                style={styles.categoryImage}
-            />
-            <Text style={styles.categoryText}>{item.name}</Text>
-        </TouchableOpacity>
-    );
+    const renderCategoryItem = ({ item }) => {
+        const isSelected = budgetCategory === item.name;
+        return (
+            <TouchableOpacity
+                style={[
+                    { margin: 10, alignItems: 'center', padding: 5 },
+                    isSelected && { borderWidth: 2, borderColor: theme.colors.primary, borderRadius: 10 }
+                ]}
+                onPress={() => handleCategorySelect(item)}
+            >
+                <Image source={item.image} style={{ width: 30, height: 30 }} />
+                <Text style={{ color: theme.colors.textSecondary, fontFamily: theme.fonts.bold.fontFamily }}>{item.name}</Text>
+            </TouchableOpacity>
+        );
+    };
 
     const createBudget = async () => {
         const token = await AsyncStorage.getItem('access_token');
@@ -229,7 +256,7 @@ export default function CreateBudgetsScreen({ navigation }) {
         try {
           setLoading(true);
           const token = await AsyncStorage.getItem("access_token");
-    
+
           if (!token) {
             console.error('No Token Found');
             return;
@@ -384,16 +411,19 @@ export default function CreateBudgetsScreen({ navigation }) {
 
                                     <Text style={[styles.defaultText, { marginTop: 8 }]}>Select Budget Category:</Text>
 
-                                    <FlatList
-                                        data={categoryData}
-                                        renderItem={renderCategoryItem}
-                                        keyExtractor={(item) => item.id.toString()}
-                                        horizontal
-                                        showsHorizontalScrollIndicator={false}
-                                        contentContainerStyle={styles.scrollContainer}
-                                    />
+                                    {categories.length > 0 ? (
+                                            <FlatList
+                                                data={categories}
+                                                renderItem={renderCategoryItem}
+                                                keyExtractor={(item) => item.id.toString()}
+                                                horizontal
+                                                showsHorizontalScrollIndicator={false}
+                                                contentContainerStyle={styles.scrollContainer}
+                                            />
+                                        ) : (
+                                            <Text>Loading Categories...</Text>
+                                        )}
                                 </View>
-
                                 <Button mode="outlined" onPress={createBudget}>Create</Button>
                             </View>
                         </View>
@@ -569,7 +599,6 @@ const styles = StyleSheet.create({
     categoryImage: {
         width: 40,
         height: 40,
-        borderRadius: 30,
         resizeMode: 'cover',
     },
 

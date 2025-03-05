@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView } from 'react-native';
-import { Button } from 'react-native-paper';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import Button from '../components/Button';
 import InAppHeader from '../components/InAppHeader';
 import InAppBackground from '../components/InAppBackground';
 import { useFocusEffect } from '@react-navigation/native';
@@ -52,27 +52,57 @@ export default function Dashboard({ navigation }) {
   //   navigation.navigate('AddBank');
   // };
 
-  const handleLogout = () => {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'StartScreen' }],
-    });
-  };
+  const handleLogout = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
 
-  const renderBankItem = ({ item }) => {
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+
+      const response = await fetch('https://ffm-application-midterm.onrender.com/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'StartScreen' }],
+        });
+
+        AsyncStorage.removeItem('access_token');
+        console.log(data.message); // "Logged Out Successfully"
+      } else {
+        console.error('Logout Failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Logout Error:', error);
+    }
+  };
+  
+
+  const renderBankItem = ( {item} ) => {
     return (
-      <View style={styles.bankItem}>
-        <Text style={styles.bankTitle}>{item.bankTitle}</Text>
-        <Text style={styles.bankAmount}>{item.bankAmount} {item.bankCurrency}</Text>
-      </View>
+      <TouchableOpacity
+        style={styles.bankCard}
+      >
+        <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
+        <Text style={styles.bankCardAmount}>{item.bankAmount}</Text>
+      </TouchableOpacity>
     );
   };
 
   return (
     <InAppBackground>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <InAppHeader>Dashboard</InAppHeader>
-
+        <Text style={styles.sectionTitle}>Banks</Text>
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
         ) : banks.length === 0 ? (
@@ -82,19 +112,19 @@ export default function Dashboard({ navigation }) {
             <FlatList
               data={banks}
               renderItem={renderBankItem}
-              keyExtractor={(item) => item?.bankID}
+              keyExtractor={(item, index) => item?.bankID?.toString() ?? index.toString()}
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.flatListContainer}
             />
-            <Button mode="contained" style={styles.addButton}>+</Button>
+            <Button mode="contained" style={styles.addButton}>
+              <Text style={styles.buttonText}>+</Text>
+            </Button>
           </View>
         )}
         <View style={styles.buttonContainer}>
-          <Button mode="outlined" onPress={handleLogout} style={styles.button}>Logout</Button>
+          <Button mode="contained" onPress={handleLogout}>Logout</Button>
         </View>
-          
-      </ScrollView>
     </InAppBackground>
   );
 }
@@ -128,36 +158,49 @@ const styles = StyleSheet.create({
     borderRadius: 5, 
   },
 
-  bankTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
+  bankCardTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: theme.fonts.bold.fontFamily,
+    textAlign: 'center',
+},
 
-  bankAmount: {
-    fontSize: 14,
-    color: theme.colors.description,
-  },
+bankCardAmount: {
+  color: '#fff',
+  fontSize: 16,
+  fontFamily: theme.fonts.medium.fontFamily,
+  marginBottom: 5,
+  textAlign: 'center',
+},
 
   bankItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    width: '100%',
+    padding: 10,
+    borderRadius: 8,
+    gap: 10,
   },
 
   addButton: {
-    width: 50,
-    height: 50,
+    width: 80,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 10,
-    borderRadius: 10,
-    padding: 0,
+    borderRadius: 15,
+  },
+
+  buttonText: {
+    fontSize: 20,
+    textAlign: "center",
+    alignContent: "center",
+    fontFamily: theme.fonts.bold.fontFamily,
   },
 
   buttonContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
+    // flex: 1,
+    // justifyContent: 'flex-end',
   },
 
   button: {
@@ -167,5 +210,21 @@ const styles = StyleSheet.create({
 
   flatListContainer: {
     paddingVertical: 10,
-  }
+  },
+
+  bankCard: {
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    width: 175,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    fontSize: 25,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
+    marginLeft: 20,
+  },
 });

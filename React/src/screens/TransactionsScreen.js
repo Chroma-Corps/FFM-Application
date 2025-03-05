@@ -160,48 +160,53 @@ export default function TransactionsScreen({ navigation }) {
 
 
   const renderGroupedTransactions = () => {
-    return Object.keys(groupedTransactions).map((date) => (
-      <View key={date}>
-        <Text style={styles.dateHeader}>{date}</Text>
-        {groupedTransactions[date].map((transaction) => renderData({ item: transaction }))}
-      </View>
-    ));
+    const flatListData = Object.keys(groupedTransactions).flatMap((date) => [
+      { type: "header", date },
+      ...groupedTransactions[date].map((transaction) => ({ type: "item", transaction })),
+    ]);
+  
+    return (
+      <FlatList
+        data={flatListData}
+        keyExtractor={(item, index) => (item.type === "header" ? `header-${item.date}` : `transaction-${item.transaction.transactionID}`)}
+        renderItem={({ item }) =>
+          item.type === "header" ? (
+            <Text style={styles.dateHeader}>{item.date}</Text>
+          ) : (
+            renderData({ item: item.transaction })
+          )
+        }
+      />
+    );
   };
 
-
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={styles.transactionsScreen}>
-            <InAppBackground>
-              <InAppHeader>Transactions</InAppHeader>
+    <View style={styles.transactionsScreen}>
+      <InAppBackground>
+        <InAppHeader>Transactions</InAppHeader>
 
-              {/* Transactions Search Bar : Title/ Category */}
-              <TextInput
-                style={styles.searchBar}
-                placeholder="Search Transactions"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-      
-              {/* Horizontal Month Filter */}
-              <MonthFilter selectedMonth={selectedMonth} onSelectMonth={setSelectedMonth} />
+        {/* Transactions Search Bar : Title/ Category */}
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search Transactions"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
-              {/* Summary Bar : Total Expenses and Incomes for Selected truck */}
-              <View style={styles.summaryContainer}>
-                <Text style={styles.expenseText}>Expenses: -${totalExpenses}</Text>
-                <Text style={styles.incomeText}>Income: +${totalIncome}</Text>
-              </View>
-                
-              {renderGroupedTransactions()}
+        {/* Horizontal Month Filter */}
+        <MonthFilter selectedMonth={selectedMonth} onSelectMonth={setSelectedMonth} />
 
-              <PlusFAB onPress={() => navigation.push('AddTransaction')} />
-            </InAppBackground>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </GestureHandlerRootView>
+        {/* Summary Bar : Total Expenses and Incomes for Selected truck */}
+        <View style={styles.summaryContainer}>
+          <Text style={styles.expenseText}>Expenses: -${totalExpenses}</Text>
+          <Text style={styles.incomeText}>Income: +${totalIncome}</Text>
+        </View>
+          
+        <View style={{ flex: 1 }}>{renderGroupedTransactions()}</View>
+
+        <PlusFAB onPress={() => navigation.push('AddTransaction')} />
+      </InAppBackground>
+    </View>
   );
 }
 
