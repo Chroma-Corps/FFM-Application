@@ -7,7 +7,8 @@ import { View,
          TextInput, 
          TouchableOpacity,
          Pressable,
-         Platform } from 'react-native';
+         Platform,
+         Image } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import InAppBackground from '../components/InAppBackground';
@@ -15,7 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Button from '../components/Button';
 import TransactionType from '../constants/TransactionTypes';
-import TransactionCategories from '../constants/TransactionCategories';
+// import TransactionCategories from '../constants/TransactionCategories';
 import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 import { ScrollView, KeyboardAvoidingView, FlatList } from 'react-native';
@@ -38,6 +39,7 @@ export default function AddTransactionScreen({ navigation }) {
     const [selectedBudget, setSelectedBudget] = useState(null);
     const [budgets, setBudgets] = useState(null);
     const [banks, setBanks] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedBankID, setSelectedBankID] = useState(null);
     // const selectBank = (id) => setSelectedBank(id);
@@ -49,10 +51,40 @@ export default function AddTransactionScreen({ navigation }) {
 
     const [time, setTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
+    const categoryImages = {
+        bills: require('../assets/icons/bills.png'),
+        entertainment: require('../assets/icons/entertainment.png'),
+        groceries: require('../assets/icons/groceries.png'),
+        income: require('../assets/icons/income.png'),
+        shopping: require('../assets/icons/shopping.png'),
+        transit: require('../assets/icons/transit.png')
+      };
+
+      useEffect(() => {
+              fetch('https://ffm-application-midterm.onrender.com/ffm/categories')
+                  .then(response => response.json())
+                  .then(data => {
+                      const categoryArray = Object.entries(data).map(([key, value], index) => {
+                          const categoryName = value.toLowerCase();
+                          return {
+                              id: index + 1,
+                              name: value,
+                              image: categoryImages[categoryName] || require('../assets/default_img.jpg')  // FallBack
+                          };
+                      });
+                      setCategories(categoryArray);
+                  })
+                  .catch(error => console.error('Error Fetching categories:', error));
+          }, []);
 
     const toggleDatepicker = () => {
         setShowPicker(!showPicker);
     };
+
+    const handleCategorySelect = (category) => {
+        setTransactionCategory(category);
+        console.log('Selected category:', category);
+    }
 
     const onChange = ({ type }, selectedDate) => {
         if (type == "set") {
@@ -159,31 +191,27 @@ export default function AddTransactionScreen({ navigation }) {
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
-            <Text style={styles.bankCardRemaining}>
-                Remaining: {item.bankCurrency} {item.remainingBankAmount}
-            </Text>
+            <Text style={styles.bankCardRemaining}> {item.remainingBankAmount}</Text>
         </TouchableOpacity>
     );
 
-    const renderCategories = ({ item }) => (
-        <TouchableOpacity
+    const renderCategories = ({ item }) => {
+        const isSelected = transactionCategory === item.name;
+        return (
+            <TouchableOpacity
           style={[
             styles.radioButton,
-            transactionCategory === item && styles.radioSelected,
+            isSelected && styles.radioSelected,
           ]}
-          onPress={() => setTransactionCategory(item)}
+          onPress={() => handleCategorySelect(item.name)}
         >
-          <Text
-            style={
-              transactionCategory === item
-                ? styles.radioTextSelected
-                : styles.radioText
-            }
-          >
-            {item.charAt(0).toUpperCase() + item.slice(1)}
-          </Text>
+        <View style={styles.inputRow}>
+            <Image source={item.image} style={{ width: 20, height: 20 }} />
+            <Text style={ transactionCategory === item.name ? styles.radioTextSelected : styles.radioText}>{item.name}</Text>
+        </View>
         </TouchableOpacity>
-      );
+        );
+    };
 
       const renderBudgets = ({ item }) => (
                 <TouchableOpacity
@@ -304,6 +332,7 @@ export default function AddTransactionScreen({ navigation }) {
             });
             console.log(transactionDate);
             console.log(transactionTime);
+            console.log(transactionCategory);
             const data = await response.json();
 
             if (response.ok) {
@@ -322,7 +351,6 @@ export default function AddTransactionScreen({ navigation }) {
     <View style={styles.screen}>
         <InAppBackground>
         <BackButton goBack={navigation.goBack} />
-            <InAppHeader>Add Transaction</InAppHeader>
             <View style={styles.card}>
                 <View style={styles.inputRow}>
                     <TextInput
@@ -367,17 +395,22 @@ export default function AddTransactionScreen({ navigation }) {
                     />
                 </View>
                 <View style={styles.radioContainer}>
-                <FlatList
-                    data={Object.values(TransactionCategories)}
-                    renderItem={renderCategories}
-                    keyExtractor={(item) => item}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.radioContainer}
-                />
+                {categories.length > 0 ? (
+                    <FlatList
+                        data={categories}
+                        renderItem={renderCategories}
+                        keyExtractor={(item) => item.id.toString()}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={styles.scrollContainer}
+                    />
+                ) : (
+                    <Text>Loading Categories...</Text>
+                )}
                 </View>
 
                 <View>
+                <Text style={styles.sectionTitle}>Banks</Text>
                     {loading ? (
                     <ActivityIndicator size="large" color={theme.colors.primary} />
                     ) : banks.length === 0 ? (
@@ -429,13 +462,13 @@ export default function AddTransactionScreen({ navigation }) {
                         </TouchableOpacity>
                     </View>
                 )}
-            <View  style={styles.inputRow}>
+
                 {!showPicker && (
                     <Pressable
                         onPress={toggleDatepicker}
                     >
                         <TextInput
-                            placeholder="Date (YYYY-MM-DD)"
+                            placeholder="Date"
                             value={transactionDate}
                             onChangeText={onChange}
                             style={styles.input}
@@ -477,7 +510,7 @@ export default function AddTransactionScreen({ navigation }) {
                 {!showTimePicker && (
                     <Pressable onPress={toggleTimepicker}>
                         <TextInput
-                            placeholder="Time (HH:MM AM/PM)"
+                            placeholder="Time"
                             value={transactionTime}
                             onChangeText={setTransactionTime}
                             style={styles.input}
@@ -486,7 +519,6 @@ export default function AddTransactionScreen({ navigation }) {
                         />
                     </Pressable>
                 )}
-                </View>
 
                 <View style={styles.container}>
                 <FlatList
@@ -518,7 +550,7 @@ export default function AddTransactionScreen({ navigation }) {
                 </View>
 
             </View>
-            <Button mode="outlined" onPress={addTransaction}>Add</Button>
+            <Button mode="contained" onPress={addTransaction}>Add</Button>
         </InAppBackground>
     </View>
     );
@@ -549,14 +581,13 @@ export default function AddTransactionScreen({ navigation }) {
         inputRow: {
             flexDirection: "row",
             alignSelf: "center",
-            gap: 1,
+            gap: 10,
           },
 
         button: { marginBottom: 0, },
 
         radioContainer: { 
             flexDirection: "row",
-            flexWrap: "wrap",
             justifyContent: "center",
             alignItems: "center",
         },
@@ -567,13 +598,13 @@ export default function AddTransactionScreen({ navigation }) {
             marginVertical: 10,
             borderWidth: 1,
             borderColor: theme.colors.surface,
-            borderRadius: 5,
+            borderRadius: 10,
             backgroundColor: "#181818",
         },
 
         radioSelected: { backgroundColor: theme.colors.primary },
-        radioText: { color: theme.colors.surface, fontFamily: theme.fonts.medium.fontFamily, fontSize: 12 },
-        radioTextSelected: { color: "white" },
+        radioText: { color: theme.colors.surface, fontFamily: theme.fonts.medium.fontFamily},
+        radioTextSelected: { color: theme.colors.textSecondary, fontFamily: theme.fonts.bold.fontFamily },
           pickerContainer: {
             width: '100%',
           },
@@ -633,22 +664,24 @@ export default function AddTransactionScreen({ navigation }) {
           },
           
           sectionTitle: {
-            fontSize: 16,
+            fontSize: 18,
             fontFamily: theme.fonts.bold.fontFamily,
             marginBottom: 5,
             color: "#ffffff",
           },
           attachmentButton: {
-            backgroundColor: theme.colors.primary,
-            padding: 12,
+            backgroundColor: theme.colors.background,
+            padding: 10,
             borderRadius: 8,
             alignItems: "center",
             marginVertical: 10,
+            borderWidth: 2,
+            borderColor: theme.colors.secondary,
           },
           
           attachmentButtonText: {
-            color: "white",
-            fontWeight: "bold",
+            color: theme.colors.textSecondary,
+            fontFamily: theme.fonts.bold.fontFamily,
           },
           
           filePreview: {

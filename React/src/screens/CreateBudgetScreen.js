@@ -13,19 +13,6 @@ import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
 
-//Dummy data for caegories
-// const categories = [
-//     { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
-//     { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
-//     { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
-//     { id: 4, name: 'Category#4', image: require('../assets/default_img.jpg') },
-//     { id: 5, name: 'Category#5', image: require('../assets/default_img.jpg') },
-//     { id: 6, name: 'Category#6', image: require('../assets/default_img.jpg') },
-//     { id: 7, name: 'Category#7', image: require('../assets/default_img.jpg') },
-//     { id: 8, name: 'Category#8', image: require('../assets/default_img.jpg') },
-//     { id: 9, name: 'Category#9', image: require('../assets/default_img.jpg') },
-//     { id: 10, name: 'Category#10', image: require('../assets/default_img.jpg') },
-// ];
 const formatDate = (date) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -131,12 +118,10 @@ export default function CreateBudgetsScreen({ navigation }) {
 
     const displayPeriodSelected = (period) => {
         let formattedPeriod = period;
-
         if (period === 'Daily') formattedPeriod = 'Day(s)';
         if (period === 'Weekly') formattedPeriod = 'Week(s)';
         if (period === 'Monthly') formattedPeriod = 'Month(s)';
         if (period === 'Yearly') formattedPeriod = 'Year(s)';
-
         return formattedPeriod;
     };
 
@@ -424,7 +409,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                             <Text>Loading Categories...</Text>
                                         )}
                                 </View>
-                                <Button mode="outlined" onPress={createBudget}>Create</Button>
+                                <Button mode="contained" onPress={createBudget}>Create</Button>
                             </View>
                         </View>
                     </View>

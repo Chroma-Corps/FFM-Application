@@ -15,17 +15,17 @@ export default function BottomTabsNavigator() {
         tabBarIcon: ({ color, size }) => {
           let iconName
 
-          if (route.name === 'Dashboard') iconName = 'home'
-          else if (route.name === 'Budgets') iconName = 'attach-money'
-          else if (route.name === 'Transactions') iconName = 'swap-horiz'
+          if (route.name === 'Dashboard') iconName = 'dashboard'
+          else if (route.name === 'Budgets') iconName = 'account-balance-wallet'
+          else if (route.name === 'Transactions') iconName = 'credit-card'
 
           return <MaterialIcons name={iconName} size={size} color={color} />
         },
-        tabBarActiveTintColor: theme.colors.primary,
+        tabBarActiveTintColor: theme.colors.secondary,
         tabBarInactiveTintColor: theme.colors.surface,
         tabBarStyle: {
-          backgroundColor: '#181818',
-          borderTopColor: theme.colors.secondary,
+          backgroundColor: theme.colors.background,
+          borderTopColor: theme.colors.surface,
           borderTopWidth: 2,
           height: 70,
           justifyContent: 'center',
@@ -33,7 +33,7 @@ export default function BottomTabsNavigator() {
         },
         tabBarLabelStyle: {
           fontSize: 10,
-          fontFamily: theme.fonts.medium.fontFamily,
+          fontFamily: theme.fonts.bold.fontFamily,
         },
         headerShown: false,
       })}

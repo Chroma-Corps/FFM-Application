@@ -120,7 +120,7 @@ export default function TransactionsScreen({ navigation }) {
   };
 
   const renderData = ({ item }) => {
-    const isExpense = item.transactionType === "expense";
+    const isExpense = item.transactionType === "Expense";
   
     return (
     <View>
@@ -128,9 +128,9 @@ export default function TransactionsScreen({ navigation }) {
         renderRightActions={() => (
           <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => deleteTransaction(item.transactionID)}
+            // onPress={() => deleteTransaction(item.transactionID)}
           >
-            <Icon name="trash-can-outline" size={24} color="white" />
+            <Icon name="cancel" size={24} color="white" />
           </TouchableOpacity>
         )}
       >
@@ -150,6 +150,7 @@ export default function TransactionsScreen({ navigation }) {
                 </Text>
               </View>
             </View>
+            <Text style={styles.cardText}>{item.transactionCategory}</Text>
             <Text style={styles.timeText}>{item.transactionTime}</Text> 
           </Card>
         </TouchableOpacity>
@@ -234,7 +235,8 @@ const styles = StyleSheet.create({
       padding: 20,
       backgroundColor: '#181818',
       borderColor: theme.colors.secondary,
-      borderWidth: 1,
+      borderBottomWidth: 2,
+      borderLeftWidth: 2,
     },
     cardRow: {
       flexDirection: 'row',
@@ -253,7 +255,7 @@ const styles = StyleSheet.create({
     },
 
   deleteButton: {
-    backgroundColor: theme.colors.error,
+    backgroundColor: "gray",
     justifyContent: "center",
     alignItems: "center",
     width: 70,
