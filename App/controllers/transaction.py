@@ -63,6 +63,18 @@ def get_transactions_by_budget(budgetID):
     transactions = Transaction.query.filter_by(budgetID=budgetID).all()
     return [transaction.get_json() for transaction in transactions]
 
+def get_all_active_transactions():
+    return Transaction.query.filter_by(voided=False).all()
+
+def get_all_inactive_transactions():
+    return Transaction.query.filter_by(voided=True).all()
+
+def get_user_active_transactions(user_id):
+    return Transaction.query.filter_by(userID=user_id, voided=False).all()
+
+def get_user_inactive_transactions(user_id):
+    return Transaction.query.filter_by(userID=user_id, voided=True).all()
+
 # Update Existing Transaction
 def update_transaction(id, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory=None, transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None):
     transaction = get_transaction(id)
@@ -96,3 +108,9 @@ def delete_transaction(id):
         db.session.commit()
         return True
     return False
+
+def void_transaction(id):
+    transaction = get_transaction(id)
+    if transaction:
+        transaction.voided = True
+        db.session.commit()

@@ -142,8 +142,7 @@ class BudgetIntegrationTests(unittest.TestCase):
                                "startDate":"Wed, 01 Jan 2025",
                                "endDate":"Fri, 31 Jan 2025",
                                "userID": newuser.id,
-                               "bankID": newbank.bankID,
-                               "transactions":[] },
+                               "bankID": newbank.bankID},
                               ], user_budgets_json)
 
     def test_int_07_update_budget(self):
@@ -195,7 +194,8 @@ class TransactionIntegrationTests(unittest.TestCase):
             transactionAmount=30.00, 
             transactionDate="2025-02-10",
             transactionTime="17:30",
-            budgetID=newbudget.budgetID
+            budgetID=newbudget.budgetID,
+            bankID=newbank.bankID
         )
         user_transaction_json = get_user_transactions_json(newuser.id)
         self.assertListEqual([{"userID":newuser.id, 
@@ -203,7 +203,7 @@ class TransactionIntegrationTests(unittest.TestCase):
                                "transactionTitle":"Movie Night",
                                "transactionDescription":"Spontaneous Movie Night",
                                "transactionType":"Expense",
-                               "transactionCategory":"Entertainment",
+                               "transactionCategory":"ENTERTAINMENT",
                                "transactionAmount": "$30.00",
                                "transactionDate": "Mon, 10 Feb 2025",
                                "transactionTime": "17:30" },
@@ -222,11 +222,12 @@ class TransactionIntegrationTests(unittest.TestCase):
             transactionAmount=75.00, 
             transactionDate="2025-02-01",
             transactionTime="14:30",
-            budgetID=newbudget.budgetID
+            budgetID=newbudget.budgetID,
+            bankID=newbank.bankID
         )
         update_transaction(id=newtransaction.transactionID, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory="ENTERTAINMENT", transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None)
         transaction = get_transaction(newtransaction.transactionID)
-        assert transaction.transactionCategory == "Entertainment"
+        assert transaction.transactionCategory == "ENTERTAINMENT"
 
     def test_int_12_void_transaction(self):
         newuser = create_user(name="Laura Lynn", email="laura@mail.com", password="laurapass")
@@ -249,18 +250,19 @@ class TransactionIntegrationTests(unittest.TestCase):
 
 class BankIntegrationTests(unittest.TestCase):
 
-    def test_13_create_bank(self):
+    def test_int_13_create_bank(self):
         newuser = create_user(name="Curt Curtis", email="curt@mail.com", password="curtpass")
         newbank = create_bank(userID=newuser.id, bankTitle="Curt Bank", bankCurrency="TTD", bankAmount=50000.00)
         bank = get_bank(newbank.bankID)
         assert bank.bankTitle == "Curt Bank"
         assert bank.bankAmount == 50000.00
 
-    def test_14_get_user_banks(self):
+    def test_int_14_get_user_banks(self):
         newuser = create_user(name="James Klug", email="klug@mail.com", password="klugpass")
         newbank = create_bank(userID=newuser.id, bankTitle="Klug Bank", bankCurrency="USD", bankAmount=2300.00)
         user_banks_json = get_user_banks_json(newuser.id)
-        self.assertListEqual([{"userID":newuser.id, 
+        self.assertListEqual([{"bankID":newbank.bankID,
+                               "userID":newuser.id, 
                                "bankTitle":"Klug Bank",
                                "bankCurrency":"USD",
                                "bankAmount":"$2300.00",
