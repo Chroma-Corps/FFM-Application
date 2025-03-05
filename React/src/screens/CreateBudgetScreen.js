@@ -167,11 +167,12 @@ export default function CreateBudgetsScreen({ navigation }) {
             ]}
             onPress={() => {
                 setSelectedBankID(item.bankID);
-                console.log('Selected Bank ID:', item.bankID);
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
-            <Text style={styles.bankCardAmount}>{item.bankAmount}</Text>
+            <Text style={styles.bankCardAmount}>
+                 <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount} /</Text> {item.bankAmount}
+            </Text>
         </TouchableOpacity>
     );
 
@@ -203,8 +204,6 @@ export default function CreateBudgetsScreen({ navigation }) {
             Alert.alert('Error', 'Please Fill In All Fields');
             return;
         }
-
-        console.log('Creating budget with bankID:', selectedBankID); // Testing Bank selection before making the API call
 
         try {
             const response = await fetch(`https://ffm-application-midterm.onrender.com/create-budget`, {
@@ -557,12 +556,20 @@ const styles = StyleSheet.create({
     },
 
     bankCardAmount: {
-        color: '#fff',
-        fontSize: 16,
+        color: theme.colors.textSecondary,
+        fontSize: 10,
         fontFamily: theme.fonts.medium.fontFamily,
         marginBottom: 5,
         textAlign: 'center',
-    },
+      },
+
+    remainingBankCardAmount: {
+        color: theme.colors.textSecondary,
+        fontSize: 15,
+        fontFamily: theme.fonts.bold.fontFamily,
+        marginBottom: 5,
+        textAlign: 'center',
+      },
 
     bankCardRemaining: {
         color: '#fff',

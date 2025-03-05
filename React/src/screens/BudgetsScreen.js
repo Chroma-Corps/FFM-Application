@@ -47,7 +47,6 @@ export default function BudgetsScreen({ navigation }) {
 
       if (response.ok) {
         const budgets = await response.json();
-        console.log('Fetched Budgets:', budgets);
         setData(budgets);
       } else {
         console.error('Failed To Fetch Budgets:', response.statusText);
@@ -110,7 +109,7 @@ export default function BudgetsScreen({ navigation }) {
 
               <View style={styles.cardDetailsContainer}>
                 <Text style={styles.cardText}>
-                  <Text style={{ fontWeight: 'bold' }}>{item.remainingBudgetAmount} </Text>
+                  <Text style={styles.remainingBudgetAmountText}>{item.remainingBudgetAmount} </Text>
                   left of {item.budgetAmount}
                 </Text>
 
@@ -266,6 +265,11 @@ const styles = StyleSheet.create({
   cardText: {
     color: "#fff",
     fontFamily: theme.fonts.medium.fontFamily,
+  },
+
+  remainingBudgetAmountText: {
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.secondary,
   },
 
   insightsText: {

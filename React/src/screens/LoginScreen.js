@@ -40,7 +40,6 @@ export default function LoginScreen({ navigation }) {
       })
 
       const data = await response.json()
-      console.log(data)
 
       if (response.ok) {
         await AsyncStorage.setItem('access_token', data.access_token);

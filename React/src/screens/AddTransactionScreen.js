@@ -83,7 +83,6 @@ export default function AddTransactionScreen({ navigation }) {
 
     const handleCategorySelect = (category) => {
         setTransactionCategory(category);
-        console.log('Selected category:', category);
     }
 
     const onChange = ({ type }, selectedDate) => {
@@ -187,11 +186,12 @@ export default function AddTransactionScreen({ navigation }) {
             ]}
             onPress={() => {
                 setSelectedBankID(item.bankID);
-                console.log('Selected Bank ID:', item.bankID);
             }}
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
-            <Text style={styles.bankCardRemaining}> {item.remainingBankAmount}</Text>
+            <Text style={styles.bankCardAmount}>
+                <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount} /</Text> {item.bankAmount}
+            </Text>
         </TouchableOpacity>
     );
 
@@ -330,9 +330,6 @@ export default function AddTransactionScreen({ navigation }) {
                     budgetID: selectedBudget,
                 }),
             });
-            console.log(transactionDate);
-            console.log(transactionTime);
-            console.log(transactionCategory);
             const data = await response.json();
 
             if (response.ok) {
@@ -534,7 +531,8 @@ export default function AddTransactionScreen({ navigation }) {
                 <View>
                     <Text style={styles.sectionTitle}>Attach Document (Optional)</Text>
 
-                    <TouchableOpacity onPress={pickDocument} style={styles.attachmentButton}>
+                    {/* onPress={pickDocument} */}
+                    <TouchableOpacity style={styles.attachmentButton}>
                         <Text style={styles.attachmentButtonText}>Choose File</Text>
                     </TouchableOpacity>
 
@@ -745,12 +743,20 @@ export default function AddTransactionScreen({ navigation }) {
         },
     
         bankCardAmount: {
-            color: '#fff',
-            fontSize: 16,
+            color: theme.colors.textSecondary,
+            fontSize: 10,
             fontFamily: theme.fonts.medium.fontFamily,
             marginBottom: 5,
             textAlign: 'center',
-        },
+          },
+    
+        remainingBankCardAmount: {
+            color: theme.colors.textSecondary,
+            fontSize: 15,
+            fontFamily: theme.fonts.bold.fontFamily,
+            marginBottom: 5,
+            textAlign: 'center',
+          },
     
         bankCardRemaining: {
             color: '#fff',

@@ -15,7 +15,6 @@ export default function DateSelector({ showDatePicker, setStartDate, onSave, onC
         if (selectedDate) {
             onSave(selectedDate);
         }
-        console.log('Selected Date:', selectedDate);
         onCancel();
     };
 

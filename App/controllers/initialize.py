@@ -13,34 +13,37 @@ def initialize():
     bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
     alice = create_user('Alice Wonderland','alice@mail.com', 'alicepass')
 
-    bob_bank = create_bank(bob.id, "Bob's Savings", "ttd", 5000.00)
-    alice_bank = create_bank(alice.id, "Alice's Checking", "usd", 1500.00)
+    # Banks
+    bob_bank1 = create_bank(bob.id, "Bank 1", "ttd", 5000.00)
+    bob_bank2 = create_bank(bob.id, "Bank 2", "usd", 5000.00)
+    alice_bank = create_bank(alice.id, "Bank 1", "usd", 1500.00)
 
-    budget1 = create_budget (
-        budgetTitle="January Budget", 
+    # Budgets
+    expense_budet = create_budget (
+        budgetTitle="Expense Budget", 
         budgetAmount=150.25, 
         budgetType=BudgetType.EXPENSE,
-        budgetCategory="grocercies",
+        budgetCategory="groceries",
         startDate="2025-01-01",
         endDate="2025-01-31",
         userID=bob.id,
-        bankID=bob_bank.bankID
+        bankID=bob_bank1.bankID
     )
 
-    budget2 = create_budget( 
-        budgetTitle="February Budget",
-        budgetAmount=50,
+    savings_budget = create_budget( 
+        budgetTitle="Savings Budget",
+        budgetAmount=50.00,
         budgetType=BudgetType.SAVINGS,
         budgetCategory=None,
         startDate="2025-02-01",
         endDate="2025-02-28",
         userID=bob.id,
-        bankID=bob_bank.bankID
+        bankID=bob_bank2.bankID
     )
 
-    budget3 = create_budget (
-        budgetTitle="March Budget",
-        budgetAmount=1000,
+    create_budget (
+        budgetTitle="Budget `",
+        budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
         budgetCategory="shopping",
         startDate="2025-03-01",
@@ -49,15 +52,29 @@ def initialize():
         bankID=alice_bank.bankID
     )
 
-    transaction = add_transaction (
+    # Transactions
+    add_transaction (
         userID=bob.id,
-        transactionTitle="Bank Deposit",
-        transactionDesc="Deposited money into my savings account",
-        transactionType=TransactionType.INCOME,
-        transactionCategory="income",
-        transactionAmount=500.00,
+        transactionTitle="Expense Transaction",
+        transactionDesc="An Expense Transaction",
+        transactionType=TransactionType.SHOPPING,
+        transactionCategory="expense",
+        transactionAmount=50.00,
         transactionDate="2025-01-25",
         transactionTime="11:30",
-        budgetID=budget2.budgetID,
-        bankID=bob_bank.bankID
+        budgetID=expense_budet.budgetID,
+        bankID=bob_bank1.bankID
+    )
+
+    add_transaction (
+        userID=bob.id,
+        transactionTitle="Savings Transaction",
+        transactionDesc="An Savings Transaction",
+        transactionType=TransactionType.INCOME,
+        transactionCategory="income",
+        transactionAmount=50.00,
+        transactionDate="2025-02-05",
+        transactionTime="11:30",
+        budgetID=savings_budget.budgetID,
+        bankID=bob_bank2.bankID
     )

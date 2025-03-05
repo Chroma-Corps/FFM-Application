@@ -94,7 +94,9 @@ export default function Dashboard({ navigation }) {
         style={styles.bankCard}
       >
         <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
-        <Text style={styles.bankCardAmount}>{item.bankAmount}</Text>
+        <Text style={styles.bankCardAmount}>
+          <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount} /</Text> {item.bankAmount}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -166,9 +168,17 @@ const styles = StyleSheet.create({
 },
 
 bankCardAmount: {
-  color: '#fff',
-  fontSize: 16,
+  color: theme.colors.textSecondary,
+  fontSize: 10,
   fontFamily: theme.fonts.medium.fontFamily,
+  marginBottom: 5,
+  textAlign: 'center',
+},
+
+remainingBankCardAmount: {
+  color: theme.colors.textSecondary,
+  fontSize: 15,
+  fontFamily: theme.fonts.bold.fontFamily,
   marginBottom: 5,
   textAlign: 'center',
 },
