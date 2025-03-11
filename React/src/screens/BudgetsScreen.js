@@ -153,17 +153,17 @@ export default function BudgetsScreen({ navigation }) {
           ))}
         </View>
 
-          {loading ? (
+        {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          ) : filteredBudgets.length === 0 ? (
+        ) : filteredBudgets.length === 0 ? (
           <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
-          ) : (
-            <FlatList
-              data={filteredBudgets}
-              renderItem={({ item }) => renderData(item)}
-              keyExtractor={item => `${item.budgetID}`}
-            />
-          )}
+        ) : (
+          <FlatList
+            data={filteredBudgets}
+            renderItem={({ item }) => renderData(item)}
+            keyExtractor={item => `${item.budgetID}`}
+          />
+        )}
 
         <PlusFAB onPress={() => navigation.push('CreateBudget')} />
       </InAppBackground>

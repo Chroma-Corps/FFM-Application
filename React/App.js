@@ -11,7 +11,10 @@ import {
   RegisterScreen,
   ResetPasswordScreen,
   Dashboard,
+
 } from './src/screens'
+
+import BankDetailsScreen from './src/screens/BankDetailsScreen'
 import BudgetsScreen from './src/screens/BudgetsScreen'
 import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
 import AddTransactionScreen from './src/screens/AddTransactionScreen'
@@ -51,6 +54,7 @@ export default function App() {
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
             <Stack.Screen name="Dashboard" component={Dashboard} />
+            <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />
             <Stack.Screen name="Budgets" component={BudgetsScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
