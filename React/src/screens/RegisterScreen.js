@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
 import { Text } from 'react-native-paper'
 import Background from '../components/Background'
-import Logo from '../components/Logo'
 import Header from '../components/Header'
 import Button from '../components/Button'
 import TextInput from '../components/TextInput'
@@ -16,8 +15,9 @@ export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: '', error: '' })
   const [email, setEmail] = useState({ value: '', error: '' })
   const [password, setPassword] = useState({ value: '', error: '' })
+  const [loading, setLoading] = useState(false)
 
-  const onSignUpPressed = () => {
+  const onSignUpPressed = async () => {
     const nameError = nameValidator(name.value)
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
@@ -27,17 +27,46 @@ export default function RegisterScreen({ navigation }) {
       setPassword({ ...password, error: passwordError })
       return
     }
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Dashboard' }],
-    })
+
+    setLoading(true)
+
+    try {
+      const response = await fetch(`https://ffm-application-midterm.onrender.com/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.value,
+          email: email.value,
+          password: password.value,
+        }),
+      })
+
+      const data = await response.json()
+
+      if(response.ok) {
+        console.log('Registration Successful:', data)
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'LoginScreen' }],
+        })
+      } else {
+        console.error('Registration Failed:', data.message)
+        alert(data.message)
+      }
+    } catch(error) {
+      console.error('Error Registering', error)
+      alert('An Error Occurred, Please Try Again Later')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
-      <Logo />
-      <Header>Create Account</Header>
+      <Header>Happy To Have You!</Header>
       <TextInput
         label="Name"
         returnKeyType="next"
@@ -71,11 +100,14 @@ export default function RegisterScreen({ navigation }) {
         mode="contained"
         onPress={onSignUpPressed}
         style={{ marginTop: 24 }}
+        loading={loading}
       >
         Sign Up
       </Button>
-      <View style={styles.row}>
-        <Text>Already have an account? </Text>
+      <Text style={styles.orText}>- Or SignUp With -</Text>
+          <Button mode="outlined" icon="google">Google</Button>
+      <View style={[styles.row, { marginTop: 50 }]}>
+        <Text style={styles.loginLabel}>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('LoginScreen')}>
           <Text style={styles.link}>Login</Text>
         </TouchableOpacity>
@@ -89,8 +121,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 4,
   },
+
   link: {
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.primary,
+    textDecorationLine: 'underline',
+  },
+
+  orText: {
+    textAlign: 'center',
+    marginVertical: 12,
+    fontFamily: theme.fonts.light.fontFamily,
+    color: theme.colors.text
+  },
+
+  loginLabel: {
+    fontFamily: theme.fonts.regular.fontFamily,
+    fontSize: 15,
+    color: theme.colors.text,
   },
 })

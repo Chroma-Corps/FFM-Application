@@ -6,6 +6,8 @@ import Header from '../components/Header'
 import TextInput from '../components/TextInput'
 import Button from '../components/Button'
 import { emailValidator } from '../helpers/emailValidator'
+import { theme } from '../core/theme'
+import { StyleSheet, Text } from 'react-native'
 
 export default function ResetPasswordScreen({ navigation }) {
   const [email, setEmail] = useState({ value: '', error: '' })
@@ -22,8 +24,8 @@ export default function ResetPasswordScreen({ navigation }) {
   return (
     <Background>
       <BackButton goBack={navigation.goBack} />
-      <Logo />
       <Header>Restore Password</Header>
+
       <TextInput
         label="E-mail address"
         returnKeyType="done"
@@ -35,8 +37,12 @@ export default function ResetPasswordScreen({ navigation }) {
         autoCompleteType="email"
         textContentType="emailAddress"
         keyboardType="email-address"
-        description="You will receive email with password reset link."
       />
+
+      <Text style={styles.textInputDescription}>
+        You will receive email with password reset link.
+      </Text>
+
       <Button
         mode="contained"
         onPress={sendResetPasswordEmail}
@@ -47,3 +53,12 @@ export default function ResetPasswordScreen({ navigation }) {
     </Background>
   )
 }
+
+const styles = StyleSheet.create({
+  textInputDescription: {
+    marginTop: 2,
+    fontSize: 14,
+    color: theme.colors.description,
+    fontFamily: theme.fonts.regular.fontFamily,
+  },
+})

@@ -13,6 +13,12 @@ export default function Button({ mode, style, ...props }) {
       ]}
       labelStyle={styles.text}
       mode={mode}
+      theme={{
+        colors: {
+          ...theme.colors,
+          outline: theme.colors.primary,
+        },
+      }}
       {...props}
     />
   )
@@ -20,12 +26,15 @@ export default function Button({ mode, style, ...props }) {
 
 const styles = StyleSheet.create({
   button: {
-    width: '100%',
+    alignSelf: "center",
+    width: '80%',
     marginVertical: 10,
     paddingVertical: 2,
+    borderRadius: 8,
+    backgroundColor: theme.colors.primary
   },
   text: {
-    fontWeight: 'bold',
+    fontFamily: theme.fonts.bold.fontFamily,
     fontSize: 15,
     lineHeight: 26,
   },

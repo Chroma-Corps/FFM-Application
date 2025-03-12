@@ -1,32 +1,240 @@
-import React from 'react'
-import Background from '../components/Background'
-import Logo from '../components/Logo'
-import Header from '../components/Header'
-import Paragraph from '../components/Paragraph'
-import Button from '../components/Button'
-import Home from '../../components/Home'
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import Button from '../components/Button';
+import InAppHeader from '../components/InAppHeader';
+import InAppBackground from '../components/InAppBackground';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { theme } from '../core/theme';
 
 export default function Dashboard({ navigation }) {
-  return (
-    <Background>
-      <Home />
-      <Logo />
-      <Header>Let’s start</Header>
-      <Paragraph>
-        Your amazing app starts here. Open you favorite code editor and start
-        editing this project.
-      </Paragraph>
-      <Button
-        mode="outlined"
-        onPress={() =>
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'StartScreen' }],
-          })
-        }
+  const [banks, setBanks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchBanks = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("access_token");
+
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+
+      const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBanks(data);
+      } else {
+        console.error('Failed To Fetch Banks:', response.statusText);
+      }
+    } catch (error) {
+      console.error("Error Fetching Banks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchBanks();
+    }, [])
+  );
+
+  // const handleAddBank = () => {
+  //   navigation.navigate('AddBank');
+  // };
+
+  const handleLogout = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+
+      const response = await fetch('https://ffm-application-midterm.onrender.com/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'StartScreen' }],
+        });
+
+        AsyncStorage.removeItem('access_token');
+        console.log(data.message); // "Logged Out Successfully"
+      } else {
+        console.error('Logout Failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Logout Error:', error);
+    }
+  };
+  
+
+  const renderBankItem = ( {item} ) => {
+    return (
+      <TouchableOpacity
+        style={styles.bankCard}
       >
-        Logout
-      </Button>
-    </Background>
-  )
+        <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
+        <Text style={styles.bankCardAmount}>
+          <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount} /</Text> {item.bankAmount}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <InAppBackground>
+        <InAppHeader>Dashboard</InAppHeader>
+        <Text style={styles.sectionTitle}>Banks</Text>
+        {loading ? (
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        ) : banks.length === 0 ? (
+          <Text style={styles.defaultText}>You Have No Banks Added Yet!</Text>
+        ) : (
+          <View style={styles.bankItemContainer}>
+            <FlatList
+              data={banks}
+              renderItem={renderBankItem}
+              keyExtractor={(item, index) => item?.bankID?.toString() ?? index.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.flatListContainer}
+            />
+            <Button mode="contained" style={styles.addButton}>
+              <Text style={styles.buttonText}>+</Text>
+            </Button>
+          </View>
+        )}
+        <View style={styles.buttonContainer}>
+          <Button mode="contained" onPress={handleLogout}>Logout</Button>
+        </View>
+    </InAppBackground>
+  );
 }
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 15,
+    paddingBottom: 30,
+  },
+
+  defaultText: {
+    fontSize: 16,
+    fontFamily: theme.fonts.medium.fontFamily,
+    color: theme.colors.description,
+    textAlign: 'center',
+    marginTop: 10,
+  },
+
+  bankItem: {
+    backgroundColor: theme.colors.card,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 150,
+    marginRight: 10,
+    marginBottom: 10,
+    borderWidth: 2,
+    borderColor: '#ccc',
+    margin: 5,
+    padding: 15,
+    borderRadius: 5, 
+  },
+
+  bankCardTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontFamily: theme.fonts.bold.fontFamily,
+    textAlign: 'center',
+},
+
+bankCardAmount: {
+  color: theme.colors.textSecondary,
+  fontSize: 10,
+  fontFamily: theme.fonts.medium.fontFamily,
+  marginBottom: 5,
+  textAlign: 'center',
+},
+
+remainingBankCardAmount: {
+  color: theme.colors.textSecondary,
+  fontSize: 15,
+  fontFamily: theme.fonts.bold.fontFamily,
+  marginBottom: 5,
+  textAlign: 'center',
+},
+
+  bankItemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+    padding: 10,
+    borderRadius: 8,
+    gap: 10,
+  },
+
+  addButton: {
+    width: 80,
+    height: 80,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 15,
+  },
+
+  buttonText: {
+    fontSize: 20,
+    textAlign: "center",
+    alignContent: "center",
+    fontFamily: theme.fonts.bold.fontFamily,
+  },
+
+  buttonContainer: {
+    // flex: 1,
+    // justifyContent: 'flex-end',
+  },
+
+  button: {
+    width: '100%',
+    borderRadius: 8,
+  },
+
+  flatListContainer: {
+    paddingVertical: 10,
+  },
+
+  bankCard: {
+    backgroundColor: '#333',
+    padding: 15,
+    borderRadius: 8,
+    marginHorizontal: 10,
+    width: 175,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sectionTitle: {
+    fontSize: 25,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
+    marginLeft: 20,
+  },
+});
