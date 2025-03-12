@@ -23,6 +23,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e50aec13-2c93-4b32-804b-20075b0c690f"
+      }
+    },
+    "owner": "jalenea",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/e50aec13-2c93-4b32-804b-20075b0c690f"
     }
   }
 }
