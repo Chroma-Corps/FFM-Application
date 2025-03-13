@@ -93,17 +93,17 @@ export default function LoginScreen({ navigation }) {
         errorText={password.error}
         secureTextEntry
       />
-          <View style={styles.forgotPassword}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('ResetPasswordScreen')}
-            >
-              <Text style={styles.link}>Forgot Password?</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.forgotPassword}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ResetPasswordScreen')}
+        >
+          <Text style={styles.link}>Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
 
-          <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
-          <Text style={styles.orText}>- Or Login With -</Text>
-          <Button mode="outlined" icon="google">Google</Button>
+      <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
+      <Text style={styles.orText}>- Or Login With -</Text>
+      <Button mode="outlined" icon="google">Google</Button>
       <View style={[styles.row, { marginTop: 50 }]}>
         <Text style={styles.signUpLabel}>Don't Have An Account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('RegisterScreen')}>

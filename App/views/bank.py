@@ -52,7 +52,7 @@ def get_bank_details(bankID):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'error': 'Bank Not Found'}), 404 
-    
+
 @bank_views.route('/bank/<int:bankID>/transactions', methods=['GET'])
 def get_bank_transactions(bankID):
     try:

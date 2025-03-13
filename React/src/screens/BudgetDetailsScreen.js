@@ -7,7 +7,6 @@ import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
-import CircularGraph from '../components/CircularGraph';
 import BudgetsScreen from './BudgetsScreen';
 
 export default function BudgetDetailsScreen({ navigation, route }) {

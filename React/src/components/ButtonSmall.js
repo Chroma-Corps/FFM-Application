@@ -6,7 +6,7 @@ const ButtonSmall = ({ label, onPress, style }) => {
     return (
         <TouchableOpacity
             style={[styles.tag, style]}
-            onPress={onPress} // Handle onPress
+            onPress={onPress}
         >
             <Text style={styles.text}>{label}</Text>
         </TouchableOpacity>
