@@ -20,7 +20,7 @@ const getCategoryColor = (index) => {
 };
 
 
-export default function CircleGraph({ transactions }) {
+export default function CircularGraph({ transactions }) {
 
     const categories = transactions.reduce((acc, transaction) => {
         const { transactionCategory, transactionAmount } = transaction;

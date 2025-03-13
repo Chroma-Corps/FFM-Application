@@ -7,12 +7,14 @@ import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
-import CircleGraph from '../components/CircleGraph';
+import CirclularGraph from '../components/CircularGraph';
 import BudgetsScreen from './BudgetsScreen';
 
 export default function BankDetailsScreen({ navigation, route }) {
     const { bankID } = route.params;
     const [bankDetails, setBankDetails] = useState(null);
+    const [bankTransactions, setBankTransactions] = useState([]);
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -21,8 +23,8 @@ export default function BankDetailsScreen({ navigation, route }) {
             try {
                 const response = await fetch(`https://ffm-application-midterm.onrender.com/bank/${bankID}`);
                 if (response.ok) {
-                    const data = await response.json();
-                    setBankDetails(data);
+                    const bankData = await response.json();
+                    setBankDetails(bankData);
                 } else {
                     console.error('Failed to fetch bank details:', response.statusText);
                 }
@@ -33,7 +35,25 @@ export default function BankDetailsScreen({ navigation, route }) {
             }
         };
 
+        const fetchBankTransactions = async () => {
+            try {
+                const response = await fetch(`https://ffm-application-midterm.onrender.com/bank/${bankID}/transactions`);
+
+                if (response.ok) {
+                    const transactionData = await response.json();
+                    setBankTransactions(transactionData);
+                } else {
+                    console.error('Failed to Fetch Bank Transactions:', response.status,);
+                }
+            } catch (error) {
+                console.error('Error Fetching Bank Transactions:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchBankDetails();
+        fetchBankTransactions();
     }, [bankID]);
 
     if (loading) {
