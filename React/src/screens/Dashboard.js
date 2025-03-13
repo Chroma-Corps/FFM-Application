@@ -6,6 +6,7 @@ import InAppBackground from '../components/InAppBackground';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../core/theme';
+import RadialMenu from '../components/RadialMenu';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
@@ -127,6 +128,7 @@ export default function Dashboard({ navigation }) {
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={handleLogout}>Logout</Button>
         </View>
+        <RadialMenu navigation={navigation} />
     </InAppBackground>
   );
 }

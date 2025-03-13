@@ -8,10 +8,10 @@ import { Image } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import InAppHeader from '../components/InAppHeader';
 import { theme } from '../core/theme';
-import PlusFAB from '../components/PlusFAB';
 import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
 import ProgressBar from '../components/ProgressBar';
+import RadialMenu from '../components/RadialMenu';
 
 const defaultCategories = [ //To Replace With API Route Fetch - JaleneA
   { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
@@ -164,8 +164,7 @@ export default function BudgetsScreen({ navigation }) {
               keyExtractor={item => `${item.budgetID}`}
             />
           )}
-
-        <PlusFAB onPress={() => navigation.push('CreateBudget')} />
+          <RadialMenu navigation={navigation} />
       </InAppBackground>
     </View>
   );

@@ -10,7 +10,6 @@ import {View,
 import { useFocusEffect } from '@react-navigation/native';
 import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
-import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,6 +17,7 @@ import MonthFilter from '../components/MonthFilter';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import RadialMenu from '../components/RadialMenu';
 
 export default function TransactionsScreen({ navigation }) {
 
@@ -204,7 +204,7 @@ export default function TransactionsScreen({ navigation }) {
           
         <View style={{ flex: 1 }}>{renderGroupedTransactions()}</View>
 
-        <PlusFAB onPress={() => navigation.push('AddTransaction')} />
+        <RadialMenu navigation={navigation} />
       </InAppBackground>
     </View>
   );
