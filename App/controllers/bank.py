@@ -1,5 +1,6 @@
 from App.database import db
 from App.models import Bank
+from App.models.transaction import Transaction
 from App.services.currency import CurrencyService
 
 # Create A New Bank
@@ -67,6 +68,18 @@ def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None):
 
     db.session.commit()
     return bank
+
+# Get Bank Transactions
+def get_bank_transactions(bankID):
+    return Transaction.query.filter_by(bankID=bankID).all()
+
+# Get Bank Transactions (JSON)
+def get_bank_transactions_json(bankID):
+    transactions = Transaction.query.filter_by(bankID=bankID).all()
+    if not transactions:
+        return []
+    transactions = [transaction.get_json() for transaction in transactions]
+    return transactions
 
 # Delete Bank
 def delete_bank(bank_id):
