@@ -6,7 +6,7 @@ import Button from '../components/Button'
 import ButtonSmall from '../components/ButtonSmall';
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
-import { API_URL_LOCAL, API_URL_DEVICE, API_URL_RENDER } from '@env';
+import TransactionType from '../constants/TransactionTypes';
 
 
 export default function BankDetailsScreen({ navigation, route }) {
@@ -15,6 +15,11 @@ export default function BankDetailsScreen({ navigation, route }) {
     const [bankTransactions, setBankTransactions] = useState([]);
 
     const [selectedOption, setSelectedOption] = useState(null);
+    const [incomeCount, setIncomeCount] = useState(0);
+    const [expenseCount, setExpenseCount] = useState(0);
+    const [incomeAmount, setIncomeAmount] = useState(0);
+    const [expenseAmount, setExpenseAmount] = useState(0);
+    const [currencySymbol, setCurrencySymbol] = useState('');
 
     const [loading, setLoading] = useState(true);
 
@@ -57,8 +62,43 @@ export default function BankDetailsScreen({ navigation, route }) {
         fetchBankTransactions();
     }, [bankID]);
 
+    useEffect(() => {
+        if (bankTransactions.length > 0) {
+            let income = 0;
+            let expense = 0;
+            let incomeTotal = 0;
+            let expenseTotal = 0;
+            let symbol = '';
+
+            bankTransactions.forEach(transaction => {
+                const type = transaction.transactionType.toLowerCase();
+                symbol = transaction.transactionAmount.replace(/[^a-zA-Z$€£]/g, "").trim() || ''; // This will capture currency symbols like $ € £ TT$
+                let amount = parseFloat(transaction.transactionAmount.replace(/[^0-9.]/g, "")) || 0; //This Removes the Currency Symbol from the amount
+
+                if (type === TransactionType.INCOME.toLowerCase()) {
+                    income++;
+                    incomeTotal += amount;
+
+                } else if (type === TransactionType.EXPENSE.toLowerCase()) {
+                    expense++;
+                    expenseTotal += amount;
+                }
+            });
+
+            setIncomeCount(income);
+            setExpenseCount(expense);
+            setIncomeAmount(incomeTotal);
+            setExpenseAmount(expenseTotal);
+            setCurrencySymbol(symbol);
+        }
+    }, [bankTransactions]);
+
     const handleOptionPress = (option) => {
         setSelectedOption(option);
+    };
+
+    const showTransactionsPopup = () => {
+        Alert.alert("No Bank Transactions", "You have No Bank Transactions");
     };
 
     if (loading) {
@@ -81,11 +121,6 @@ export default function BankDetailsScreen({ navigation, route }) {
         );
     }
 
-    const showTransactionsPopup = () => {
-        // Show popup message when button is pressed
-        Alert.alert("No Bank Transactions", "You have No Bank Transactions");
-    };
-
     return (
 
         <View style={styles.bankDetailsScreen} >
@@ -104,15 +139,15 @@ export default function BankDetailsScreen({ navigation, route }) {
                             <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>All Time</Text>
 
                             <View style={styles.transactionRow}>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Income (x1)</Text>
+                                <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>Income (x{incomeCount})</Text>
                                 <View style={styles.line} />
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>$100</Text>
+                                <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>{currencySymbol} {incomeAmount}</Text>
                             </View>
 
                             <View style={styles.transactionRow}>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Expense (x2)</Text>
+                                <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>Expense (x{expenseCount})</Text>
                                 <View style={styles.line} />
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>$200</Text>
+                                <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>{currencySymbol} {expenseAmount}</Text>
                             </View>
                         </View>
                     </View>
