@@ -4,7 +4,8 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, current_user, uns
 from App.controllers import (
     create_bank,
     get_user_banks_json,
-    get_bank_json
+    get_bank_json,
+    get_bank_transactions_json
 )
 
 bank_views = Blueprint('bank_views', __name__)
@@ -50,3 +51,17 @@ def get_bank_details(bankID):
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'error': 'Bank Not Found'}), 404 
+    
+@bank_views.route('/bank/<int:bankID>/transactions', methods=['GET'])
+def get_bank_transactions(bankID):
+    try:
+        transactions = get_bank_transactions_json(bankID)
+
+        if not transactions:
+            return jsonify({"message": "No Transactions Found For This Bank"}), 404
+
+        return jsonify( transactions), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': 'Failed to Fetch Bank Transactions'}), 500
