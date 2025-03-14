@@ -14,10 +14,10 @@ def create_user_bank(userID, bankID):
         return None
 
 def get_user_banks_json(userID):
-    user_banks = UserBank.query.filter_by(userID=userID).all()
+    try:
+        user_banks = UserBank.query.filter_by(userID=userID).all()
+        return [user_bank.bank.get_json() for user_bank in user_banks] if user_banks else []
 
-    if not user_banks:
+    except Exception as e:
+        print(f"Error Fetching Banks For User {userID}: {e}")
         return []
-
-    user_banks_json = [user_bank.bank.get_json() for user_bank in user_banks]
-    return user_banks_json

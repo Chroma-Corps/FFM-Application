@@ -1,6 +1,7 @@
 from App.database import db
 from App.models import UserBudget
 
+# Associates A User With A Budget
 def create_user_budget(userID, budgetID):
     try:
         new_user_budget = UserBudget(userID=userID, budgetID=budgetID)
@@ -13,19 +14,19 @@ def create_user_budget(userID, budgetID):
         print(f"Failed To Create User-Budget Relationship: {e}")
         return None
 
+# Retrieves All Budgets Associated With A User
 def get_user_budgets_json(userID):
-    user_budgets = UserBudget.query.filter_by(userID=userID).all()
+    try:
+        user_budgets = UserBudget.query.filter_by(userID=userID).all()
+        return [user_budget.budget.get_json() for user_budget in user_budgets] if user_budgets else []
 
-    if not user_budgets:
+    except Exception as e:
+        print(f"Error Fetching Budgets For User {userID}: {e}")
         return []
 
-    user_budgets_json = [user_budget.budget.get_json() for user_budget in user_budgets]
-    return user_budgets_json
-
+# Verifies Whether The User Is The Creator Of The Budget
 def is_budget_owner(currentUserID, budgetID):
-    user_budget = UserBudget.query.filter_by(userID=currentUserID, budgetID=budgetID).first()
-    if user_budget:
-        budget = user_budget.budget
-        if budget.userID == currentUserID:
-            return True
+    user_budget = UserBudget.query.filter_by(budgetID=budgetID).order_by(UserBudget.userBudgetID).first()
+    if user_budget and user_budget.userID == currentUserID:
+        return True
     return False

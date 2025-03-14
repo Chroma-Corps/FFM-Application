@@ -36,8 +36,8 @@ class Budget(db.Model):
         self.bankID = bankID
 
     def get_json(self):
-        amount = CurrencyService.format_currency(self.budgetAmount, self.bank.bankCurrency)
-        remainingAmount = CurrencyService.format_currency(self.remainingBudgetAmount, self.bank.bankCurrency)
+        amount = CurrencyService.format_currency(self.budgetAmount, self.banks.bankCurrency)
+        remainingAmount = CurrencyService.format_currency(self.remainingBudgetAmount, self.banks.bankCurrency)
 
         return{
             'budgetID': self.budgetID,
@@ -52,7 +52,7 @@ class Budget(db.Model):
         }
 
     def __str__(self):
-        amount = CurrencyService.format_currency(self.budgetAmount, self.bank.bankCurrency)
+        amount = CurrencyService.format_currency(self.budgetAmount, self.banks.bankCurrency)
         return f"{self.budgetTitle} ({self.budgetType.value} | {self.budgetCategory}) {amount} (Start: {self.startDate}, End: {self.endDate})"
 
     def __repr__(self):

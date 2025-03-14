@@ -1,7 +1,8 @@
-from App.controllers.userBudget import create_user_budget
-from App.models import Budget
+from App.controllers.userBudget import create_user_budget, is_budget_owner
+from App.models import Budget, UserBudget
 from App.database import db
 from App.services.category import CategoryService
+from App.services.datetime import convert_to_date
 
 # Create A New Budget
 def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID, userIDs=None):
@@ -37,12 +38,12 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDa
         return None
 
 # Get Budget By ID
-def get_budget(id):
-    return Budget.query.get(id)
+def get_budget(budgetID):
+    return Budget.query.get(budgetID)
 
 # Get Budget By ID (JSON)
-def get_budget_json(id):
-    budget = Budget.query.get(id)
+def get_budget_json(budgetID):
+    budget = Budget.query.get(budgetID)
     if budget:
         return budget.get_json()
     return None
@@ -60,8 +61,8 @@ def get_all_budgets_json():
     return budgets
 
 # Get Budgets for Specific User (JSON)
-def get_user_budgets_json(user_id):
-    budgets = Budget.query.filter_by(userID=user_id).all()
+def get_user_budgets_json(userID):
+    budgets = Budget.query.filter_by(userID=userID).all()
     if not budgets:
         return []
     budgets = [budget.get_json() for budget in budgets]
@@ -69,33 +70,59 @@ def get_user_budgets_json(user_id):
 
 # Update Existing Budget
 def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None, budgetCategory=None, startDate=None, endDate=None, bankID=None):
-    budget = get_budget(budgetID)
-    if budget:
-        if budgetTitle:
-            budget.budgetTitle = budgetTitle
-        if budgetAmount is not None:
-            budget.budgetAmount = budgetAmount
-            budget.remainingBudgetAmount = budgetAmount
-        if budgetType:
-            budget.budgetType = budgetType
-        if budgetCategory:
-            budget.budgetCategory = CategoryService.get_category(budgetCategory)
-        if startDate:
-            budget.startDate = startDate
-        if endDate:
-            budget.endDate = endDate
-        if bankID:
-            budget.bankID = bankID
+    try:
+        budget = get_budget(budgetID)
 
-        db.session.commit()
-        return budget
-    return None
+        if not budget:
+            print(f"No Budget Found With ID {budgetID}")
+            return None
+
+        if budget:
+            if budgetTitle:
+                budget.budgetTitle = budgetTitle
+            if budgetAmount is not None:
+                budget.budgetAmount = budgetAmount
+                budget.remainingBudgetAmount = budgetAmount
+            if budgetType:
+                budget.budgetType = budgetType
+            if budgetCategory:
+                budget.budgetCategory = CategoryService.get_category(budgetCategory)
+            if startDate:
+                budget.startDate = convert_to_date(startDate)
+            if endDate:
+                budget.endDate = convert_to_date(endDate)
+            if bankID:
+                budget.bankID = bankID
+            db.session.commit()
+
+            print(f"Budget With ID {budgetID} Updated Successfully.")
+            return budget
+        return None
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Update Budget: {e}")
+        return None
 
 # Delete Budget
-def delete_budget(id):
-    budget = get_budget(id)
-    if budget:
+def delete_budget(userID, budgetID):
+    try:
+        if not is_budget_owner(userID, budgetID):
+            return "Unauthorized"
+
+        budget = get_budget(budgetID)
+        if not budget:
+            return None
+
+        user_budgets = UserBudget.query.filter_by(budgetID=budgetID).all()
+        for user_budget in user_budgets:
+            db.session.delete(user_budget)
+
         db.session.delete(budget)
         db.session.commit()
         return True
-    return False
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Delete Budget: {e}")
+        return None
