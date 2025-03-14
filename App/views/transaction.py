@@ -122,7 +122,7 @@ def get_transation_details(transactionID):
         return jsonify({"status": "error", "message": "Failed To Fetch Transaction"}), 500
 
 # 4. Void Transaction - Handles Non-Owner Users Of The Transaction (AKA Those Who Didn't Create It)
-@transaction_views.route('/transaction/<int:transactionID/void>', methods=['PUT'])
+@transaction_views.route('/transaction/<int:transactionID>/void>', methods=['PUT'])
 @jwt_required()
 def void_user_transaction(transactionID):
     try:
