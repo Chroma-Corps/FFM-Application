@@ -19,14 +19,13 @@ class Budget(db.Model):
     remainingBudgetAmount = db.Column(db.Float, nullable=False)
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
-    userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=False)
 
     # Relationships
-    transaction = db.relationship('Transaction', back_populates='budget', cascade='all, delete-orphan')
-    bank = db.relationship('Bank', backref='budgets', lazy=True)
+    user_budgets = db.relationship('UserBudget', back_populates='budget') # UserBudget
+    banks = db.relationship('Bank', back_populates='budgets')
 
-    def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID):
+    def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, startDate, endDate, bankID):
         self.budgetTitle = budgetTitle
         self.budgetAmount = budgetAmount
         self.remainingBudgetAmount = remainingBudgetAmount
@@ -34,7 +33,6 @@ class Budget(db.Model):
         self.budgetCategory = budgetCategory
         self.startDate = convert_to_date(startDate)
         self.endDate = convert_to_date(endDate)
-        self.userID = userID
         self.bankID = bankID
 
     def get_json(self):
@@ -50,7 +48,6 @@ class Budget(db.Model):
             'budgetCategory': self.budgetCategory,
             'startDate': self.startDate.strftime("%a, %d %b %Y"),
             'endDate': self.endDate.strftime("%a, %d %b %Y"),
-            'userID': self.userID,
             'bankID': self.bankID
         }
 

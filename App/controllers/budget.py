@@ -1,9 +1,10 @@
-from App.models import Budget, BudgetType
+from App.controllers.userBudget import create_user_budget
+from App.models import Budget
 from App.database import db
 from App.services.category import CategoryService
 
 # Create A New Budget
-def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID):
+def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID, userIDs=None):
     try: 
         if budgetCategory is not None:
             selectedCategory = CategoryService.get_category(budgetCategory)
@@ -18,12 +19,16 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDa
             budgetCategory=selectedCategory,
             startDate=startDate,
             endDate=endDate,
-            userID=userID,
             bankID=bankID
         )
-
         db.session.add(new_budget)
         db.session.commit()
+
+        create_user_budget(userID, new_budget.budgetID)
+
+        if userIDs:
+            for otherUserID in userIDs:
+                create_user_budget(otherUserID, new_budget.budgetID)
         return new_budget
 
     except Exception as e:

@@ -10,10 +10,12 @@ class Bank(db.Model):
     bankCurrency = db.Column(db.String(3), nullable=False)
     bankAmount = db.Column(db.Float, nullable=False)
     remainingBankAmount = db.Column(db.Float, nullable=False)
-    userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    def __init__(self, userID, bankTitle, bankCurrency, bankAmount, remainingBankAmount):
-        self.userID = userID
+    # Relationships
+    budgets = db.relationship('Budget', back_populates='banks', cascade='all, delete-orphan')
+    user_banks = db.relationship('UserBank', back_populates='bank') # UserBanks
+
+    def __init__(self, bankTitle, bankCurrency, bankAmount, remainingBankAmount):
         self.bankTitle = bankTitle
         self.bankCurrency = bankCurrency
         self.bankAmount = bankAmount
@@ -24,7 +26,6 @@ class Bank(db.Model):
         remainingBalance = CurrencyService.format_currency(self.remainingBankAmount, self.bankCurrency)
 
         return {
-            'userID': self.userID,
             'bankID': self.bankID,
             'bankTitle': self.bankTitle,
             'bankCurrency': self.bankCurrency,

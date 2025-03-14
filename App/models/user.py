@@ -3,10 +3,17 @@ from App.database import db
 from flask_login import UserMixin
 
 class User(db.Model, UserMixin):
+    __tablename__ = 'user'
+
+    # Attributes
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(225), nullable=False, unique=False)
     email =  db.Column(db.String(225), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
+
+    # Relationships
+    user_budgets = db.relationship('UserBudget', back_populates='user') # UserBudget
+    user_banks = db.relationship('UserBank', back_populates='user') # UserBank
 
     def __init__(self, name, email, password):
         self.name = name

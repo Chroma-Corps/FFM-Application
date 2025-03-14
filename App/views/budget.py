@@ -25,11 +25,21 @@ def new_budget():
         endDate = data.get('endDate')
         userID = get_jwt_identity()
         bankID = data.get('bankID')
+        userIDs = data.get('userIDs', [])
 
         if not all([budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID]):
             return jsonify({"error": "Missing Required Fields"}), 400
 
-        new_budget = create_budget(budgetTitle=budgetTitle, budgetAmount=budgetAmount, budgetType=budgetType, budgetCategory=budgetCategory, startDate=startDate, endDate=endDate, userID=userID, bankID=bankID)
+        new_budget = create_budget(
+            budgetTitle=budgetTitle,
+            budgetAmount=budgetAmount,
+            budgetType=budgetType,
+            budgetCategory=budgetCategory,
+            startDate=startDate,
+            endDate=endDate,
+            userID=userID,
+            bankID=bankID,
+            userIDs=userIDs)
 
         if new_budget is None:
             return jsonify({"error": "Failed To Create Budget"}), 500

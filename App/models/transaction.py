@@ -20,13 +20,16 @@ class Transaction(db.Model):
     transactionDate = db.Column(db.Date, nullable=False)
     transactionTime = db.Column(db.Time, nullable=False)
     voided = db.Column(db.Boolean, default=False)
+
+    # Foreign Keys
     userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
 
     # Relationships
-    budget = db.relationship('Budget', back_populates='transaction')
-    bank = db.relationship('Bank', backref='transactions', lazy=True)
+    user = db.relationship('User', backref='transactions', lazy=True) # 1 User -> Many Transactions
+    budget = db.relationship('Budget', backref='transactions', lazy=True) # 1 Budget -> Many Transactions
+    bank = db.relationship('Bank', backref='transactions', lazy=True) # 1 Bank -> Many Transactions
 
     def __init__(self, userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
         self.userID = userID
