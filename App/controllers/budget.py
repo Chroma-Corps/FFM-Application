@@ -1,8 +1,8 @@
-from App.controllers.userBudget import create_user_budget, is_budget_owner
-from App.models import Budget, UserBudget
 from App.database import db
+from App.models import Budget, UserBudget
 from App.services.category import CategoryService
 from App.services.datetime import convert_to_date
+from App.controllers.userBudget import create_user_budget, is_budget_owner
 
 # Create A New Budget
 def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID, userIDs=None):
@@ -55,14 +55,6 @@ def get_all_budgets():
 # Get All Budgets (JSON)
 def get_all_budgets_json():
     budgets = Budget.query.all()
-    if not budgets:
-        return []
-    budgets = [budget.get_json() for budget in budgets]
-    return budgets
-
-# Get Budgets for Specific User (JSON)
-def get_user_budgets_json(userID):
-    budgets = Budget.query.filter_by(userID=userID).all()
     if not budgets:
         return []
     budgets = [budget.get_json() for budget in budgets]

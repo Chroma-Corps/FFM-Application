@@ -1,13 +1,13 @@
-from App.controllers.userBank import create_user_bank
 from App.database import db
-from App.models import Bank
-from App.models.transaction import Transaction
+from App.models import Bank, UserBank
 from App.services.currency import CurrencyService
+from App.controllers.userBank import create_user_bank, is_bank_owner
 
 # Create A New Bank
-def create_bank(userID, bankTitle, bankCurrency, bankAmount):
+def create_bank(userID, bankTitle, bankCurrency, bankAmount, userIDs=None):
     try:
-        new_bank = Bank (bankTitle=bankTitle,
+        new_bank = Bank (
+            bankTitle=bankTitle,
             bankCurrency=bankCurrency,
             bankAmount=bankAmount,
             remainingBankAmount=bankAmount
@@ -16,6 +16,10 @@ def create_bank(userID, bankTitle, bankCurrency, bankAmount):
         db.session.commit()
 
         create_user_bank(userID, new_bank.bankID)
+
+        if userIDs:
+            for otherUserID in userIDs:
+                create_user_bank(otherUserID, new_bank.bankID)
         return new_bank
 
     except Exception as e:
@@ -24,12 +28,12 @@ def create_bank(userID, bankTitle, bankCurrency, bankAmount):
         return None
 
 # Get Bank By ID
-def get_bank(id):
-    return Bank.query.get(id)
+def get_bank(bankID):
+    return Bank.query.get(bankID)
 
 # Get Bank By ID (JSON)
-def get_bank_json(id):
-    bank = Bank.query.get(id)
+def get_bank_json(bankID):
+    bank = Bank.query.get(bankID)
     if bank:
         return bank.get_json()
     return None
@@ -49,44 +53,27 @@ def get_all_banks_json():
 # Update Existing Bank
 def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None):
     try:
-        bank = Bank.query.get(bankID)
+        bank = get_bank(bankID)
 
         if not bank:
+            print(f"No Bank Found With ID {bankID}")
             return None
 
-        if bankTitle:
-            bank.bankTitle = bankTitle
-        if bankCurrency:
-            bank.bankCurrency = CurrencyService.fetch_currency(bankCurrency)
-        if bankAmount is not None:
-            bank.bankAmount = bankAmount
-            bank.remainingBankAmount = bankAmount
+        if bank:
+            if bankTitle:
+                bank.bankTitle = bankTitle
+            if bankCurrency:
+                bank.bankCurrency = CurrencyService.fetch_currency(bankCurrency)
+            if bankAmount is not None:
+                bank.bankAmount = bankAmount
+                bank.remainingBankAmount = bankAmount
+            db.session.commit()
 
-        db.session.commit()
-        return bank
+            print(f"Bank With ID {bankID} Updated Successfully.")
+            return bank
+        return None
+
     except Exception as e:
         db.session.rollback()
         print(f"Failed To Update Bank: {e}")
         return None
-
-# Get Bank Transactions
-def get_bank_transactions(bankID):
-    return Transaction.query.filter_by(bankID=bankID).all()
-
-# Get Bank Transactions (JSON)
-def get_bank_transactions_json(bankID):
-    transactions = Transaction.query.filter_by(bankID=bankID).all()
-    if not transactions:
-        return []
-    transactions_json = [transaction.get_json() for transaction in transactions]
-    return transactions_json
-
-# Delete Bank
-def delete_bank(bank_id):
-    bank = Bank.query.get(bank_id)
-    if not bank:
-        return None
-
-    db.session.delete(bank)
-    db.session.commit()
-    return bank

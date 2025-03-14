@@ -1,6 +1,7 @@
 from App.database import db
 from App.models import UserBank
 
+# Associates A User With A Bank
 def create_user_bank(userID, bankID):
     try:
         new_user_bank = UserBank(userID=userID, bankID=bankID)
@@ -13,6 +14,7 @@ def create_user_bank(userID, bankID):
         print(f"Failed To Create User-Bank Relationship: {e}")
         return None
 
+# Retrieves All Banks Associated With A User
 def get_user_banks_json(userID):
     try:
         user_banks = UserBank.query.filter_by(userID=userID).all()
@@ -21,3 +23,10 @@ def get_user_banks_json(userID):
     except Exception as e:
         print(f"Error Fetching Banks For User {userID}: {e}")
         return []
+
+# Verifies Whether The User Is The Creator Of The Bank
+def is_bank_owner(currentUserID, bankID):
+    user_bank = UserBank.query.filter_by(bankID=bankID).order_by(UserBank.userBankID).first()
+    if user_bank and user_bank.userID == currentUserID:
+        return True
+    return False

@@ -22,8 +22,8 @@ class Budget(db.Model):
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=False)
 
     # Relationships
-    user_budgets = db.relationship('UserBudget', back_populates='budget') # UserBudget
     banks = db.relationship('Bank', back_populates='budgets')
+    user_budgets = db.relationship('UserBudget', back_populates='budget') # UserBudget
 
     def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, startDate, endDate, bankID):
         self.budgetTitle = budgetTitle

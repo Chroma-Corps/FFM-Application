@@ -17,7 +17,7 @@ class UserBank(db.Model):
             'userBankID': self.userBankID,
             'userID': self.userID,
             'bankID': self.bankID
-    }
+        }
 
     def __str__(self):
         return f"UserBank(userBankID={self.userBankID}, userID={self.userID}, bankID={self.bankID})"

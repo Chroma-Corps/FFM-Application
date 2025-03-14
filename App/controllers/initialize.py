@@ -14,8 +14,20 @@ def initialize():
     alice = create_user('Alice Bobberson','alice@mail.com', 'alicepass')
 
     # Banks
-    bob_bank = create_bank(bob.id, "Bob Bank", "TTD", 5000.00)
-    alice_bank = create_bank(alice.id, "Alice Bank", "USD", 1500.00)
+    bobberson_bank = create_bank (
+        userID=bob.id,
+        bankTitle="Bobberson Bank",
+        bankCurrency="TTD",
+        bankAmount=5000.00,
+        userIDs=[alice.id]
+    )
+
+    bob_bank = create_bank (
+        userID=bob.id,
+        bankTitle="Bob Personal Bank",
+        bankCurrency="USD",
+        bankAmount=500.00
+    )
 
     # Budgets
     family_budget = create_budget (
@@ -26,12 +38,12 @@ def initialize():
         startDate="2025-01-01",
         endDate="2025-01-31",
         userID=bob.id,
-        bankID=bob_bank.bankID,
+        bankID=bobberson_bank.bankID,
         userIDs=[alice.id]
     )
 
     bob_budget = create_budget (
-        budgetTitle="Just Bob Budget",
+        budgetTitle="Bob Personal Budget",
         budgetAmount=200.00,
         budgetType=BudgetType.EXPENSE,
         budgetCategory="shopping",
@@ -39,7 +51,6 @@ def initialize():
         endDate="2025-02-28",
         userID=bob.id,
         bankID=bob_bank.bankID,
-        userIDs=[]
     )
 
     # Transactions
@@ -53,5 +64,5 @@ def initialize():
         transactionDate="2025-01-25",
         transactionTime="9:30",
         budgetID=family_budget.budgetID,
-        bankID=bob_bank.bankID
+        bankID=bobberson_bank.bankID
     )

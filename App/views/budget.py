@@ -2,12 +2,12 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from App.controllers import (
-    get_user_budgets_json,
-    get_budget_json,
     create_budget,
-    get_transactions_by_budget,
     delete_budget,
-    update_budget
+    update_budget,
+    get_budget_json,
+    get_user_budgets_json,
+    get_all_budget_transactions
 )
 
 budget_views = Blueprint('budget_views', __name__)
@@ -57,9 +57,6 @@ def list_user_budgets():
     try:
         user_id = get_jwt_identity()
         budgets = get_user_budgets_json(user_id)
-
-        if not budgets:
-            return jsonify({"status": "error", "message": "No Budgets Found"}), 404
         return jsonify({"status": "success", "budgets": budgets}), 200
 
     except Exception as e:
@@ -71,27 +68,21 @@ def list_user_budgets():
 def get_budget_details(budgetID):
     try:
         budget_data = get_budget_json(budgetID)
-
-        if not budget_data:
-            return jsonify({"status": "error", "message": "Budget Not Found"}), 404
         return jsonify({"status": "success", "budget": budget_data}), 200
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"An Error Occurred: {e}")
         return jsonify({"status": "error", "message": "Failed To Fetch Budget"}), 500
 
 # 4. Retrieve Budget Transactions
 @budget_views.route('/budget/<int:budgetID>/transactions', methods=['GET'])
 def get_budget_transactions(budgetID):
     try:
-        transactions = get_transactions_by_budget(budgetID)
-        if transactions:
-            return jsonify({"status":"success", "transactions": transactions}), 200
-        else:
-            return jsonify({"status":"error", "message": "No Transactions Found For This Budget"}), 404
+        transactions = get_all_budget_transactions(budgetID)
+        return jsonify({"status":"success", "transactions": transactions}), 200
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"An Error Occurred: {e}")
         return jsonify({"status":"error", "message": f"Failed To Fetch Transactions: {str(e)}"}), 500
 
 # 5. Delete Budget - Handles Non-Owner Users Of The Budget (AKA Those Who Didn't Create It)
@@ -135,5 +126,5 @@ def update_user_budget(budgetID):
             return jsonify({"status": "error", "message": "Failed To Update Budget"}), 500
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"An Error Occurred: {e}")
         return jsonify({"status": "error", "message": "Failed To Update Budget: " + str(e)}), 500

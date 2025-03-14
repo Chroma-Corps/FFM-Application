@@ -1,15 +1,17 @@
-from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
-from flask_jwt_extended import get_jwt_identity, jwt_required, current_user, unset_jwt_cookies, set_access_cookies
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from App.controllers import (
     create_bank,
-    get_user_banks_json,
+    update_bank,
     get_bank_json,
-    get_bank_transactions_json
+    get_user_banks_json,
+    get_all_bank_transactions
 )
 
 bank_views = Blueprint('bank_views', __name__)
 
+# 1. Creates A New Bank -  Handles Multi-User Associations
 @bank_views.route('/create-bank', methods=['POST'])
 @jwt_required()
 def new_bank():
@@ -19,49 +21,79 @@ def new_bank():
         bankTitle = data.get('bankTitle')
         bankCurrency = data.get('bankCurrency')
         bankAmount = data.get('bankAmount')
+        userIDs = data.get('userIDs', [])
 
         if not all([bankTitle, bankCurrency, bankAmount]):
-            return jsonify({"error": "Missing Required Fields"}), 400
+            return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
 
-        new_bank = create_bank(userID, bankTitle, bankCurrency, bankAmount)
-        if not new_bank:
-            return jsonify({"error": "Failed To Create Bank"}), 500
-        return jsonify({"message": "Bank Created Successfully", "bankID": new_bank.bankID}), 201
+        new_bank = create_bank(
+            userID, # Creator Of Bank
+            bankTitle,
+            bankCurrency,
+            bankAmount,
+            userIDs=userIDs) # Associated Users
+
+        if new_bank is None:
+            return jsonify({"status":"error", "message":"Failed To Create Bank"}), 500
+        return jsonify({"status":"success", "message": "Bank Created Successfully", "bankID": new_bank.bankID}), 201
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({"error": str(e)}), 500
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
 
+# 2. List User Banks
 @bank_views.route('/banks', methods=['GET'])
 @jwt_required()
 def list_user_banks():
     try:
-        user_id = get_jwt_identity()
-        banks = get_user_banks_json(user_id)
-        return jsonify(banks), 200
-    except Exception as e:
-        print(f"Error: {e}")
-        return jsonify(error="Failed To Fetch Banks"), 500
+        userID = get_jwt_identity()
+        banks = get_user_banks_json(userID)
+        return jsonify({"status": "success", "banks": banks}), 200
 
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": "Failed To Fetch Banks"}), 500
+
+# 3. Retrieve A Specific Bank
 @bank_views.route('/bank/<int:bankID>', methods=['GET'])
 def get_bank_details(bankID):
     try:
         bank_data = get_bank_json(bankID)
-        return jsonify(bank_data), 200
+        return jsonify({"status": "success", "bank": bank_data}), 200
+
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({'error': 'Bank Not Found'}), 404 
-    
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": "Failed To Fetch Bank"}), 500
+
+# 4. Retrieve Bank Transactions
 @bank_views.route('/bank/<int:bankID>/transactions', methods=['GET'])
 def get_bank_transactions(bankID):
     try:
-        transactions = get_bank_transactions_json(bankID)
-
-        if not transactions:
-            return jsonify({"message": "No Transactions Found For This Bank"}), 404
-
-        return jsonify( transactions), 200
+        transactions = get_all_bank_transactions(bankID)
+        return jsonify({"status":"success", "transactions": transactions}), 200
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify({'error': 'Failed to Fetch Bank Transactions'}), 500
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status":"error", "message": f"Failed To Fetch Transactions: {str(e)}"}), 500
+
+
+# 5. Update Bank
+@bank_views.route('/bank/<int:bankID>', methods=['PUT'])
+@jwt_required()
+def update_user_bank(bankID):
+    try:
+        data = request.get_json()
+        bankTitle = data.get('bankTitle')
+        bankCurrency = data.get('bankCurrency')
+        bankAmount = data.get('bankAmount')
+
+        updated_bank = update_bank(bankID, bankTitle, bankCurrency, bankAmount)
+
+        if updated_bank:
+            return jsonify({"status": "success", "message": "Bank Updated Successfully"}), 200
+        else:
+            return jsonify({"status": "error", "message": "Failed To Update Bank"}), 500
+
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": "Failed To Update Bank: " + str(e)}), 500

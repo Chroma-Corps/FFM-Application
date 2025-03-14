@@ -13,11 +13,11 @@ class UserBudget(db.Model):
     budget = db.relationship('Budget', back_populates='user_budgets') # Relationship to Budget
 
     def get_json(self):
-            return {
-                'userBudgetID': self.userBudgetID,
-                'userID': self.userID,
-                'budgetID': self.budgetID
-            }
+        return {
+            'userBudgetID': self.userBudgetID,
+            'userID': self.userID,
+            'budgetID': self.budgetID
+        }
 
     def __str__(self):
         return f"UserBudget(userBudgetID={self.userBudgetID}, userID={self.userID}, budgetID={self.budgetID})"
