@@ -7,6 +7,7 @@ import ButtonSmall from '../components/ButtonSmall';
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import TransactionType from '../constants/TransactionTypes';
+import BankTransactionsPopup from '../components/BankTransactionsPopup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 {/* <Icon
@@ -28,6 +29,8 @@ export default function BankDetailsScreen({ navigation, route }) {
     const [expenseAmount, setExpenseAmount] = useState(0);
     const [currencySymbol, setCurrencySymbol] = useState('');
     const [topCategories, setTopCategories] = useState([]);
+
+    const [showBankTransactionsPopup, setShowBankTransactionsPopup] = useState(false);
 
 
     const [loading, setLoading] = useState(true);
@@ -157,8 +160,8 @@ export default function BankDetailsScreen({ navigation, route }) {
         setTopCategories(getTopCategories());
     };
 
-    const showTransactionsPopup = () => {
-        Alert.alert("No Bank Transactions", "You have No Bank Transactions");
+    const handleViewAllTransactions = () => {
+        setShowBankTransactionsPopup(true);
     };
 
     const renderTopTransactions = (transactions) => {
@@ -167,6 +170,7 @@ export default function BankDetailsScreen({ navigation, route }) {
         }
 
         return transactions.map((transaction, index) => {
+
             return (
                 <View key={index} style={styles.transactionRow}>
                     <View style={styles.transactionCategoryTitleContainer}>
@@ -181,9 +185,13 @@ export default function BankDetailsScreen({ navigation, route }) {
                     </View>
 
                     <View style={styles.transactionAmountContainer}>
-                        <Text style={[styles.defaultText, { fontSize: 15, fontWeight: 'bold' }]}>
-                            {transaction.totalAmount > 0 ? '↑' : '↓'}
-                        </Text>
+
+                        {/* This logic is inverted untill the problem is fixed */}
+                        <Icon
+                            name={transaction.type === 'expense' ? "arrow-up" : "arrow-down"}
+                            size={18}
+                            color={transaction.type === 'expense' ? '#80c582' : '#e57373'}
+                        />
                         <Text style={[styles.defaultText, { fontSize: 15 }]}>
                             {transaction.totalAmount ? `$${transaction.totalAmount.toFixed(2)}` : 'N/A'}
                         </Text>
@@ -221,6 +229,13 @@ export default function BankDetailsScreen({ navigation, route }) {
 
                 <BackButton goBack={navigation.goBack} />
                 <EditButton />
+
+                {showBankTransactionsPopup && (
+                    <BankTransactionsPopup
+                        bankTransactions={bankTransactions}
+                        setShowBankTransactionsPopup={setShowBankTransactionsPopup}
+                    />
+                )}
 
                 <View style={styles.bankDetailsContainer}>
                     <View style={styles.headerContainer}>
@@ -287,31 +302,13 @@ export default function BankDetailsScreen({ navigation, route }) {
                     <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>Transaction Overview</Text>
 
                     <View style={styles.transactionsListingContainer}>
-
                         {renderTopTransactions(topCategories)}
-
-                        {/* <View style={styles.transactionRow}>
-                            <View style={styles.transactionCategoryTitleContainer}>
-
-                                <View style={styles.transactionCountCircle}>
-                                    <Text style={[styles.defaultText, { fontSize: 15 }]}>10</Text>
-                                </View>
-
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Groceries</Text>
-                            </View>
-
-                            <View style={styles.transactionAmountContainer}>
-                                <Text style={[styles.defaultText, { fontSize: 15, fontWeight: 'bold' }]}>↑</Text>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>$250</Text>
-                            </View>
-                        </View> */}
-
                     </View>
 
                     <View>
                         <ButtonSmall
                             label="View All Transactions"
-                            onPress={showTransactionsPopup}
+                            onPress={handleViewAllTransactions}
                         />
                     </View>
                 </View>
