@@ -1,40 +1,50 @@
-from App.models import Transaction
 from App.database import db
-from App.models.budget import Budget
+from App.models import Transaction
+from App.services.category import CategoryService
+from App.services.datetime import convert_to_date, convert_to_time
+from App.controllers.userTransaction import create_user_transaction,is_transaction_owner
 
-# Add Transaction
-def add_transaction(userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
-    new_transaction = Transaction(
-        userID=userID,
-        transactionTitle=transactionTitle,
-        transactionDesc=transactionDesc,
-        transactionType=transactionType,
-        transactionCategory=transactionCategory,
-        transactionAmount=transactionAmount,
-        transactionDate=transactionDate,
-        transactionTime=transactionTime,
-        budgetID=budgetID,
-        bankID=bankID
-    )
-    db.session.add(new_transaction)
+# Add A New Transaction
+def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
+    try:
+        if transactionCategory is not None:
+            selectedCategory = CategoryService.get_category(transactionCategory)
+        else:
+            selectedCategory = None
 
-    # Update budget's remaining amount if tied to a budget
-    if budgetID:
-        budget = Budget.query.get(budgetID)
-        if budget:
-            budget.remainingBudgetAmount -= transactionAmount
+        new_transaction = Transaction(
+            transactionTitle=transactionTitle,
+            transactionDesc=transactionDesc,
+            transactionType=transactionType,
+            transactionCategory=selectedCategory,
+            transactionAmount=transactionAmount,
+            transactionDate=transactionDate,
+            transactionTime=transactionTime,
+            budgetID=budgetID,
+            bankID=bankID
+        )
+        db.session.add(new_transaction)
+        db.session.commit()
 
+        create_user_transaction(userID, new_transaction.transactionID)
 
-    db.session.commit()
-    return new_transaction
+        if userIDs:
+            for otherUserID in userIDs:
+                create_user_transaction(otherUserID, new_transaction.transactionID)
+        return new_transaction
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Create Transaction: {e}")
+        return None
 
 # Get Transaction By ID
-def get_transaction(id):
-    return Transaction.query.get(id)
+def get_transaction(transactionID):
+    return Transaction.query.get(transactionID)
 
 # Get Transaction By ID (JSON)
-def get_transaction_json(id):
-    transaction = Transaction.query.get(id)
+def get_transaction_json(transactionID):
+    transaction = Transaction.query.get(transactionID)
     if transaction:
         return transaction.get_json()
     return None
@@ -52,69 +62,70 @@ def get_all_transactions_json():
     return transactions
 
 # Get Transactions for Specific User (JSON)
-def get_user_transactions_json(user_id):
-    transactions = Transaction.query.filter_by(userID=user_id).all()
+def get_user_transactions_json(userID):
+    transactions = Transaction.query.filter_by(userID=userID).all()
     if not transactions:
         return []
     transactions = [transactions.get_json() for transactions in transactions]
     return transactions
 
+# Get Transaction Associated With A Budget
 def get_all_budget_transactions(budgetID):
     transactions = Transaction.query.filter_by(budgetID=budgetID).all()
     return [transaction.get_json() for transaction in transactions]
 
+# Get Transaction Associated With A Bank
 def get_all_bank_transactions(bankID):
     transactions = Transaction.query.filter_by(bankID=bankID).all()
     return [transaction.get_json() for transaction in transactions]
 
-def get_all_active_transactions():
-    return Transaction.query.filter_by(voided=False).all()
-
-def get_all_inactive_transactions():
-    return Transaction.query.filter_by(voided=True).all()
-
-def get_user_active_transactions(user_id):
-    return Transaction.query.filter_by(userID=user_id, voided=False).all()
-
-def get_user_inactive_transactions(user_id):
-    return Transaction.query.filter_by(userID=user_id, voided=True).all()
-
 # Update Existing Transaction
-def update_transaction(id, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory=None, transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None):
-    transaction = get_transaction(id)
-    if transaction:
-        if transactionTitle:
-            transaction.transactionTitle = transactionTitle
-        if transactionDesc:
-            transaction.transactionDesc = transactionDesc
-        if transactionType:
-            transaction.transactionType = transactionType
-        if transactionCategory:
-            transaction.transactionCategory = transactionCategory
-        if transactionAmount:
-            transaction.transactionAmount = transactionAmount
-        if transactionDate:
-            transaction.transactionDate = transactionDate
-        if transactionTime:
-            transaction.transactionTime = transactionTime
-        if budgetID is not None:
-            transaction.budgetID = budgetID
-        db.session.add(transaction)
-        db.session.commit()
-        return transaction
-    return None
+def update_transaction(transactionID, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory=None, transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None):
+    try:
+        transaction = get_transaction(transactionID)
 
-# Delete A Transaction
-def delete_transaction(id):
-    transaction = get_transaction(id)
-    if transaction:
-        db.session.delete(transaction)
-        db.session.commit()
-        return True
-    return False
+        if transaction:
+            if transactionTitle:
+                transaction.transactionTitle = transactionTitle
+            if transactionDesc:
+                transaction.transactionDesc = transactionDesc
+            if transactionType:
+                transaction.transactionType = transactionType
+            if transactionCategory:
+                transaction.transactionCategory = CategoryService.get_category(transactionCategory)
+            if transactionAmount is not None:
+                transaction.transactionAmount = transactionAmount
+            if transactionDate:
+                transaction.transactionDate = convert_to_date(transactionDate)
+            if transactionTime:
+                transaction.transactionTime = convert_to_time(transactionTime)
+            if budgetID:
+                transaction.budgetID = budgetID
+            db.session.commit()
 
-def void_transaction(id):
-    transaction = get_transaction(id)
-    if transaction:
+            print(f"Transaction With ID {transactionID} Updated Successfully.")
+            return transaction
+        return None
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Update Transaction: {e}")
+        return None
+
+# Void Transaction
+def void_transaction(userID, transactionID):
+    try:
+        if not is_transaction_owner(userID, transactionID):
+            return "Unauthorized"
+
+        transaction = get_transaction(transactionID)
+        if not transaction:
+            return None
+
         transaction.voided = True
         db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Void Transaction: {e}")
+        return None

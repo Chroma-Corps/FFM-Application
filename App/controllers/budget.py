@@ -65,10 +65,6 @@ def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None
     try:
         budget = get_budget(budgetID)
 
-        if not budget:
-            print(f"No Budget Found With ID {budgetID}")
-            return None
-
         if budget:
             if budgetTitle:
                 budget.budgetTitle = budgetTitle

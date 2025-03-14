@@ -1,7 +1,7 @@
 from App.database import db
-from App.models import Bank, UserBank
+from App.models import Bank
 from App.services.currency import CurrencyService
-from App.controllers.userBank import create_user_bank, is_bank_owner
+from App.controllers.userBank import create_user_bank
 
 # Create A New Bank
 def create_bank(userID, bankTitle, bankCurrency, bankAmount, userIDs=None):

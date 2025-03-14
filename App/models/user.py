@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     # Relationships
     user_budgets = db.relationship('UserBudget', back_populates='user') # UserBudget
     user_banks = db.relationship('UserBank', back_populates='user') # UserBank
+    user_transactions = db.relationship('UserTransaction', back_populates='user') # UserTransaction
 
     def __init__(self, name, email, password):
         self.name = name

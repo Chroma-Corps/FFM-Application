@@ -21,7 +21,7 @@ def new_bank():
         bankTitle = data.get('bankTitle')
         bankCurrency = data.get('bankCurrency')
         bankAmount = data.get('bankAmount')
-        userIDs = data.get('userIDs', [])
+        userIDs = data.get('userIDs') or []
 
         if not all([bankTitle, bankCurrency, bankAmount]):
             return jsonify({"status": "error", "message": "Missing Required Fields"}), 400

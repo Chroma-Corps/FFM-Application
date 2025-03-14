@@ -22,17 +22,15 @@ class Transaction(db.Model):
     voided = db.Column(db.Boolean, default=False)
 
     # Foreign Keys
-    userID = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
 
     # Relationships
-    user = db.relationship('User', backref='transactions', lazy=True) # 1 User -> Many Transactions
     budget = db.relationship('Budget', backref='transactions', lazy=True) # 1 Budget -> Many Transactions
     bank = db.relationship('Bank', backref='transactions', lazy=True) # 1 Bank -> Many Transactions
+    user_transactions = db.relationship('UserTransaction', back_populates='transaction') # UserTransaction
 
-    def __init__(self, userID, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
-        self.userID = userID
+    def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
         self.transactionTitle = transactionTitle
         self.transactionDesc = transactionDesc
         self.transactionType = transactionType
@@ -47,7 +45,6 @@ class Transaction(db.Model):
         amount = CurrencyService.format_currency(self.transactionAmount, self.bank.bankCurrency)
 
         return {
-            'userID': self.userID,
             'transactionID': self.transactionID,
             'transactionTitle': self.transactionTitle,
             'transactionDescription': self.transactionDesc,

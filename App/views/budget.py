@@ -26,7 +26,7 @@ def new_budget():
         endDate = data.get('endDate')
         userID = get_jwt_identity()
         bankID = data.get('bankID')
-        userIDs = data.get('userIDs', [])
+        userIDs = data.get('userIDs') or []
 
         if not all([budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID]):
            return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
@@ -55,8 +55,8 @@ def new_budget():
 @jwt_required()
 def list_user_budgets():
     try:
-        user_id = get_jwt_identity()
-        budgets = get_user_budgets_json(user_id)
+        userID = get_jwt_identity()
+        budgets = get_user_budgets_json(userID)
         return jsonify({"status": "success", "budgets": budgets}), 200
 
     except Exception as e:
@@ -101,7 +101,7 @@ def delete_user_budget(budgetID):
             return jsonify({"status": "error", "message": "Failed To Delete Budget"}), 500
 
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"An Error Occurred: {e}")
         return jsonify({"status": "error", "message": f"Failed To Delete Budget: {str(e)}"}), 500
 
 # 6. Update Budget
