@@ -51,8 +51,11 @@ def create_app(overrides={}):
     app.app_context().push()
 
     # Used to Check all available routes
-    print("Available Routes:")
+    
+    numRoutes = 0;
     for rule in app.url_map.iter_rules():
-        print(rule)
+        numRoutes += 1
+
+    print('Available routes: ', numRoutes)
 
     return app

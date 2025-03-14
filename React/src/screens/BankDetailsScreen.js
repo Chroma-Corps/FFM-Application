@@ -7,6 +7,13 @@ import ButtonSmall from '../components/ButtonSmall';
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import TransactionType from '../constants/TransactionTypes';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+{/* <Icon
+                  name={isExpense ? "arrow-down" : "arrow-up"}
+                  size={18}
+                  color={isExpense ? theme.colors.expense : theme.colors.income}
+                /> */}
 
 
 export default function BankDetailsScreen({ navigation, route }) {
@@ -14,14 +21,17 @@ export default function BankDetailsScreen({ navigation, route }) {
     const [bankDetails, setBankDetails] = useState(null);
     const [bankTransactions, setBankTransactions] = useState([]);
 
-    const [selectedOption, setSelectedOption] = useState(null);
+    const [selectedOption, setSelectedOption] = useState('Expense');
     const [incomeCount, setIncomeCount] = useState(0);
     const [expenseCount, setExpenseCount] = useState(0);
     const [incomeAmount, setIncomeAmount] = useState(0);
     const [expenseAmount, setExpenseAmount] = useState(0);
     const [currencySymbol, setCurrencySymbol] = useState('');
+    const [topCategories, setTopCategories] = useState([]);
+
 
     const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchBankDetails = async () => {
@@ -72,6 +82,7 @@ export default function BankDetailsScreen({ navigation, route }) {
 
             bankTransactions.forEach(transaction => {
                 const type = transaction.transactionType.toLowerCase();
+
                 symbol = transaction.transactionAmount.replace(/[^a-zA-Z$€£]/g, "").trim() || ''; // This will capture currency symbols like $ € £ TT$
                 let amount = parseFloat(transaction.transactionAmount.replace(/[^0-9.]/g, "")) || 0; //This Removes the Currency Symbol from the amount
 
@@ -93,13 +104,95 @@ export default function BankDetailsScreen({ navigation, route }) {
         }
     }, [bankTransactions]);
 
+    const getTopCategories = (filteredTransactions) => {
+        if (!Array.isArray(filteredTransactions)) {
+            console.error("filteredTransactions is not an array:", filteredTransactions);
+            return [];
+        }
+
+        const topCategoriesMap = {};
+
+        filteredTransactions.forEach(transaction => {
+            const category = transaction.transactionCategory;
+            const amount = parseFloat(transaction.transactionAmount.replace(/[^0-9.]/g, "")) || 0;
+
+            if (!topCategoriesMap[category]) {
+                topCategoriesMap[category] = { count: 0, totalAmount: 0, transactions: [] };
+            }
+
+            topCategoriesMap[category].count += 1;
+            topCategoriesMap[category].totalAmount += amount;
+            topCategoriesMap[category].transactions.push(transaction);
+        });
+        // Return the top 3 categories (descending), Includes: (1)Category (2)Count (3)Associated Transactions in a Nested List
+        return Object.keys(topCategoriesMap)
+            .sort((a, b) => topCategoriesMap[b].count - topCategoriesMap[a].count)
+            .map(category => ({
+                category,
+                count: topCategoriesMap[category].count,
+                totalAmount: topCategoriesMap[category].totalAmount,
+                transactions: topCategoriesMap[category].transactions
+            }))
+            .slice(0, 3);
+    };
+
+    useEffect(() => {
+        if (bankTransactions.length > 0) {
+            const filteredTransactions = bankTransactions.filter(transaction =>
+                selectedOption === 'Income'
+                    ? transaction.transactionType.toLowerCase() === 'income'
+                    : transaction.transactionType.toLowerCase() === 'expense'
+            );
+
+            setTopCategories(getTopCategories(filteredTransactions));  // Use filteredTransactions here
+        }
+    }, [selectedOption, bankTransactions]);  // Trigger when `selectedOption` or `bankTransactions` changes
+
+
     const handleOptionPress = (option) => {
+
+        console.log('Button pressed:', option);
+
         setSelectedOption(option);
+        setTopCategories(getTopCategories());
     };
 
     const showTransactionsPopup = () => {
         Alert.alert("No Bank Transactions", "You have No Bank Transactions");
     };
+
+    const renderTopTransactions = (transactions) => {
+        if (!transactions || !Array.isArray(transactions)) {
+            return <Text style={[styles.defaultText, { fontSize: 15 }]}>No transactions available</Text>;
+        }
+
+        return transactions.map((transaction, index) => {
+            return (
+                <View key={index} style={styles.transactionRow}>
+                    <View style={styles.transactionCategoryTitleContainer}>
+                        <View style={styles.transactionCountCircle}>
+                            <Text style={[styles.defaultText, { fontSize: 15 }]}>
+                                {transaction.count || 0}
+                            </Text>
+                        </View>
+                        <Text style={[styles.defaultText, { fontSize: 15 }]}>
+                            {transaction.category}
+                        </Text>
+                    </View>
+
+                    <View style={styles.transactionAmountContainer}>
+                        <Text style={[styles.defaultText, { fontSize: 15, fontWeight: 'bold' }]}>
+                            {transaction.totalAmount > 0 ? '↑' : '↓'}
+                        </Text>
+                        <Text style={[styles.defaultText, { fontSize: 15 }]}>
+                            {transaction.totalAmount ? `$${transaction.totalAmount.toFixed(2)}` : 'N/A'}
+                        </Text>
+                    </View>
+                </View>
+            );
+        });
+    };
+
 
     if (loading) {
         return (
@@ -132,7 +225,7 @@ export default function BankDetailsScreen({ navigation, route }) {
                 <View style={styles.bankDetailsContainer}>
                     <View style={styles.headerContainer}>
                         <Text style={[styles.defaultText, { fontSize: 40 }]}>{bankDetails.bankTitle}</Text>
-                        <Text style={[styles.defaultText, { fontSize: 30 }]}>{bankDetails.bankAmount}</Text>
+                        <Text style={[styles.defaultText, { fontSize: 30 }]}>{bankDetails.remainingBankAmount}</Text>
 
                         <View style={styles.transactionsListingContainer}>
 
@@ -191,10 +284,13 @@ export default function BankDetailsScreen({ navigation, route }) {
                         </View>
                     </View>
 
-                    <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>Transactions Oveview</Text>
+                    <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>Transaction Overview</Text>
 
                     <View style={styles.transactionsListingContainer}>
-                        <View style={styles.transactionRow}>
+
+                        {renderTopTransactions(topCategories)}
+
+                        {/* <View style={styles.transactionRow}>
                             <View style={styles.transactionCategoryTitleContainer}>
 
                                 <View style={styles.transactionCountCircle}>
@@ -208,28 +304,13 @@ export default function BankDetailsScreen({ navigation, route }) {
                                 <Text style={[styles.defaultText, { fontSize: 15, fontWeight: 'bold' }]}>↑</Text>
                                 <Text style={[styles.defaultText, { fontSize: 15 }]}>$250</Text>
                             </View>
-                        </View>
+                        </View> */}
 
-                        <View style={styles.transactionRow}>
-                            <View style={styles.transactionCategoryTitleContainer}>
-
-                                <View style={styles.transactionCountCircle}>
-                                    <Text style={[styles.defaultText, { fontSize: 15 }]}>10</Text>
-                                </View>
-
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Groceries</Text>
-                            </View>
-
-                            <View style={styles.transactionAmountContainer}>
-                                <Text style={[styles.defaultText, { fontSize: 15, fontWeight: 'bold' }]}>↑</Text>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>$250</Text>
-                            </View>
-                        </View>
                     </View>
 
                     <View>
                         <ButtonSmall
-                            label="All Transactions"
+                            label="View All Transactions"
                             onPress={showTransactionsPopup}
                         />
                     </View>
