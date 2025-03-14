@@ -25,13 +25,13 @@ def initialize():
         userID=bob.id,
         bankTitle="Bob Personal Bank",
         bankCurrency="USD",
-        bankAmount=500.00
+        bankAmount=5000.00
     )
 
     # Budgets
     family_budget = create_budget (
         budgetTitle="Alice & Bob Budget",
-        budgetAmount=150.00,
+        budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
         budgetCategory="groceries",
         startDate="2025-01-01",
@@ -43,7 +43,7 @@ def initialize():
 
     bob_budget = create_budget (
         budgetTitle="Bob Personal Budget",
-        budgetAmount=200.00,
+        budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
         budgetCategory="shopping",
         startDate="2025-02-01",

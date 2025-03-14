@@ -4,8 +4,11 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from App.controllers import (
     create_bank,
     update_bank,
+    delete_bank,
     get_bank_json,
     get_user_banks_json,
+    get_all_bank_budgets,
+    get_bank_users_json,
     get_all_bank_transactions
 )
 
@@ -76,8 +79,29 @@ def get_bank_transactions(bankID):
         print(f"An Error Occurred: {e}")
         return jsonify({"status":"error", "message": f"Failed To Fetch Transactions: {str(e)}"}), 500
 
+# 5. Retrieve Bank Budgets
+@bank_views.route('/bank/<int:bankID>/budgets', methods=['GET'])
+def get_bank_budgets(bankID):
+    try:
+        budgets = get_all_bank_budgets(bankID)
+        return jsonify({"status":"success", "budgets": budgets}), 200
 
-# 5. Update Bank
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status":"error", "message": f"Failed To Fetch Budgets: {str(e)}"}), 500
+
+# 6. Retrieve Bank Users
+@bank_views.route('/bank/<int:bankID>/users', methods=['GET'])
+def get_bank_users(bankID):
+    try:
+        users = get_bank_users_json(bankID)
+        return jsonify({"status":"success", "users": users}), 200
+
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status":"error", "message": f"Failed To Fetch Users: {str(e)}"}), 500
+
+# 7. Update Bank
 @bank_views.route('/bank/<int:bankID>', methods=['PUT'])
 @jwt_required()
 def update_user_bank(bankID):
@@ -96,4 +120,23 @@ def update_user_bank(bankID):
 
     except Exception as e:
         print(f"An Error Occurred: {e}")
-        return jsonify({"status": "error", "message": "Failed To Update Bank: " + str(e)}), 500
+        return jsonify({"status": "error", "message": f"Failed To Update Bank: {str(e)}"}), 500
+
+# 8. Delete Bank
+@bank_views.route('/bank/<int:bankID>', methods=['DELETE'])
+@jwt_required()
+def delete_user_bank(bankID):
+    try:
+        userID = get_jwt_identity()
+        result = delete_bank(userID, bankID)
+
+        if result == True:
+            return jsonify({"status": "success", "message": "Bank Deleted Successfully"}), 200
+        elif result == "Unauthorized":
+            return jsonify({"status": "error", "message": "Unauthorized To Delete This Bank"}), 403
+        else:
+            return jsonify({"status": "error", "message": "Failed To Delete Bank"}), 500
+
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": f"Failed To Delete Bank: {str(e)}"}), 500

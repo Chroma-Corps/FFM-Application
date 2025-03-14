@@ -30,3 +30,13 @@ def is_budget_owner(currentUserID, budgetID):
     if user_budget and user_budget.userID == currentUserID:
         return True
     return False
+
+# Retrieves All Users Associated With A Budget
+def get_budget_users_json(budgetID):
+    try:
+        budget_users = UserBudget.query.filter_by(budgetID=budgetID).all()
+        return [budget_user.user.get_json() for budget_user in budget_users] if budget_users else []
+
+    except Exception as e:
+        print(f"Error Fetching Users For Budget {budgetID}: {e}")
+        return []

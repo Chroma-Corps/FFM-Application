@@ -24,6 +24,16 @@ def get_user_banks_json(userID):
         print(f"Error Fetching Banks For User {userID}: {e}")
         return []
 
+# Retrieves All Users Associated With A Bank
+def get_bank_users_json(bankID):
+    try:
+        bank_users = UserBank.query.filter_by(bankID=bankID).all()
+        return [bank_user.user.get_json() for bank_user in bank_users] if bank_users else []
+
+    except Exception as e:
+        print(f"Error Fetching Users For Bank {bankID}: {e}")
+        return []
+
 # Verifies Whether The User Is The Creator Of The Bank
 def is_bank_owner(currentUserID, bankID):
     user_bank = UserBank.query.filter_by(bankID=bankID).order_by(UserBank.userBankID).first()

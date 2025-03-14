@@ -24,11 +24,13 @@ def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, tran
         if not bank:
             return None, "Bank Not Found"
 
+        print(f"DEBUG: transactionType = {transactionType}")
+        print(f"DEBUG: Expected INCOME Value = {TransactionType.INCOME.value}")
+
         # Adjust Balance Within Associated Bank and Budget
-        factor = 1 if transactionType == TransactionType.INCOME else -1
+        factor = 1 if transactionType.lower() == TransactionType.INCOME.value.lower() else -1
         budget.remainingBudgetAmount += factor * transactionAmount
         bank.remainingBankAmount += factor * transactionAmount
-
 
         if budget.remainingBudgetAmount < 0:
             return None, "Insufficient Budget Balance"

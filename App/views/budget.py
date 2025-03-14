@@ -6,6 +6,7 @@ from App.controllers import (
     delete_budget,
     update_budget,
     get_budget_json,
+    get_budget_users_json,
     get_user_budgets_json,
     get_all_budget_transactions
 )
@@ -85,7 +86,18 @@ def get_budget_transactions(budgetID):
         print(f"An Error Occurred: {e}")
         return jsonify({"status":"error", "message": f"Failed To Fetch Transactions: {str(e)}"}), 500
 
-# 5. Delete Budget - Handles Non-Owner Users Of The Budget (AKA Those Who Didn't Create It)
+# 5. Retrieve Budget Users
+@budget_views.route('/budget/<int:budgetID>/users', methods=['GET'])
+def get_budget_users(budgetID):
+    try:
+        users = get_budget_users_json(budgetID)
+        return jsonify({"status":"success", "users": users}), 200
+
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status":"error", "message": f"Failed To Fetch Users: {str(e)}"}), 500
+
+# 6. Delete Budget - Handles Non-Owner Users Of The Budget (AKA Those Who Didn't Create It)
 @budget_views.route('/budget/<int:budgetID>', methods=['DELETE'])
 @jwt_required()
 def delete_user_budget(budgetID):
@@ -104,7 +116,7 @@ def delete_user_budget(budgetID):
         print(f"An Error Occurred: {e}")
         return jsonify({"status": "error", "message": f"Failed To Delete Budget: {str(e)}"}), 500
 
-# 6. Update Budget
+# 7. Update Budget
 @budget_views.route('/budget/<int:budgetID>', methods=['PUT'])
 @jwt_required()
 def update_user_budget(budgetID):
@@ -127,4 +139,4 @@ def update_user_budget(budgetID):
 
     except Exception as e:
         print(f"An Error Occurred: {e}")
-        return jsonify({"status": "error", "message": "Failed To Update Budget: " + str(e)}), 500
+        return jsonify({"status": "error", "message": f"Failed To Update Budget: {str(e)}"}), 500

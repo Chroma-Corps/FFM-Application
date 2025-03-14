@@ -1,7 +1,7 @@
 from App.database import db
-from App.models import Bank
+from App.models import Bank, Budget, UserBank
 from App.services.currency import CurrencyService
-from App.controllers.userBank import create_user_bank
+from App.controllers.userBank import create_user_bank, is_bank_owner
 
 # Create A New Bank
 def create_bank(userID, bankTitle, bankCurrency, bankAmount, userIDs=None):
@@ -76,4 +76,32 @@ def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None):
     except Exception as e:
         db.session.rollback()
         print(f"Failed To Update Bank: {e}")
+        return None
+
+# Get Budgets Associated With A Bank
+def get_all_bank_budgets(bankID):
+    budgets = Budget.query.filter_by(bankID=bankID).all()
+    return [budget.get_json() for budget in budgets]
+
+# Delete Bank
+def delete_bank(userID, bankID):
+    try:
+        if not is_bank_owner(userID, bankID):
+            return "Unauthorized"
+
+        bank = get_bank(bankID)
+        if not bank:
+            return None
+
+        user_banks = UserBank.query.filter_by(bankID=bankID).all()
+        for user_bank in user_banks:
+            db.session.delete(user_bank)
+
+        db.session.delete(bank)
+        db.session.commit()
+        return True
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Delete Bank: {e}")
         return None
