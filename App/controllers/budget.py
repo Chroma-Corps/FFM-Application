@@ -5,7 +5,7 @@ from App.services.datetime import convert_to_date
 from App.controllers.userBudget import create_user_budget, is_budget_owner
 
 # Create A New Budget
-def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID, userIDs=None):
+def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, userID, bankID, userIDs=None):
     try: 
         if budgetCategory is not None:
             selectedCategory = CategoryService.get_category(budgetCategory)
@@ -18,6 +18,7 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, startDa
             remainingBudgetAmount=budgetAmount,
             budgetType=budgetType,
             budgetCategory=selectedCategory,
+            transactionScope=transactionScope,
             startDate=startDate,
             endDate=endDate,
             bankID=bankID
@@ -114,3 +115,8 @@ def delete_budget(userID, budgetID):
         db.session.rollback()
         print(f"Failed To Delete Budget: {e}")
         return None
+
+# Get Budget By Category
+def get_budgets_by_category(category_name):
+    budgets = Budget.query.filter(Budget.budgetCategory.like(f"%{category_name}%")).all()
+    return [budget.get_json() for budget in budgets]

@@ -22,14 +22,15 @@ def new_budget():
         budgetTitle = data.get('budgetTitle')
         budgetAmount = data.get('budgetAmount')
         budgetType=data.get('budgetType')
-        budgetCategory=data.get('budgetCategory')
+        budgetCategory= data.get('budgetCategory')
+        transactionScope = data.get('transactionScope')
         startDate = data.get('startDate')
         endDate = data.get('endDate')
         userID = get_jwt_identity()
         bankID = data.get('bankID')
         userIDs = data.get('userIDs') or []
 
-        if not all([budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, userID, bankID]):
+        if not all([budgetTitle, budgetAmount, budgetType, transactionScope, startDate, endDate, userID]):
            return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
 
         new_budget = create_budget(
@@ -37,6 +38,7 @@ def new_budget():
             budgetAmount=budgetAmount,
             budgetType=budgetType,
             budgetCategory=budgetCategory,
+            transactionScope=transactionScope,
             startDate=startDate,
             endDate=endDate,
             userID=userID, # Creator Of Budget
@@ -45,7 +47,7 @@ def new_budget():
 
         if new_budget is None:
             return jsonify({"status":"error", "message":"Failed To Create Budget"}), 500
-        return jsonify({"status":"success", "message":"Budget Created Successfully", "budgetID": new_budget.budgetID}), 201
+        return jsonify({"status":"success", "message":"Budget Created Successfully", "budgetID": new_budget.budgetID, "budget": new_budget.get_json()}), 201
 
     except Exception as e:
         print(f"An Error Occurred: {e}")

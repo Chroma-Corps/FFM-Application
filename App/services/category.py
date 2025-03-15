@@ -13,9 +13,16 @@ class CategoryService:
     @staticmethod
     def get_category(category_key):
         categories = CategoryService.load_transaction_categories()
-        category = categories.get(category_key.upper())
 
-        if category:
-            return category
+        if isinstance(category_key, list):
+            result = []
+            for key in category_key:
+                category = categories.get(key.upper())
+                if category:
+                    result.append(category)
+                else:
+                    result.append( "Unknown Category")
+            return result
         else:
-            return ("Unknown Category")
+            category = categories.get(category_key.upper())
+            return [category] if category else ["Unknown Category"]

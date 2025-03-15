@@ -1,42 +1,45 @@
+from App.controllers.budget import get_budget
+from App.controllers.userBudget import get_user_budgets_json
 from App.database import db
-from App.models import Transaction
+from App.controllers.bank import get_bank
 from App.services.category import CategoryService
 from App.services.datetime import convert_to_date, convert_to_time
+from App.models import Transaction, TransactionType, Budget, TransactionScope, UserBudget
 from App.controllers.userTransaction import create_user_transaction,is_transaction_owner
 
 # Add A New Transaction
 def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
     try:
-        if transactionCategory is not None:
-            selectedCategory = CategoryService.get_category(transactionCategory)
-        else:
-            selectedCategory = None
+        userIDs = userIDs or []
+        transaction_data, error = transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID)
+        if error:
+            return None, error
 
         new_transaction = Transaction(
-            transactionTitle=transactionTitle,
-            transactionDesc=transactionDesc,
-            transactionType=transactionType,
-            transactionCategory=selectedCategory,
-            transactionAmount=transactionAmount,
-            transactionDate=transactionDate,
-            transactionTime=transactionTime,
-            budgetID=budgetID,
-            bankID=bankID
+            transactionTitle=transaction_data['transactionTitle'],
+            transactionDesc=transaction_data['transactionDesc'],
+            transactionType=transaction_data['transactionType'],
+            transactionCategory=CategoryService.get_category(transaction_data['transactionCategory']) if transaction_data['transactionCategory'] else None,
+            transactionAmount=transaction_data['transactionAmount'],
+            transactionDate=transaction_data['transactionDate'],
+            transactionTime=transaction_data['transactionTime'],
+            budgetID=transaction_data['budgetID'],
+            bankID=transaction_data['bankID']
         )
         db.session.add(new_transaction)
         db.session.commit()
 
         create_user_transaction(userID, new_transaction.transactionID)
-
         if userIDs:
             for otherUserID in userIDs:
                 create_user_transaction(otherUserID, new_transaction.transactionID)
-        return new_transaction
+
+        return new_transaction, None
 
     except Exception as e:
         db.session.rollback()
         print(f"Failed To Create Transaction: {e}")
-        return None
+        return None, str(e)
 
 # Get Transaction By ID
 def get_transaction(transactionID):
@@ -69,9 +72,25 @@ def get_user_transactions_json(userID):
     transactions = [transactions.get_json() for transactions in transactions]
     return transactions
 
-# Get Transaction Associated With A Budget
+# Get Transaction Associated With A Budget | Considers Both Inclusive & Exclusive
 def get_all_budget_transactions(budgetID):
-    transactions = Transaction.query.filter_by(budgetID=budgetID).all()
+    budget = Budget.query.get(budgetID)
+    if not budget:
+        return {"error": "Budget Not Found"}
+
+    transactions = []
+    if budget.transactionScope.value == TransactionScope.INCLUSIVE.value:
+        all_transactions = Transaction.query.all()
+        for transaction in all_transactions:
+            if isinstance(transaction.transactionCategory, list):
+                if any(cat in budget.budgetCategory for cat in transaction.transactionCategory):
+                    transactions.append(transaction)
+            else:
+                if transaction.transactionCategory in budget.budgetCategory:
+                    transactions.append(transaction)
+    else:
+        transactions = Transaction.query.filter_by(budgetID=budgetID).all()
+
     return [transaction.get_json() for transaction in transactions]
 
 # Get Transaction Associated With A Bank
@@ -80,11 +99,22 @@ def get_all_bank_transactions(bankID):
     return [transaction.get_json() for transaction in transactions]
 
 # Update Existing Transaction
-def update_transaction(transactionID, transactionTitle=None, transactionDesc=None, transactionType=None, transactionCategory=None, transactionAmount=None, transactionDate=None, transactionTime=None, budgetID=None):
+def update_transaction(transactionID, transactionTitle=None, transactionDesc=None, transactionType=None,
+                       transactionCategory=None, transactionAmount=None, transactionDate=None,
+                       transactionTime=None, voided=None, budgetID=None, bankID=None):
     try:
         transaction = get_transaction(transactionID)
 
         if transaction:
+
+            currBudgetID = transaction.budgetID
+            currBankID = transaction.bankID
+
+            if (budgetID and budgetID != currBudgetID) or (bankID and bankID != currBankID):
+                adjust_bank_balance(currBankID, transaction.transactionType, -transaction.transactionAmount)
+                adjust_exclusive_budget_balance(currBudgetID, transaction.transactionType, -transaction.transactionAmount)
+                adjust_inclusive_budgets(transaction.userID, transaction.transactionCategory, transaction.transactionType, -transaction.transactionAmount)
+
             if transactionTitle:
                 transaction.transactionTitle = transactionTitle
             if transactionDesc:
@@ -99,9 +129,18 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
                 transaction.transactionDate = convert_to_date(transactionDate)
             if transactionTime:
                 transaction.transactionTime = convert_to_time(transactionTime)
+            if voided is not None:
+                transaction.voided = voided
             if budgetID:
                 transaction.budgetID = budgetID
+            if bankID:
+                transaction.bankID = bankID
             db.session.commit()
+
+            if (budgetID and budgetID != currBudgetID) or (bankID and bankID != currBankID):
+                adjust_bank_balance(bankID, transaction.transactionType, transaction.transactionAmount)
+                adjust_exclusive_budget_balance(budgetID, transaction.transactionType, transaction.transactionAmount)
+                adjust_inclusive_budgets(transaction.userID, transactionCategory, transaction.transactionType, transaction.transactionAmount)
 
             print(f"Transaction With ID {transactionID} Updated Successfully.")
             return transaction
@@ -129,3 +168,87 @@ def void_transaction(userID, transactionID):
         db.session.rollback()
         print(f"Failed To Void Transaction: {e}")
         return None
+
+# Adjusts Bank Balance Based On Transaction Type (Income/Expense)
+def adjust_bank_balance(bankID, transactionType, transactionAmount):
+    bank = get_bank(bankID)
+    if not bank:
+        raise ValueError("Bank Not Found")
+
+    factor = 1 if transactionType.lower() == TransactionType.INCOME.value.lower() else -1
+    bank.remainingBankAmount += factor * transactionAmount
+
+    # Handle Insufficient Bank Balance
+    if bank.remainingBankAmount < 0:
+        raise ValueError("Insufficient Bank Balance")
+    db.session.commit()
+
+# Adjusts Exclusive Budget Balance Based On Transaction Type (Income/Expense)
+def adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount):
+    if budgetID:
+        budget = Budget.query.get(budgetID)
+        if not budget:
+            raise ValueError("Budget Not Found")
+
+        factor = 1 if transactionType.lower() == TransactionType.INCOME.value.lower() else -1
+        budget.remainingBudgetAmount += factor * transactionAmount
+
+        # Handle Insufficient Budget Balance
+        if budget.remainingBudgetAmount < 0:
+            raise ValueError("Insufficient Budget Balance")
+        db.session.commit()
+
+# Adjusts Inclusive Budget Balance Based On Transaction Type (Income/Expense)
+def adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount):
+    try:
+        user_budgets_json = get_user_budgets_json(userID)
+
+        for user_budget in user_budgets_json:
+            inclusive_budget = get_budget(user_budget['budgetID'])
+            if inclusive_budget and inclusive_budget.transactionScope.value == TransactionScope.INCLUSIVE.value:
+
+                # Rather Do This Here Than In Frontend
+                normalized_budget_categories = [category.lower() for category in inclusive_budget.budgetCategory]
+                normalized_transaction_categories = [category.lower() for category in transactionCategory]
+
+                if any(cat in normalized_budget_categories for cat in normalized_transaction_categories):
+                    if transactionType.lower() == TransactionType.INCOME.value.lower():
+                        inclusive_budget.remainingBudgetAmount += transactionAmount
+                    else:
+                        inclusive_budget.remainingBudgetAmount -= transactionAmount
+
+                    if inclusive_budget.remainingBudgetAmount < 0:
+                        raise ValueError("Insufficient Budget Balance in Inclusive Budget")
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        raise ValueError(f"Error adjusting inclusive budgets: {str(e)}")
+
+def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID):
+    try:
+        adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount)
+        adjust_bank_balance(bankID, transactionType, transactionAmount)
+        adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount)
+
+        transaction_data = {
+            'userID': userID,
+            'userIDs': userIDs,
+            'transactionTitle': transactionTitle,
+            'transactionDesc': transactionDesc,
+            'transactionType': transactionType,
+            'transactionCategory': transactionCategory,
+            'transactionAmount': transactionAmount,
+            'transactionDate': transactionDate,
+            'transactionTime': transactionTime,
+            'budgetID': budgetID,  # Can be None
+            'bankID': bankID
+        }
+        return transaction_data, None
+
+    except ValueError as e:
+        return None, str(e)
+
+    except Exception as e:
+        db.session.rollback()
+        return None, f"Transaction Handler Error: {str(e)}"

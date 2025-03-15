@@ -4,13 +4,14 @@ from App.services.currency import CurrencyService
 from App.controllers.userBank import create_user_bank, is_bank_owner
 
 # Create A New Bank
-def create_bank(userID, bankTitle, bankCurrency, bankAmount, userIDs=None):
+def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=None):
     try:
         new_bank = Bank (
             bankTitle=bankTitle,
             bankCurrency=bankCurrency,
             bankAmount=bankAmount,
-            remainingBankAmount=bankAmount
+            remainingBankAmount=bankAmount,
+            isPrimary=isPrimary
         )
         db.session.add(new_bank)
         db.session.commit()
@@ -51,7 +52,7 @@ def get_all_banks_json():
     return banks
 
 # Update Existing Bank
-def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None):
+def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None, isPrimary=None):
     try:
         bank = get_bank(bankID)
 
@@ -67,6 +68,8 @@ def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None):
             if bankAmount is not None:
                 bank.bankAmount = bankAmount
                 bank.remainingBankAmount = bankAmount
+            if isPrimary is not None:
+                bank.isPrimary = isPrimary
             db.session.commit()
 
             print(f"Bank With ID {bankID} Updated Successfully.")

@@ -1,5 +1,7 @@
 import enum
 from App.database import db
+from sqlalchemy import types
+from sqlalchemy.ext.mutable import MutableList
 from App.services.currency import CurrencyService
 from App.services.datetime import convert_to_date, convert_to_time
 
@@ -15,7 +17,7 @@ class Transaction(db.Model):
     transactionTitle = db.Column(db.String(20), nullable=False)
     transactionDesc = db.Column(db.String(120), nullable=True)
     transactionType = db.Column(db.Enum(TransactionType), nullable=False)
-    transactionCategory = db.Column(db.String(20), nullable=False)
+    transactionCategory = db.Column(MutableList.as_mutable(types.JSON), nullable=True)
     transactionAmount = db.Column(db.Float, nullable=False)
     transactionDate = db.Column(db.Date, nullable=False)
     transactionTime = db.Column(db.Time, nullable=False)
@@ -23,7 +25,7 @@ class Transaction(db.Model):
 
     # Foreign Keys
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
-    bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
+    bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=False)
 
     # Relationships
     budget = db.relationship('Budget', backref='transactions', lazy=True) # 1 Budget -> Many Transactions
@@ -31,6 +33,8 @@ class Transaction(db.Model):
     user_transactions = db.relationship('UserTransaction', back_populates='transaction') # UserTransaction
 
     def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
+        self.bankID = bankID
+        self.budgetID = budgetID
         self.transactionTitle = transactionTitle
         self.transactionDesc = transactionDesc
         self.transactionType = transactionType
@@ -38,8 +42,6 @@ class Transaction(db.Model):
         self.transactionAmount = transactionAmount
         self.transactionDate = convert_to_date(transactionDate)
         self.transactionTime = convert_to_time(transactionTime)
-        self.budgetID = budgetID
-        self.bankID = bankID
 
     def get_json(self):
         amount = CurrencyService.format_currency(self.transactionAmount, self.bank.bankCurrency)

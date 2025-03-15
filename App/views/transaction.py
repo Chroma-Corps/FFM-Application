@@ -8,53 +8,11 @@ from App.controllers import (
     add_transaction,
     get_budget,
     get_bank,
-    void_transaction
+    void_transaction,
+    update_transaction
 )
 
 transaction_views = Blueprint('transaction_views', __name__)
-
-# Helper Function: When Adding A Transaction Adjusts Relevant Balances Accordingly
-def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID):
-    try: 
-        budget = get_budget(budgetID)
-        if not budget:
-            return None, "Budget Not Found"
-        
-        bank = get_bank(bankID)
-        if not bank:
-            return None, "Bank Not Found"
-
-        print(f"DEBUG: transactionType = {transactionType}")
-        print(f"DEBUG: Expected INCOME Value = {TransactionType.INCOME.value}")
-
-        # Adjust Balance Within Associated Bank and Budget
-        factor = 1 if transactionType.lower() == TransactionType.INCOME.value.lower() else -1
-        budget.remainingBudgetAmount += factor * transactionAmount
-        bank.remainingBankAmount += factor * transactionAmount
-
-        if budget.remainingBudgetAmount < 0:
-            return None, "Insufficient Budget Balance"
-        if bank.remainingBankAmount < 0:
-            return None, "Insufficient Bank Balance"
-
-        # Transaction Data
-        transaction_data = {
-            'userID': userID,
-            'userIDs': userIDs,
-            'transactionTitle': transactionTitle,
-            'transactionDesc': transactionDesc,
-            'transactionType': transactionType,
-            'transactionCategory': transactionCategory,
-            'transactionAmount': transactionAmount,
-            'transactionDate': transactionDate,
-            'transactionTime': transactionTime,
-            'budgetID': budgetID,
-            'bankID': bankID
-        }
-        return transaction_data, None
-
-    except Exception as e:
-        return None, str(e)
 
 # 1. Creates A New Transaction -  Handles Multi-User Associations
 @transaction_views.route('/add-transaction', methods=['POST'])
@@ -74,26 +32,37 @@ def new_transaction():
         bankID = data.get('bankID')
         userIDs = data.get('userIDs') or []
 
-        if not all([userID, transactionTitle, transactionDesc, transactionType,
+        if not all([userID, transactionTitle, transactionType,
                     transactionCategory, transactionAmount, transactionDate,
-                    transactionTime, budgetID, bankID]):
+                    transactionTime, bankID]):
             return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
 
         if not isinstance(transactionAmount, (int, float)):
             return jsonify({"status": "error", "message": "Invalid Transaction Amount"}), 400
 
-        transaction_data, error_message = transaction_handler(
-            userID, userIDs, transactionTitle, transactionDesc, transactionType,
-            transactionCategory, float(transactionAmount), transactionDate,
-            transactionTime, budgetID, bankID
+        new_transaction, error_message = add_transaction(
+            transactionTitle=transactionTitle,
+            transactionDesc=transactionDesc,
+            transactionType=transactionType,
+            transactionCategory=transactionCategory,
+            transactionAmount=float(transactionAmount),
+            transactionDate=transactionDate,
+            transactionTime=transactionTime,
+            userID=userID,
+            userIDs=userIDs,
+            budgetID=budgetID,
+            bankID=bankID
         )
-        if error_message:
-            return jsonify({"status":"error", "message": error_message}), 400
 
-        new_transaction = add_transaction(**transaction_data)
-        if new_transaction is None:
-            return jsonify({"status":"error", "message": "Failed To Add Transaction"}), 500
-        return jsonify({"status":"success", "message": "Transaction Added Successfully", "transactionID": new_transaction.transactionID}), 201
+        if error_message:
+            return jsonify({"status": "error", "message": error_message}), 500
+
+        return jsonify({
+            "status": "success",
+            "message": "Transaction Added Successfully",
+            "transactionID": new_transaction.transactionID,
+            "transaction": new_transaction.get_json()
+        }), 201
 
     except Exception as e:
         print(f"An Error Occurred: {e}")
@@ -143,7 +112,41 @@ def void_user_transaction(transactionID):
         return jsonify({"status": "error", "message": f"Failed To Void Transaction: {str(e)}"}), 500
 
 # 5. Update Transaction
-transaction_views.route('/transaction/<int:transactionID>', methods=['PUT'])
+@transaction_views.route('/transaction/<int:transactionID>', methods=['PUT'])
 @jwt_required()
 def update_user_transaction(transactionID):
-    return
+    try:
+        data = request.get_json()
+        transactionTitle = data.get('transactionTitle')
+        transactionDesc = data.get('transactionDesc')
+        transactionType = data.get('transactionType')
+        transactionCategory = data.get('transactionCategory')
+        transactionAmount = data.get('transactionAmount')
+        transactionDate = data.get('transactionDate')
+        transactionTime = data.get('transactionTime')
+        voided = data.get('voided')
+        budgetID = data.get('budgetID')
+        bankID = data.get('bankID')
+
+        updated_transaction = update_transaction (
+            transactionID,
+            transactionTitle,
+            transactionDesc,
+            transactionType,
+            transactionCategory,
+            transactionAmount,
+            transactionDate,
+            transactionTime,
+            voided,
+            budgetID,
+            bankID
+        )
+
+        if updated_transaction:
+            return jsonify({"status": "success", "message": "Transaction Updated Successfully"}), 200
+        else:
+            return jsonify({"status": "error", "message": "Failed To Update Transaction"}), 500
+
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": f"Failed To Update Budget: {str(e)}"}), 500

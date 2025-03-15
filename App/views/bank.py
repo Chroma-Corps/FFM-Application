@@ -24,6 +24,7 @@ def new_bank():
         bankTitle = data.get('bankTitle')
         bankCurrency = data.get('bankCurrency')
         bankAmount = data.get('bankAmount')
+        isPrimary = data.get('isPrimary')
         userIDs = data.get('userIDs') or []
 
         if not all([bankTitle, bankCurrency, bankAmount]):
@@ -34,11 +35,12 @@ def new_bank():
             bankTitle,
             bankCurrency,
             bankAmount,
+            isPrimary,
             userIDs=userIDs) # Associated Users
 
         if new_bank is None:
             return jsonify({"status":"error", "message":"Failed To Create Bank"}), 500
-        return jsonify({"status":"success", "message": "Bank Created Successfully", "bankID": new_bank.bankID}), 201
+        return jsonify({"status":"success", "message": "Bank Created Successfully", "bankID": new_bank.bankID, "bank": new_bank.get_json()}), 201
 
     except Exception as e:
         print(f"An Error Occurred: {e}")
