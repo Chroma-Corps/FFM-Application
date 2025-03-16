@@ -21,10 +21,11 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                 const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`);
                 const data = await response.json();
                 if (response.ok) {
-                    setBudgetDetails(data);
+                    setBudgetDetails(data.budget);
                 } else {
-                    console.error('Failed to fetch budget details:', response.statusText);
+                    console.error(data.message);
                 }
+                console.log('Fetch Budget Status:', data.status)
             } catch (error) {
                 console.error('Error fetching budget details:', error);
             } finally {

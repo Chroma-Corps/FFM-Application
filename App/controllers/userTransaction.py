@@ -18,7 +18,7 @@ def create_user_transaction(userID, transactionID):
 def get_user_transactions_json(userID):
     try:
         user_transactions = UserTransaction.query.filter_by(userID=userID).all()
-        return [user_transactions.transaction.get_json() for user_transaction in user_transactions] if user_transactions else []
+        return [user_transaction.transaction.get_json() for user_transaction in user_transactions] if user_transactions else []
 
     except Exception as e:
         print(f"Error Fetching Transactions For User {userID}: {e}")
