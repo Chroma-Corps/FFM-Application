@@ -6,8 +6,8 @@ class Bank(db.Model):
 
     # Attributes
     bankID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    bankTitle = db.Column(db.String(20), nullable=False)
-    bankCurrency = db.Column(db.String(3), nullable=False)
+    bankTitle = db.Column(db.String(120), nullable=False)
+    bankCurrency = db.Column(db.String(10), nullable=False)
     bankAmount = db.Column(db.Float, nullable=False)
     remainingBankAmount = db.Column(db.Float, nullable=False)
     isPrimary = db.Column(db.Boolean, default=False)

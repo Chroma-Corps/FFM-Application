@@ -21,7 +21,7 @@ class Budget(db.Model):
 
     # Attributes
     budgetID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    budgetTitle = db.Column(db.String(20), nullable=False)
+    budgetTitle = db.Column(db.String(120), nullable=False)
     budgetAmount = db.Column(db.Float, nullable=False)
     budgetType = db.Column(db.Enum(BudgetType), nullable=False)
     budgetCategory = db.Column(MutableList.as_mutable(types.JSON), nullable=True)
