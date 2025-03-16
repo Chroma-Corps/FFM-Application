@@ -53,8 +53,9 @@ export default function RegisterScreen({ navigation }) {
         })
       } else {
         console.error('Registration Failed:', data.message)
-        alert(data.message)
+        alert(data.message || 'Registration Failed, Please Try Again')
       }
+      console.log('Response Status:', data.status);
     } catch(error) {
       console.error('Error Registering', error)
       alert('An Error Occurred, Please Try Again Later')

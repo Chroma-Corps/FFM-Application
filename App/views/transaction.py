@@ -1,13 +1,10 @@
 from flask import Blueprint, jsonify, request
-from App.models.transaction import TransactionType
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from App.controllers import (
     get_transaction_json,
     get_user_transactions_json,
     add_transaction,
-    get_budget,
-    get_bank,
     void_transaction,
     update_transaction
 )

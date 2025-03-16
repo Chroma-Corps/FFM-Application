@@ -2,9 +2,9 @@ import enum
 from App.database import db
 from sqlalchemy import types
 from App.models.bank import Bank
-from sqlalchemy.ext.mutable import MutableList
 from App.models.userBank import UserBank
 from App.models.userBudget import UserBudget
+from sqlalchemy.ext.mutable import MutableList
 from App.services.currency import CurrencyService
 from App.services.datetime import convert_to_date
 

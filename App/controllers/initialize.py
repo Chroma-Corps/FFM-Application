@@ -12,14 +12,14 @@ def initialize():
     bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
     alice = create_user('Alice Bobberson','alice@mail.com', 'alicepass')
 
-    # # Banks
-    # bobberson_bank = create_bank (
-    #     userID=bob.id,
-    #     bankTitle="Bobberson Bank",
-    #     bankCurrency="TTD",
-    #     bankAmount=5000.00,
-    #     userIDs=[alice.id]
-    # )
+    # Bank
+    new_bank = create_bank (
+        userID=bob.id,
+        bankTitle="Bob's Bank",
+        bankCurrency="TTD",
+        bankAmount=5000.00,
+        isPrimary=True
+    )
 
     # # Family Budgets
     # family_budget = create_budget (

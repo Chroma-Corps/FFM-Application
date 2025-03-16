@@ -1,5 +1,4 @@
-from App.models.user import User
-from flask import Blueprint, jsonify, request, flash
+from flask import Blueprint, jsonify, request
 
 from App.controllers import (
     create_user,
@@ -35,4 +34,4 @@ def register_action():
 
     except Exception as e:
         print(f"An Error Occurred: {e}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": "An Error Occurred During Registration"}), 500

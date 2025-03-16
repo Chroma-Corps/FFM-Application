@@ -1,5 +1,5 @@
-from App.database import db
 from App.models import User
+from App.database import db
 
 # Create A New User
 def create_user(name, email, password):

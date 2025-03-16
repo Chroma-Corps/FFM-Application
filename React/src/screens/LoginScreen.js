@@ -41,7 +41,7 @@ export default function LoginScreen({ navigation }) {
 
       const data = await response.json()
 
-      if (response.ok) {
+      if (response.ok && data.status === 'success') {
         await AsyncStorage.setItem('access_token', data.access_token);
         console.log('Login Successful:', data)
 
@@ -50,11 +50,12 @@ export default function LoginScreen({ navigation }) {
           routes: [{ name: 'Home' }],
         })
       } else {
-        console.error('Login Failed:', data.error)
-        alert(data.error)
+        console.error('Login Failed:', data.message || data.error);
+        alert(data.message || data.error || 'Login Failed, Please Try Again');
       }
+      console.log('Response Status:', data.status);
     } catch (error) {
-      console.error('Error Loggin In', error)
+      console.error('Error Logging In', error)
       alert('An Error Occurred, Please Try Again Later')
     } finally {
       setLoading(false)
