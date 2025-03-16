@@ -47,20 +47,22 @@ export default function TransactionsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`https://ffm-application-midterm.onrender.com/transactions`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/transactions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-  
+
+      const data = await response.json();
+
       if (response.ok) {
-        const transactions = await response.json();
-        setData(transactions);
+        setData(data.transactions);
       } else {
-        console.error('Failed To Fetch Transactions:', response.statusText);
+        console.error(data.message);
       }
+      console.log('Fetch Transactions Status:', data.status)
     } catch (error) {
       console.error('Error Fetching Transactions:', error);
     }

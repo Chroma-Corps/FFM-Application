@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-      const response = await fetch(`https://ffm-application-midterm.onrender.com/login`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,19 +43,17 @@ export default function LoginScreen({ navigation }) {
 
       if (response.ok && data.status === 'success') {
         await AsyncStorage.setItem('access_token', data.access_token);
-        console.log('Login Successful:', data)
-
+        console.log(data.message)
         navigation.reset({
           index: 0,
           routes: [{ name: 'Home' }],
         })
       } else {
-        console.error('Login Failed:', data.message || data.error);
-        alert(data.message || data.error || 'Login Failed, Please Try Again');
+        console.error(data.message);
+        alert(data.message);
       }
-      console.log('Response Status:', data.status);
     } catch (error) {
-      console.error('Error Logging In', error)
+      console.error('Error Logging In:', error)
       alert('An Error Occurred, Please Try Again Later')
     } finally {
       setLoading(false)

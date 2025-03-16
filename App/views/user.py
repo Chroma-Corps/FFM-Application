@@ -30,7 +30,7 @@ def register_action():
         new_user = create_user(name, email, password)
         if new_user is None:
             return jsonify({"status":"error", "message":"Failed To Register New User"}), 500
-        return jsonify({"status": "success", "message": "Registration Successful!"}), 201
+        return jsonify({"status": "success", "message": "Registered Successfully"}), 201
 
     except Exception as e:
         print(f"An Error Occurred: {e}")

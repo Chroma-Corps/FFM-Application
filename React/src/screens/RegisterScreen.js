@@ -31,7 +31,7 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true)
 
     try {
-      const response = await fetch(`https://ffm-application-midterm.onrender.com/register`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,16 +46,15 @@ export default function RegisterScreen({ navigation }) {
       const data = await response.json()
 
       if(response.ok) {
-        console.log('Registration Successful:', data)
+        console.log(data.message)
         navigation.reset({
           index: 0,
           routes: [{ name: 'LoginScreen' }],
         })
       } else {
-        console.error('Registration Failed:', data.message)
+        console.error(data.message)
         alert(data.message || 'Registration Failed, Please Try Again')
       }
-      console.log('Response Status:', data.status);
     } catch(error) {
       console.error('Error Registering', error)
       alert('An Error Occurred, Please Try Again Later')

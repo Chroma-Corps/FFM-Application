@@ -93,7 +93,7 @@ export default function CreateBudgetsScreen({ navigation }) {
       };
 
       useEffect(() => {
-        fetch('https://ffm-application-midterm.onrender.com/ffm/categories')
+        fetch('https://ffm-application-main.onrender.com/ffm/categories')
             .then(response => response.json())
             .then(data => {
                 const categoryArray = Object.entries(data).map(([key, value], index) => {
@@ -206,7 +206,7 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
 
         try {
-            const response = await fetch(`https://ffm-application-midterm.onrender.com/create-budget`, {
+            const response = await fetch(`https://ffm-application-main.onrender.com/create-budget`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -246,7 +246,7 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
+          const response = await fetch('https://ffm-application-main.onrender.com/banks', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,

@@ -21,43 +21,51 @@ def initialize():
         isPrimary=True
     )
 
-    # # Family Budgets
-    # family_budget = create_budget (
-    #     budgetTitle="Alice & Bob Budget",
-    #     budgetAmount=5000.00,
-    #     budgetType=BudgetType.EXPENSE,
-    #     budgetCategory="groceries",
-    #     transactionScope=TransactionScope.EXCLUSIVE,
-    #     startDate="2025-01-01",
-    #     endDate="2025-01-31",
-    #     userID=bob.id,
-    #     bankID=bobberson_bank.bankID,
-    #     userIDs=[alice.id]
-    # )
+    inclusive_budget = create_budget (
+        userID=bob.id,
+        bankID=new_bank.bankID,
+        budgetTitle="Inclusive Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['SHOPPING', 'TRANSIT', 'ENTERTAINMENT'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+    )
 
-    # # Family Transactions - Testing Exclusivity
-    # add_transaction (
-    #     userID=bob.id,
-    #     transactionTitle="Family Transaction",
-    #     transactionDesc="Family Trip - Added By Mr. Bobberson",
-    #     transactionType=TransactionType.EXPENSE,
-    #     transactionCategory="entertainment",
-    #     transactionAmount=500.00,
-    #     transactionDate="2025-01-25",
-    #     transactionTime="9:30",
-    #     budgetID=family_budget.budgetID,
-    #     bankID=bobberson_bank.bankID
-    # )
+    exclusive_budget = create_budget (
+        userID=bob.id,
+        bankID=None,
+        budgetTitle="Exclusive Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=[],
+        transactionScope=TransactionScope.EXCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31"
+    )
 
-    # add_transaction (
-    #     userID=bob.id,
-    #     transactionTitle="Family Transaction 2",
-    #     transactionDesc="Family Trip - Added By Mr. Bobberson",
-    #     transactionType=TransactionType.EXPENSE,
-    #     transactionCategory="transit",
-    #     transactionAmount=20.00,
-    #     transactionDate="2025-02-10",
-    #     transactionTime="10:30",
-    #     budgetID=family_budget.budgetID,
-    #     bankID=bobberson_bank.bankID
-    # )
+    add_transaction (
+        userID=bob.id,
+        transactionTitle="Transit Transaction",
+        transactionDesc="",
+        transactionType=TransactionType.EXPENSE,
+        transactionCategory=['TRANSIT'],
+        transactionAmount=20.00,
+        transactionDate="2025-02-10",
+        transactionTime="10:30",
+        budgetID=exclusive_budget.budgetID,
+        bankID=new_bank.bankID
+    )
+
+    add_transaction (
+        userID=bob.id,
+        transactionTitle="Entertainment Transaction",
+        transactionDesc="",
+        transactionType=TransactionType.EXPENSE,
+        transactionCategory=['ENTERTAINMENT'],
+        transactionAmount=200.00,
+        transactionDate="2025-03-10",
+        transactionTime="09:30",
+        bankID=new_bank.bankID
+    )

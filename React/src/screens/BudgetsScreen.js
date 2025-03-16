@@ -37,7 +37,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`https://ffm-application-midterm.onrender.com/budgets`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -45,12 +45,14 @@ export default function BudgetsScreen({ navigation }) {
         }
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const budgets = await response.json();
-        setData(budgets);
+        setData(data.budgets);
       } else {
-        console.error('Failed To Fetch Budgets:', response.statusText);
+        console.error(data.message);
       }
+      console.log('Fetch Budgets Status:', data.status)
     } catch (error) {
       console.error('Error Fetching Budgets:', error);
     } finally {

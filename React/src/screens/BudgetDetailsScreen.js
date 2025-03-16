@@ -17,11 +17,10 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
     useEffect(() => {
         const fetchBudgetDetails = async () => {
-            // To Give The Application Less Work, I Want To Make A Separate Route To Fetch The Transactions Of A Budget, Instead Of Having It In The JSON (BudgetTranctions) - JaleneA
             try {
-                const response = await fetch(`https://ffm-application-midterm.onrender.com/budget/${budgetID}`);
+                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`);
+                const data = await response.json();
                 if (response.ok) {
-                    const data = await response.json();
                     setBudgetDetails(data);
                 } else {
                     console.error('Failed to fetch budget details:', response.statusText);
