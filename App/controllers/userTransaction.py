@@ -50,3 +50,6 @@ def get_user_inactive_transactions(userID):
     except Exception as e:
         print(f"Error Fetching Inactive Transactions For User {userID}: {e}")
         return []
+
+def get_user_transaction_by_transaction_id(transactionID):
+    return db.session.query(UserTransaction).filter(UserTransaction.transactionID == transactionID).first()

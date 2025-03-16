@@ -27,7 +27,7 @@ def new_bank():
         isPrimary = data.get('isPrimary')
         userIDs = data.get('userIDs') or []
 
-        if not all([bankTitle, bankCurrency, bankAmount]):
+        if not all([bankTitle, bankCurrency]):
             return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
 
         new_bank = create_bank(

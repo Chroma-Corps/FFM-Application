@@ -1,11 +1,11 @@
-from App.controllers.budget import get_budget
-from App.controllers.userBudget import get_user_budgets_json
 from App.database import db
 from App.controllers.bank import get_bank
+from App.controllers.budget import get_budget
 from App.services.category import CategoryService
+from App.controllers.userBudget import get_user_budgets_json
 from App.services.datetime import convert_to_date, convert_to_time
-from App.models import Transaction, TransactionType, Budget, TransactionScope, UserBudget
-from App.controllers.userTransaction import create_user_transaction,is_transaction_owner
+from App.models import Transaction, TransactionType, Budget, TransactionScope
+from App.controllers.userTransaction import create_user_transaction, is_transaction_owner, get_user_transaction_by_transaction_id
 
 # Add A New Transaction
 def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
@@ -33,7 +33,6 @@ def add_transaction(transactionTitle, transactionDesc, transactionType, transact
         if userIDs:
             for otherUserID in userIDs:
                 create_user_transaction(otherUserID, new_transaction.transactionID)
-
         return new_transaction, None
 
     except Exception as e:
@@ -107,13 +106,30 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
 
         if transaction:
 
-            currBudgetID = transaction.budgetID
-            currBankID = transaction.bankID
+            # Retrieving The UserID For The Transaction
+            userTransaction = get_user_transaction_by_transaction_id(transactionID)
+            if userTransaction:
+                userID = userTransaction.userID
+            else:
+                print("UserID Not Found For The Transaction")
+                return None
 
-            if (budgetID and budgetID != currBudgetID) or (bankID and bankID != currBankID):
-                adjust_bank_balance(currBankID, transaction.transactionType, -transaction.transactionAmount)
-                adjust_exclusive_budget_balance(currBudgetID, transaction.transactionType, -transaction.transactionAmount)
-                adjust_inclusive_budgets(transaction.userID, transaction.transactionCategory, transaction.transactionType, -transaction.transactionAmount)
+            currBankID = transaction.bankID
+            currBudgetID = transaction.budgetID
+            currTransactionType = transaction.transactionType
+            currTransactionAmount = transaction.transactionAmount
+            currTransactionCategory = transaction.transactionCategory
+
+            budget_changed = budgetID and budgetID != currBudgetID
+            bank_changed = bankID and bankID != currBankID
+            type_changed = transactionType and transactionType != currTransactionType
+            amount_changed = transactionAmount is not None and transactionAmount != currTransactionAmount
+
+            # Revert Old Data If Change
+            if budget_changed or bank_changed or amount_changed or type_changed:
+                adjust_bank_balance(currBankID, currTransactionType, -currTransactionAmount)
+                adjust_exclusive_budget_balance(currBudgetID, currTransactionType, -currTransactionAmount)
+                adjust_inclusive_budgets(userID, currTransactionCategory, currTransactionType, -currTransactionAmount)
 
             if transactionTitle:
                 transaction.transactionTitle = transactionTitle
@@ -137,10 +153,15 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
                 transaction.bankID = bankID
             db.session.commit()
 
-            if (budgetID and budgetID != currBudgetID) or (bankID and bankID != currBankID):
-                adjust_bank_balance(bankID, transaction.transactionType, transaction.transactionAmount)
-                adjust_exclusive_budget_balance(budgetID, transaction.transactionType, transaction.transactionAmount)
-                adjust_inclusive_budgets(transaction.userID, transactionCategory, transaction.transactionType, transaction.transactionAmount)
+            if (amount_changed or type_changed) and not budget_changed and not bank_changed:
+                adjust_bank_balance(transaction.bankID, transaction.transactionType, transaction.transactionAmount)
+                adjust_exclusive_budget_balance(transaction.budgetID, transaction.transactionType, transaction.transactionAmount)
+
+            elif budget_changed or bank_changed:
+                adjust_bank_balance(transaction.bankID, transaction.transactionType, transaction.transactionAmount)
+                adjust_exclusive_budget_balance(transaction.budgetID, transaction.transactionType, transaction.transactionAmount)
+
+            adjust_inclusive_budgets(userID, transaction.transactionCategory, transaction.transactionType, transaction.transactionAmount)
 
             print(f"Transaction With ID {transactionID} Updated Successfully.")
             return transaction
@@ -175,8 +196,11 @@ def adjust_bank_balance(bankID, transactionType, transactionAmount):
     if not bank:
         raise ValueError("Bank Not Found")
 
-    factor = 1 if transactionType.lower() == TransactionType.INCOME.value.lower() else -1
+    transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
+
+    factor = 1 if transaction_type_str == TransactionType.INCOME.value.lower() else -1
     bank.remainingBankAmount += factor * transactionAmount
+
 
     # Handle Insufficient Bank Balance
     if bank.remainingBankAmount < 0:
@@ -190,7 +214,9 @@ def adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount
         if not budget:
             raise ValueError("Budget Not Found")
 
-        factor = 1 if transactionType.lower() == TransactionType.INCOME.value.lower() else -1
+        transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
+
+        factor = 1 if transaction_type_str == TransactionType.INCOME.value.lower() else -1
         budget.remainingBudgetAmount += factor * transactionAmount
 
         # Handle Insufficient Budget Balance
@@ -212,7 +238,8 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
                 normalized_transaction_categories = [category.lower() for category in transactionCategory]
 
                 if any(cat in normalized_budget_categories for cat in normalized_transaction_categories):
-                    if transactionType.lower() == TransactionType.INCOME.value.lower():
+                    transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
+                    if transaction_type_str == TransactionType.INCOME.value.lower():
                         inclusive_budget.remainingBudgetAmount += transactionAmount
                     else:
                         inclusive_budget.remainingBudgetAmount -= transactionAmount
@@ -227,9 +254,10 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
 
 def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID):
     try:
-        adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount)
         adjust_bank_balance(bankID, transactionType, transactionAmount)
         adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount)
+        if budgetID is not None:
+            adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount)
 
         transaction_data = {
             'userID': userID,
