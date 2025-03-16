@@ -14,8 +14,8 @@ class Transaction(db.Model):
 
     # Attributes
     transactionID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    transactionTitle = db.Column(db.String(20), nullable=False)
-    transactionDesc = db.Column(db.String(120), nullable=True)
+    transactionTitle = db.Column(db.String(120), nullable=False)
+    transactionDesc = db.Column(db.String(225), nullable=True)
     transactionType = db.Column(db.Enum(TransactionType), nullable=False)
     transactionCategory = db.Column(MutableList.as_mutable(types.JSON), nullable=True)
     transactionAmount = db.Column(db.Float, nullable=False)
