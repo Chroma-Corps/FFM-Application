@@ -13,6 +13,7 @@ import {
   Dashboard,
 } from './src/screens'
 import BudgetsScreen from './src/screens/BudgetsScreen'
+import CreateBankScreen from './src/screens/CreateBankScreen'
 import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
 import AddTransactionScreen from './src/screens/AddTransactionScreen'
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
@@ -47,16 +48,17 @@ export default function App() {
             }}
           >
 
-            <Stack.Screen name="StartScreen" component={StartScreen} />
+            {/* <Stack.Screen name="StartScreen" component={StartScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
-            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-            <Stack.Screen name="Dashboard" component={Dashboard} />
-            <Stack.Screen name="Budgets" component={BudgetsScreen} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} /> */}
+            {/* <Stack.Screen name="Dashboard" component={Dashboard} /> */}
+            <Stack.Screen name="CreateBank" component={CreateBankScreen} />
+            {/* <Stack.Screen name="Budgets" component={BudgetsScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
             <Stack.Screen name="TransactionsScreen" component={TransactionsScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
-            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} /> */}
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
           </Stack.Navigator>
