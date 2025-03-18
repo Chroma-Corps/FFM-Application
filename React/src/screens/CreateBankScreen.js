@@ -10,6 +10,12 @@ import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import ButtonSmall from '../components/ButtonSmall';
 
+// Importing currency data for now until API is set up. (Rynnia.R)
+import Currencies from '../constants/currencies.json';
+
+// Main currencies to display first (6)
+const mainCurrencies = ['USD', 'EUR', 'TTD', 'CAD', 'AUD', 'JPY'];
+
 // Defining colors for bank theme selection. This could be extracted to a separate file. (Rynnia.R)
 const THEMES = [
     '#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33A1', '#8D33FF',
@@ -18,11 +24,17 @@ const THEMES = [
 ];
 
 export default function CreateBudgetsScreen({ navigation }) {
+    const [loading, setLoading] = useState(true);
+
+    //Bank Details
     const [selectedBankTitle, setSelectedBankTitle] = useState(null);
     const [selectedBankAmount, setSelectedBankAmount] = useState(null);
     const [selectedBudgetType, setSelectedBudgetType] = useState(null);
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [selectedTheme, setSelectedTheme] = useState(null);
+
+    //Currency Data 
+    const [currencyData, setCurrencyData] = useState([]);
 
     const handleBankTitleChange = (title) => {
         setSelectedBankTitle(title);
@@ -47,6 +59,67 @@ export default function CreateBudgetsScreen({ navigation }) {
 
         Alert.alert('Success', 'Bank added successfully!');
     }
+
+    useEffect(() => {
+        const formattedCurrencies = Object.entries(Currencies).map(([code, currency], index) => {
+            return {
+                id: index + 1,
+                code: currency.code,
+                symbol: currency.symbol,
+                name: currency.name,
+                decimal_digits: currency.decimal_digits,
+                name_plural: currency.name_plural,
+            };
+        });
+
+        setCurrencyData(formattedCurrencies);
+        setLoading(false);
+    }, []);
+
+
+    // Filtering out the main currencies based on `mainCurrencies` constant
+    const mainCurrenciesList = currencyData.filter(currency =>
+        mainCurrencies.includes(currency.code)
+    );
+
+
+    const renderCurrencyItem = (currency) => {
+        return (
+            <TouchableOpacity
+                key={currency}
+                style={[
+                    styles.currencyBox,
+                    selectedCurrency === currency
+                        ? styles.selectedCurrencyBox
+                        : styles.unselectedCurrencyBox,
+                ]}
+                onPress={() => handleSelectCurrencyOption(currency)}
+            >
+                <Text
+                    style={[
+                        styles.currencyText,
+                        selectedCurrency === currency
+                            ? styles.selectedCurrencyText
+                            : styles.unselectedCurrencyText,
+                    ]}
+                >
+                    {currency.code}
+                </Text>
+
+                <Text
+                    style={[
+                        styles.currencyText,
+                        selectedCurrency === currency
+                            ? styles.selectedCurrencyText
+                            : styles.unselectedCurrencyText,
+                    ]}
+                >
+                    {currency.symbol}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
+
 
     return (
         <View style={styles.createBankScreen}>
@@ -109,7 +182,13 @@ export default function CreateBudgetsScreen({ navigation }) {
                         <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency</Text>
 
                         <View style={styles.currencyContainer}>
-                            {['USD', 'EUR', 'GBP', 'TTD', 'CAD', 'JPY'].map((currency) => (
+                            {mainCurrenciesList.map((currency) => (
+                                <View key={currency.code}>
+                                    {renderCurrencyItem(currency)}
+                                </View>
+                            ))}
+
+                            {/* {['USD', 'EUR', 'GBP', 'TTD', 'CAD', 'JPY'].map((currency) => (
                                 <TouchableOpacity
                                     key={currency}
                                     style={[
@@ -131,7 +210,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         {currency}
                                     </Text>
                                 </TouchableOpacity>
-                            ))}
+                            ))} */}
                         </View>
 
                         <View>
@@ -288,7 +367,7 @@ const styles = StyleSheet.create({
     },
 
     currencyBox: {
-        width: '30%',
+        width: 100,
         aspectRatio: 1,
         borderRadius: 10,
         justifyContent: 'center',
