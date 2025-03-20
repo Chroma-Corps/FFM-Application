@@ -151,7 +151,7 @@ export default function TransactionsScreen({ navigation }) {
                 </Text>
               </View>
             </View>
-            <Text style={styles.cardText}>{item.transactionCategory}</Text>
+            <Text style={styles.cardText}>{item.transactionCategory.join(' • ')}</Text>
             <Text style={styles.timeText}>{item.transactionTime}</Text> 
           </Card>
         </TouchableOpacity>
@@ -185,7 +185,9 @@ export default function TransactionsScreen({ navigation }) {
   return (
     <View style={styles.transactionsScreen}>
       <InAppBackground>
-        <InAppHeader>Transactions</InAppHeader>
+        <View style={styles.headerContainer}>
+          <InAppHeader>Transactions</InAppHeader>
+        </View>
 
         {/* Transactions Search Bar : Title/ Category */}
         <TextInput
@@ -224,6 +226,14 @@ const styles = StyleSheet.create({
         lineHeight: 21,
         textAlign: 'center',
         paddingTop: 100
+    },
+
+    headerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+      padding: 20
     },
 
     cardText: {

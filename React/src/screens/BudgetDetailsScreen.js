@@ -76,7 +76,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
             <View style={styles.transactionCard}>
                 <Text style={styles.transactionTitle}>{item.transactionTitle}</Text>
                 <Text style={styles.transactionAmount}>{item.transactionAmount}</Text>
-                <Text style={styles.descriptionText}>{item.transactionCategory}</Text>
+                <Text style={styles.descriptionText}>{item.transactionCategory.join(' • ')}</Text>
                 <Text style={styles.descriptionText}>{item.transactionDate}</Text>
                 <Text style={styles.descriptionText}> {item.transactionDescription}</Text>
             </View>
