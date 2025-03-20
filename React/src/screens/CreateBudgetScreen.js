@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
 import Button from '../components/Button';
@@ -68,7 +68,7 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [budgetTitle, setBudgetTitle] = useState('');
     const [budgetAmount, setBudgetAmount] = useState('');
     const [budgetType, setBudgetType] = useState('');
-    const [budgetCategory, setBudgetCategory] = useState('');
+    const [budgetCategories, setBudgetCategories] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState(null);
     const [selectedBankID, setSelectedBankID] = useState(null);
@@ -83,6 +83,8 @@ export default function CreateBudgetsScreen({ navigation }) {
 
     const [banks, setBanks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [budgetScope, setBudgetScope] = useState('Inclusive');
+
     const categoryImages = {
         bills: require('../assets/icons/bills.png'),
         entertainment: require('../assets/icons/entertainment.png'),
@@ -92,16 +94,27 @@ export default function CreateBudgetsScreen({ navigation }) {
         transit: require('../assets/icons/transit.png')
       };
 
-      useEffect(() => {
+    useEffect(() => {
         fetch('https://ffm-application-main.onrender.com/ffm/categories')
             .then(response => response.json())
             .then(data => {
-                const categoryArray = Object.entries(data).map(([key, value], index) => {
+
+                if (!data || !data.categories || typeof data.categories !== 'object') {
+                    console.error("Invalid data format:", data);
+                    return;
+                }
+
+                const categoryArray = Object.entries(data.categories).map(([key, value], index) => {
+                    if (typeof value !== 'string') {
+                        console.error(`Unexpected value for ${key}:`, value);
+                        value = "Unknown"; // Fallback
+                    }
+
                     const categoryName = value.toLowerCase();
                     return {
                         id: index + 1,
                         name: value,
-                        image: categoryImages[categoryName] || require('../assets/default_img.jpg')  // FallBack
+                        image: categoryImages[categoryName] || require('../assets/default_img.jpg') // FallBack
                     };
                 });
                 setCategories(categoryArray);
@@ -134,8 +147,20 @@ export default function CreateBudgetsScreen({ navigation }) {
         return `${formattedStart} - ${formattedEnd}`;
     };
 
-    const handleCategorySelect = (category) => {
-        setBudgetCategory(category.name);
+    const handleCategorySelect = (item) => {
+        const isAlreadySelected = budgetCategories.includes(item.name);
+    
+        if (isAlreadySelected) {
+            setBudgetCategories(prevCategories => 
+                prevCategories.filter(category => category !== item.name)
+            );
+        } else {
+            const capitalizedCategory = item.name.charAt(0).toUpperCase() + item.name.slice(1);
+            setBudgetCategories(prevCategories => [
+                ...prevCategories, 
+                capitalizedCategory
+            ]);
+        }
     };
 
     const handleAmountChange = (value) => {
@@ -177,7 +202,8 @@ export default function CreateBudgetsScreen({ navigation }) {
     );
 
     const renderCategoryItem = ({ item }) => {
-        const isSelected = budgetCategory === item.name;
+        const isSelected = budgetCategories.includes(item.name);
+
         return (
             <TouchableOpacity
                 style={[
@@ -200,7 +226,7 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
         }
 
-        if (!budgetTitle || !startDate || !endDate || !selectedBankID) {
+        if (!budgetTitle || !startDate || !endDate || !budgetScope) {
             Alert.alert('Error', 'Please Fill In All Fields');
             return;
         }
@@ -217,11 +243,14 @@ export default function CreateBudgetsScreen({ navigation }) {
                     budgetTitle: budgetTitle.trim(),
                     budgetAmount: budgetAmount,
                     budgetType: budgetType.toUpperCase(),
-                    budgetCategory: "BILLS", // To Implementat - JaleneA
+                    budgetCategory: budgetCategories,
+                    transactionScope: budgetScope.toUpperCase(),
                     startDate: startDate,
                     endDate: endDate,
                 })
             });
+
+            console.log(budgetCategories)
 
             if (response.ok) {
                 Alert.alert('Success', 'Budget Created Successfully');
@@ -253,13 +282,15 @@ export default function CreateBudgetsScreen({ navigation }) {
               'Content-Type': 'application/json',
             },
           });
-    
+
+          const data = await response.json();
+
           if (response.ok) {
-            const data = await response.json();
-            setBanks(data);
+            setBanks(data.banks);
           } else {
-            console.error('Failed To Fetch Banks:', response.statusText);
+            console.error(data.message);
           }
+          console.log('Fetch Budgets Status:', data.status)
         } catch (error) {
           console.error("Error Fetching Banks:", error);
         } finally {
@@ -273,17 +304,18 @@ export default function CreateBudgetsScreen({ navigation }) {
         }, [])
       );
 
-    return (
+      return (
         <View style={styles.createBudgetScreen}>
             <InAppBackground>
-            <BackButton goBack={navigation.goBack} />
+                <BackButton goBack={navigation.goBack} />
+    
                 {showPeriodPopup && (
                     <PeriodSelectionPopup
                         setShowPeriodPopup={setShowPeriodPopup}
                         setSelectedPeriod={setSelectedPeriod}
                     />
                 )}
-
+    
                 {showDatePicker && (
                     <DateSelector
                         showDatePicker={showDatePicker}
@@ -291,15 +323,15 @@ export default function CreateBudgetsScreen({ navigation }) {
                         onCancel={handleDateCancel}
                     />
                 )}
-
-                <View style={styles.screenContainer}>
-                    <View style={styles.headerContainer}>
-                        <View style={styles.cardTitle}>
-                            <InAppHeader>Add Budget</InAppHeader>
+    
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
+                    <View style={styles.screenContainer}>
+                        <View style={styles.headerContainer}>
+                            <View style={styles.cardTitle}>
+                                <InAppHeader>New Budget</InAppHeader>
+                            </View>
                         </View>
-                    </View>
-
-                    <View>
+    
                         <View style={styles.card}>
                             <View style={styles.cardTopHalfContainer}>
                                 <TextInput
@@ -309,7 +341,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                     onChangeText={setBudgetTitle}
                                     style={[styles.input, styles.defaultText, isFocused ? styles.focused : null]}
                                 />
-
+    
                                 <View style={styles.budgetAmountContainer}>
                                     <TextInput
                                         placeholderTextColor="rgba(255, 255, 255, 0.25)"
@@ -319,9 +351,9 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         style={[styles.input, styles.shortInput, styles.defaultText]}
                                         keyboardType="numeric"
                                     />
-
+    
                                     <Text style={styles.slashText}>/</Text>
-
+    
                                     <TextInput
                                         placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                         placeholder="0"
@@ -330,88 +362,114 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         style={[styles.input, styles.shortInput, styles.defaultText]}
                                         keyboardType="numeric"
                                     />
-
+    
                                     <Text style={styles.slashText}>/</Text>
-
+    
                                     <TouchableOpacity onPress={handlePeriodFocus}>
-                                        <Text style={[
-                                            selectedPeriod ? { ...styles.selectedPeriod, color: '#fff' } : styles.selectedPeriod
-                                        ]}>
-                                            {displayPeriodSelected(selectedPeriod) || "Period"}
+                                        <Text
+                                            style={[
+                                                selectedPeriod
+                                                    ? { ...styles.selectedPeriod, color: '#fff' }
+                                                    : styles.selectedPeriod,
+                                            ]}
+                                        >
+                                            {displayPeriodSelected(selectedPeriod) || 'Period'}
                                         </Text>
                                     </TouchableOpacity>
-
                                 </View>
-
+    
                                 <Text style={styles.defaultText}>Starting:</Text>
-
+    
                                 <ButtonSmall
-                                    label={startDate ? `${startDate.split('-')[2]}-${startDate.split('-')[1]}-${startDate.split('-')[0]}` : 'Select Date'}
+                                    label={
+                                        startDate
+                                            ? `${startDate.split('-')[2]}-${startDate.split('-')[1]}-${startDate.split('-')[0]}`
+                                            : 'Select Date'
+                                    }
                                     onPress={handleShowDatePicker}
                                     mode="contained"
                                     style={styles.dateButton}
                                 />
-
-
-                                <Text style={[styles.defaultText, { marginTop: 10 }]}>Budget Period</Text>
-                                <Text style={[styles.defaultText, { fontSize: 16, color: theme.colors.primary }]}>{displayBudgetPeriod()}</Text>
-
+    
+                                <Text style={[styles.defaultText, { marginTop: 35 }]}>Budget Period</Text>
+                                <Text style={[styles.defaultText, { fontSize: 16, color: theme.colors.primary }]}>
+                                    {displayBudgetPeriod()}
+                                </Text>
                             </View>
-
+    
+                            {/* Filter Tags - Budget Type */}
+                            <View style={styles.filterTagsContainer}>
+                                <FilterTag
+                                    label="Savings"
+                                    isSelected={budgetType === 'Savings'}
+                                    onPress={() => setBudgetType('Savings')}
+                                />
+                                <FilterTag
+                                    label="Expense"
+                                    isSelected={budgetType === 'Expense'}
+                                    onPress={() => setBudgetType('Expense')}
+                                />
+                            </View>
+    
+                            {/* Filter Tags - Budget Scope */}
+                            <View style={styles.filterTagsContainer}>
+                                <FilterTag
+                                    label="Inclusive"
+                                    isSelected={budgetScope === 'Inclusive'}
+                                    onPress={() => setBudgetScope('Inclusive')}
+                                />
+                                <FilterTag
+                                    label="Exclusive"
+                                    isSelected={budgetScope === 'Exclusive'}
+                                    onPress={() => setBudgetScope('Exclusive')}
+                                />
+                            </View>
+                        </View>
+    
+                        {/* Scrollable Content Section */}
+                        {budgetScope === 'Inclusive' && (
                             <View style={styles.cardBottomHalfContainer}>
                                 <View style={styles.budgetPropertiesContainer}>
                                     <Text style={styles.defaultText}>Select Bank:</Text>
-
+    
                                     {loading ? (
                                         <ActivityIndicator size="large" color={theme.colors.primary} />
-                                        ) : banks.length === 0 ? (
+                                    ) : banks.length === 0 ? (
                                         <Text style={styles.defaultText}>You Have No Banks</Text>
-                                        ) : (
-
-                                    <FlatList
-                                        data={banks}
-                                        renderItem={renderBankCard}
-                                        keyExtractor={(item) => item?.bankID}
-                                        horizontal
-                                        showsHorizontalScrollIndicator={false}
-                                        contentContainerStyle={styles.scrollContainer}
-                                    />
-                                        )}
-
-                                    <Text style={[styles.defaultText, { marginBottom: 0 }]}>Budget Type:</Text>
-
-                                    <View style={styles.filterTagsContainer}>
-                                        <FilterTag
-                                            label="Savings"
-                                            isSelected={budgetType === 'Savings'}
-                                            onPress={() => setBudgetType('Savings')}
+                                    ) : (
+                                        <FlatList
+                                            data={banks}
+                                            renderItem={renderBankCard}
+                                            keyExtractor={(item) => item?.bankID}
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            contentContainerStyle={styles.scrollContainer}
                                         />
-                                        <FilterTag
-                                            label="Expense"
-                                            isSelected={budgetType === 'Expense'}
-                                            onPress={() => setBudgetType('Expense')}
-                                        />
-                                    </View>
-
+                                    )}
+    
                                     <Text style={[styles.defaultText, { marginTop: 8 }]}>Select Budget Category:</Text>
-
+    
                                     {categories.length > 0 ? (
-                                            <FlatList
-                                                data={categories}
-                                                renderItem={renderCategoryItem}
-                                                keyExtractor={(item) => item.id.toString()}
-                                                horizontal
-                                                showsHorizontalScrollIndicator={false}
-                                                contentContainerStyle={styles.scrollContainer}
-                                            />
-                                        ) : (
-                                            <Text>Loading Categories...</Text>
-                                        )}
+                                        <FlatList
+                                            data={categories}
+                                            renderItem={renderCategoryItem}
+                                            keyExtractor={(item) => item.id.toString()}
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            contentContainerStyle={styles.scrollContainer}
+                                        />
+                                    ) : (
+                                        <Text>Loading Categories...</Text>
+                                    )}
                                 </View>
-                                <Button mode="contained" onPress={createBudget}>Create</Button>
                             </View>
-                        </View>
+                        )}
                     </View>
+                </ScrollView>
+                <View style={styles.buttonContainer}>
+                    <Button mode="contained" onPress={createBudget} style={styles.buttonStyle}>
+                        Create
+                    </Button>
                 </View>
             </InAppBackground>
         </View>
@@ -421,14 +479,21 @@ export default function CreateBudgetsScreen({ navigation }) {
 const styles = StyleSheet.create({
     createBudgetScreen: {
         flex: 1,
+        justifyContent: 'flex-start',
+    },
+
+    buttonContainer: {
+        justifyContent: 'flex-end',
+        width: '100%',
+        padding: 10,
     },
 
     defaultText: {
         fontSize: 20,
         fontFamily: theme.fonts.bold.fontFamily,
         color: 'white',
-        lineHeight: 21,
-        marginBottom: 5,
+        lineHeight: 20,
+        marginBottom: 10,
     },
 
     selectedPeriod: {
@@ -520,11 +585,12 @@ const styles = StyleSheet.create({
     },
 
     budgetPropertiesContainer: {
-        width: '100%',
+        width: '90%',
         marginTop: 20,
-        padding: 10,
+        padding: 20,
+        alignSelf: 'center',
         backgroundColor: '#222',
-        borderRadius: 8,
+        borderRadius: 5,
         gap: 10,
     },
 
@@ -580,7 +646,8 @@ const styles = StyleSheet.create({
 
     filterTagsContainer: {
         flexDirection: 'row',
-        justifyContent: 'start',
+        justifyContent: 'center',
+        marginTop: 20,
     },
 
     categoryItem: {

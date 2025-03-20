@@ -12,7 +12,8 @@ import BudgetsScreen from './BudgetsScreen';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
-    const [budgetDetails, setBudgetDetails] = useState(null);
+    const [budgetDetails, setBudgetDetails] = useState([]);
+    const [budgetTransactions, setBudgetTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -33,6 +34,24 @@ export default function BudgetDetailsScreen({ navigation, route }) {
             }
         };
 
+        const fetchBudgetTransactions = async () => {
+            try {
+                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`);
+                const data = await response.json();
+                if (response.ok) {
+                    setBudgetTransactions(data.transactions);
+                } else {
+                    console.error(data.message);
+                }
+                console.log('Fetch Budget Transactions Status:', data.status)
+            } catch (error) {
+                console.error('Error Fetching Budget Transactions:', error);
+            } 
+            finally {
+                setLoading(false);
+            }
+        };
+        fetchBudgetTransactions();
         fetchBudgetDetails();
     }, [budgetID]);
 
@@ -56,10 +75,10 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         return (
             <View style={styles.transactionCard}>
                 <Text style={styles.transactionTitle}>{item.transactionTitle}</Text>
-                <Text style={styles.descriptionText}>{item.transactionDescription}</Text>
-                <Text style={styles.descriptionText}>Amount: ${item.transactionAmount}</Text>
-                <Text style={styles.descriptionText}>Category: {item.transactionCategory}</Text>
-                <Text style={styles.descriptionText}>Date: {item.transactionDate}</Text>
+                <Text style={styles.transactionAmount}>{item.transactionAmount}</Text>
+                <Text style={styles.descriptionText}>{item.transactionCategory}</Text>
+                <Text style={styles.descriptionText}>{item.transactionDate}</Text>
+                <Text style={styles.descriptionText}> {item.transactionDescription}</Text>
             </View>
         );
     };
@@ -86,8 +105,8 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                             budgetColorTheme={budgetDetails.color || '#9ACBD0'}
                         />
 
-                        <Text style={styles.descriptionText}>
-                            {budgetDetails.budgetType === null ? budgetDetails.budgetType : "BudgetType_Placeholder"}
+                        <Text style={styles.categoryText}>
+                        {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
                         </Text>
 
                     </View>
@@ -106,7 +125,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
                     <View style={styles.transactionsContainer}>
                         <FlatList
-                            data={budgetDetails.transactions}
+                            data={budgetTransactions}
                             renderItem={renderTransaction}
                             keyExtractor={(item) => `${item.transactionID}`}
                             showsVerticalScrollIndicator={false}
@@ -153,6 +172,13 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.medium.fontFamily,
     },
 
+    categoryText: {
+        fontSize: 15,
+        color: theme.colors.surface,
+        fontFamily: theme.fonts.bold.fontFamily,
+        alignSelf: 'center',
+    },
+
     amountText: {
         fontSize: 15,
         color: theme.colors.description,
@@ -190,15 +216,20 @@ const styles = StyleSheet.create({
     transactionCard: {
         padding: 15,
         marginVertical: 20,
-        borderBottomWidth: 1,
-        borderTopWidth: 1,
-        borderColor: theme.colors.surface,
+        borderWidth: 2,
+        borderRadius: 10,
+        borderColor: theme.colors.secondary,
     },
 
     transactionTitle: {
-        color: theme.colors.primary,
+        color: theme.colors.description,
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
+    },
+    transactionAmount: {
+        color: theme.colors.primary,
+        fontFamily: theme.fonts.bold.fontFamily,
+        fontSize: 15,
     },
     dateText: {
         fontSize: 15,
