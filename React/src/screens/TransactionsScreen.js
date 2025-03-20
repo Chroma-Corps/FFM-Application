@@ -10,7 +10,6 @@ import {View,
 import { useFocusEffect } from '@react-navigation/native';
 import InAppHeader from '../components/InAppHeader'
 import {Card} from 'react-native-paper';
-import PlusFAB from '../components/PlusFAB';
 import InAppBackground from '../components/InAppBackground';
 import { theme } from '../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,6 +17,7 @@ import MonthFilter from '../components/MonthFilter';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import RadialMenu from '../components/RadialMenu';
 
 export default function TransactionsScreen({ navigation }) {
 
@@ -47,20 +47,22 @@ export default function TransactionsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`https://ffm-application-midterm.onrender.com/transactions`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/transactions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         }
       });
-  
+
+      const data = await response.json();
+
       if (response.ok) {
-        const transactions = await response.json();
-        setData(transactions);
+        setData(data.transactions);
       } else {
-        console.error('Failed To Fetch Transactions:', response.statusText);
+        console.error(data.message);
       }
+      console.log('Fetch Transactions Status:', data.status)
     } catch (error) {
       console.error('Error Fetching Transactions:', error);
     }
@@ -149,7 +151,7 @@ export default function TransactionsScreen({ navigation }) {
                 </Text>
               </View>
             </View>
-            <Text style={styles.cardText}>{item.transactionCategory}</Text>
+            <Text style={styles.cardText}>{item.transactionCategory.join(' • ')}</Text>
             <Text style={styles.timeText}>{item.transactionTime}</Text> 
           </Card>
         </TouchableOpacity>
@@ -183,7 +185,9 @@ export default function TransactionsScreen({ navigation }) {
   return (
     <View style={styles.transactionsScreen}>
       <InAppBackground>
-        <InAppHeader>Transactions</InAppHeader>
+        <View style={styles.headerContainer}>
+          <InAppHeader>Transactions</InAppHeader>
+        </View>
 
         {/* Transactions Search Bar : Title/ Category */}
         <TextInput
@@ -204,7 +208,7 @@ export default function TransactionsScreen({ navigation }) {
           
         <View style={{ flex: 1 }}>{renderGroupedTransactions()}</View>
 
-        <PlusFAB onPress={() => navigation.push('AddTransaction')} />
+        <RadialMenu navigation={navigation} />
       </InAppBackground>
     </View>
   );
@@ -222,6 +226,14 @@ const styles = StyleSheet.create({
         lineHeight: 21,
         textAlign: 'center',
         paddingTop: 100
+    },
+
+    headerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      width: '100%',
+      padding: 20
     },
 
     cardText: {

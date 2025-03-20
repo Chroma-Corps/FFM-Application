@@ -8,17 +8,10 @@ import { Image } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import InAppHeader from '../components/InAppHeader';
 import { theme } from '../core/theme';
-import PlusFAB from '../components/PlusFAB';
 import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
 import ProgressBar from '../components/ProgressBar';
-
-const defaultCategories = [ //To Replace With API Route Fetch - JaleneA
-  { id: 1, name: 'Category#1', image: require('../assets/default_img.jpg') },
-  { id: 2, name: 'Category#2', image: require('../assets/default_img.jpg') },
-  { id: 3, name: 'Category#3', image: require('../assets/default_img.jpg') },
-  { id: 4, name: 'Category#4', image: require('../assets/default_img.jpg') },
-];
+import RadialMenu from '../components/RadialMenu';
 
 const filters = ['All', 'Savings', 'Expense'];
 
@@ -37,7 +30,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`https://ffm-application-midterm.onrender.com/budgets`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -45,12 +38,14 @@ export default function BudgetsScreen({ navigation }) {
         }
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const budgets = await response.json();
-        setData(budgets);
+        setData(data.budgets);
       } else {
-        console.error('Failed To Fetch Budgets:', response.statusText);
+        console.error(data.message);
       }
+      console.log('Fetch Budgets Status:', data.status)
     } catch (error) {
       console.error('Error Fetching Budgets:', error);
     } finally {
@@ -76,22 +71,41 @@ export default function BudgetsScreen({ navigation }) {
     const budgetColorTheme = item.color || '#9ACBD0';
 
     const renderCategories = (budgetCategories) => {
-      const categoryImages = budgetCategories && budgetCategories.length > 0
-        ? budgetCategories
-        : defaultCategories;
+      const categoryImages = {
+          bills: require('../assets/icons/bills.png'),
+          entertainment: require('../assets/icons/entertainment.png'),
+          groceries: require('../assets/icons/groceries.png'),
+          income: require('../assets/icons/income.png'),
+          shopping: require('../assets/icons/shopping.png'),
+          transit: require('../assets/icons/transit.png')
+      };
 
-      const displayedCategories = categoryImages.slice(0, 4);
-      const categoryLimit = categoryImages.length > 4;
+      const categoriesToDisplay = budgetCategories && budgetCategories.length > 0
+          ? budgetCategories
+          : [];
+
+      const displayedCategories = categoriesToDisplay.slice(0, 3);
+      const categoryLimit = categoriesToDisplay.length > 3;
+
+      const categoryWithImages = displayedCategories.map((category, index) => {
+          const categoryName = category.toLowerCase();
+          return {
+              image: categoryImages[categoryName] || require('../assets/default_img.jpg') // Fallback image
+          };
+      });
 
       return (
-        <View style={styles.categoryList}>
-          {displayedCategories.map((category, index) => (
-            <Image key={category.id || index} source={category.image} style={styles.categoryIcon} />
-          ))}
-          {categoryLimit && <Text style={styles.cardText}>...</Text>}
-        </View>
+          <View style={styles.categoryList}>
+              {categoryWithImages.map((category, index) => (
+                  <View key={category.name || index} style={styles.categoryItem}>
+                      <Image source={category.image} style={styles.categoryIcon} />
+                      <Text style={styles.categoryText}>{category.name}</Text>
+                  </View>
+              ))}
+              {categoryLimit && <Text style={styles.cardText}>...</Text>}
+          </View>
       );
-    };
+  };
 
     return (
       <TouchableOpacity
@@ -104,7 +118,13 @@ export default function BudgetsScreen({ navigation }) {
             <View style={styles.cardContent}>
               <View style={styles.cardHeaderContainer}>
                 <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
-                <View>{renderCategories(item.categories)}</View>
+                <View>
+                  {item.budgetCategory ? (
+                      renderCategories(item.budgetCategory)
+                  ) : (
+                      <Text>None</Text>
+                  )}
+                </View>
               </View>
 
               <View style={styles.cardDetailsContainer}>
@@ -164,8 +184,7 @@ export default function BudgetsScreen({ navigation }) {
               keyExtractor={item => `${item.budgetID}`}
             />
           )}
-
-        <PlusFAB onPress={() => navigation.push('CreateBudget')} />
+          <RadialMenu navigation={navigation} />
       </InAppBackground>
     </View>
   );
@@ -190,6 +209,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
+    padding: 20
   },
 
   descriptionText: {
@@ -248,13 +268,12 @@ const styles = StyleSheet.create({
 
   categoryList: {
     flexDirection: 'row',
-    gap: 5,
+    gap: 10,
   },
 
   categoryIcon: {
     width: 30,
     height: 30,
-    borderRadius: 15,
     resizeMode: 'cover',
   },
 
