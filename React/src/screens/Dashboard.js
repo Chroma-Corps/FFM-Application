@@ -106,7 +106,10 @@ export default function Dashboard({ navigation }) {
 
   return (
     <InAppBackground>
+      <View style={styles.headerContainer}>
         <InAppHeader>Dashboard</InAppHeader>
+      </View>
+        
         <Text style={styles.sectionTitle}>Banks</Text>
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -148,6 +151,14 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     textAlign: 'center',
     marginTop: 10,
+  },
+
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    padding: 20
   },
 
   bankItem: {
