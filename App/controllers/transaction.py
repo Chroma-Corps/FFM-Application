@@ -97,6 +97,11 @@ def get_all_bank_transactions(bankID):
     transactions = Transaction.query.filter_by(bankID=bankID).all()
     return [transaction.get_json() for transaction in transactions]
 
+# Get Transaction Associated With A Goal
+def get_all_goal_transactions(goalID):
+    transactions = Transaction.query.filter_by(goalID=goalID).all()
+    return [transaction.get_json() for transaction in transactions]
+
 # Update Existing Transaction
 def update_transaction(transactionID, transactionTitle=None, transactionDesc=None, transactionType=None,
                        transactionCategory=None, transactionAmount=None, transactionDate=None,

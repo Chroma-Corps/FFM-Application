@@ -1,9 +1,11 @@
+from App.controllers.goal import create_goal
 from App.database import db
 from App.controllers.bank import create_bank
 from App.controllers.budget import create_budget
 from App.controllers.transaction import add_transaction
 from App.controllers.user import create_user
 from App.models.budget import BudgetType, TransactionScope
+from App.models.goal import GoalType
 from App.models.transaction import TransactionType
 
 def initialize():
@@ -21,7 +23,18 @@ def initialize():
         isPrimary=True
     )
 
-    inclusive_budget = create_budget (
+    # Goal
+    family_goal = create_goal (
+        userID=bob.id,
+        goalTitle="Vacation Planning",
+        targetAmount=1000.00,
+        goalType=GoalType.SAVINGS,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id]
+    )
+
+    create_budget (
         userID=bob.id,
         bankID=new_bank.bankID,
         budgetTitle="Inclusive Budget",
@@ -31,6 +44,7 @@ def initialize():
         transactionScope=TransactionScope.INCLUSIVE,
         startDate="2025-01-01",
         endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
     exclusive_budget = create_budget (
@@ -42,7 +56,8 @@ def initialize():
         budgetCategory=[],
         transactionScope=TransactionScope.EXCLUSIVE,
         startDate="2025-01-01",
-        endDate="2025-01-31"
+        endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
     add_transaction (

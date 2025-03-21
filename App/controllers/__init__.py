@@ -2,8 +2,10 @@ from .user import *
 from .auth import *
 from .initialize import *
 from .bank import *
+from .goal import *
 from .budget import *
 from .transaction import *
 from .userBank import *
+from .userGoal import *
 from .userBudget import *
 from .userTransaction import *

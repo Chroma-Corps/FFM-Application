@@ -7,8 +7,8 @@ export default function RadialMenu({ navigation }) {
   const actions = [
     { 
         text: 'New Goal', 
-        icon: <MaterialIcons name="flag" size={20} color={theme.colors.textSecondary} />,
-        name: 'Budgets', position: 1, // To Change To Create Goal
+        icon: <MaterialIcons name="track-changes" size={20} color={theme.colors.textSecondary} />,
+        name: 'CreateGoal', position: 1,
         color: theme.colors.primary,
     },
     { 
