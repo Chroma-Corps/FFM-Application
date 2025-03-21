@@ -468,7 +468,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                 </ScrollView>
                 <View style={styles.buttonContainer}>
                     <Button mode="contained" onPress={createBudget} style={styles.buttonStyle}>
-                        Create
+                        Create Budget
                     </Button>
                 </View>
             </InAppBackground>

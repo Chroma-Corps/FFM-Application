@@ -72,7 +72,7 @@ export default function GoalsScreen({ navigation }) {
 
     return (
       <TouchableOpacity
-        onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}
+        // onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}
       >
         <Card style={[styles.card, { borderColor: goalColorTheme }]}>
           <View style={styles.cardContentContainer}>

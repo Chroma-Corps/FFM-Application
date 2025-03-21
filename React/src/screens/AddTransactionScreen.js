@@ -588,7 +588,7 @@ export default function AddTransactionScreen({ navigation }) {
             </ScrollView>
             <View style={styles.buttonContainer}>
                 <Button mode="contained" onPress={addTransaction}>
-                    Add
+                    Add Transaction
             </Button>
             </View>
         </InAppBackground>
