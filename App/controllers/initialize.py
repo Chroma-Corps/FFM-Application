@@ -24,16 +24,17 @@ def initialize():
     )
 
     # Goal
-    new_goal = create_goal (
+    family_goal = create_goal (
         userID=bob.id,
-        goalTitle="Bob's Goal",
+        goalTitle="Vacation Planning",
         targetAmount=1000.00,
         goalType=GoalType.SAVINGS,
         startDate="2025-01-01",
         endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
-    inclusive_budget = create_budget (
+    create_budget (
         userID=bob.id,
         bankID=new_bank.bankID,
         budgetTitle="Inclusive Budget",
@@ -43,6 +44,7 @@ def initialize():
         transactionScope=TransactionScope.INCLUSIVE,
         startDate="2025-01-01",
         endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
     exclusive_budget = create_budget (
@@ -54,7 +56,8 @@ def initialize():
         budgetCategory=[],
         transactionScope=TransactionScope.EXCLUSIVE,
         startDate="2025-01-01",
-        endDate="2025-01-31"
+        endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
     add_transaction (
