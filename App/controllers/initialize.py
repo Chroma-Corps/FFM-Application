@@ -1,9 +1,11 @@
+from App.controllers.goal import create_goal
 from App.database import db
 from App.controllers.bank import create_bank
 from App.controllers.budget import create_budget
 from App.controllers.transaction import add_transaction
 from App.controllers.user import create_user
 from App.models.budget import BudgetType, TransactionScope
+from App.models.goal import GoalType
 from App.models.transaction import TransactionType
 
 def initialize():
@@ -19,6 +21,16 @@ def initialize():
         bankCurrency="TTD",
         bankAmount=5000.00,
         isPrimary=True
+    )
+
+    # Goal
+    new_goal = create_goal (
+        userID=bob.id,
+        goalTitle="Bob's Goal",
+        targetAmount=1000.00,
+        goalType=GoalType.SAVINGS,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
     )
 
     inclusive_budget = create_budget (

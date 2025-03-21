@@ -18,40 +18,40 @@ const filters = ['All', 'Savings', 'Expense'];
 export default function GoalsScreen({ navigation }) {
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
-  const [loading, setLoading] = useState(false); // To Revert Back To True
+  const [loading, setLoading] = useState(true);
 
-//   const fetchData = async () => {
-//     try {
-//       setLoading(true);
-//       const token = await AsyncStorage.getItem("access_token");
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("access_token");
 
-//       if (!token) {
-//         console.error('No Token Found');
-//         return;
-//       }
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
 
-//       const response = await fetch(`https://ffm-application-main.onrender.com/goals`, {
-//         method: 'GET',
-//         headers: {
-//           'Authorization': `Bearer ${token}`,
-//           'Content-Type': 'application/json',
-//         }
-//       });
+      const response = await fetch(`https://ffm-application-main.onrender.com/goals`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
 
-//       const data = await response.json();
+      const data = await response.json();
 
-//       if (response.ok) {
-//         setData(data.goals);
-//       } else {
-//         console.error(data.message);
-//       }
-//       console.log('Fetch Goals Status:', data.status)
-//     } catch (error) {
-//       console.error('Error Fetching Goals:', error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+      if (response.ok) {
+        setData(data.goals);
+      } else {
+        console.error(data.message);
+      }
+      console.log('Fetch Goals Status:', data.status)
+    } catch (error) {
+      console.error('Error Fetching Goals:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredGoals = selectedFilter === 'All'
     ? data
@@ -61,11 +61,11 @@ export default function GoalsScreen({ navigation }) {
     setSelectedFilter(filter);
   };
 
-//   useFocusEffect(
-//     useCallback(() => {
-//       fetchData();
-//     }, [])
-//   );
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const renderData = (item) => {
     const goalColorTheme = item.color || '#9ACBD0';
@@ -81,19 +81,12 @@ export default function GoalsScreen({ navigation }) {
             <View style={styles.cardContent}>
               <View style={styles.cardHeaderContainer}>
                 <Text style={styles.cardTitle}>{item.goalTitle}</Text>
-                <View>
-                  {item.goalCategory ? (
-                      renderCategories(item.goalCategory)
-                  ) : (
-                      <Text>None</Text>
-                  )}
-                </View>
               </View>
 
               <View style={styles.cardDetailsContainer}>
                 <Text style={styles.cardText}>
-                  <Text style={styles.remainingGoalAmountText}>{item.remainingGoalAmount} </Text>
-                  left of {item.goalAmount}
+                  <Text style={styles.remainingGoalAmountText}>{item.currentAmount} </Text>
+                  left of {item.targetAmount}
                 </Text>
 
                 <ProgressBar
