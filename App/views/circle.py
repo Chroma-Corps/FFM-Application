@@ -8,7 +8,11 @@ from App.controllers import (
     get_all_circle_transactions,
     get_circle_users_json,
     delete_circle,
-    update_circle
+    update_circle,
+    get_user,
+    get_circle,
+    set_active_circle,
+    get_active_circle
 )
 
 circle_views = Blueprint('circle_views', __name__)
@@ -127,3 +131,39 @@ def update_user_circle(circleID):
     except Exception as e:
         print(f"An Error Occurred: {e}")
         return jsonify({"status": "error", "message": f"Failed To Update Circle: {str(e)}"}), 500
+
+# 8. Get Circle
+@circle_views.route('/active-circle', methods=['GET'])
+@jwt_required()
+def get_active_circle_route():
+    try:
+        userID = get_jwt_identity()
+        active_circle = get_active_circle(userID)
+
+        if active_circle:
+            return jsonify({"status": "success", "activeCircle": active_circle.get_json()}), 200
+        else:
+            return jsonify({"status": "error", "message": "Active Circle Not Found For This User"}), 404
+
+    except Exception as e:
+        print(f"Error Getting Active Circle: {e}")
+        return jsonify({"status": "error", "message": "An Error Occurred While Fetching Active Circle"}), 500
+
+# 9. Set Circle
+@circle_views.route('/active-circle', methods=['POST'])
+@jwt_required()
+def set_active_circle_route():
+    try:
+        data = request.get_json()
+        userID = get_jwt_identity()
+        circleID = data.get('circleID')
+
+        if not all([userID, circleID]):
+            return jsonify({"status": "error", "message": "UserID And CircleID Are Required"}), 400
+
+        set_active_circle(userID, circleID)
+        return jsonify({"status": "success", "message": "Active Circle Updated Successfully"}), 200
+
+    except Exception as e:
+        print(f"Error setting active circle: {e}")
+        return jsonify({"status": "error", "message": "An Error Occurred While Setting The Active Circle"}), 500

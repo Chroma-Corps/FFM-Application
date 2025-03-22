@@ -12,8 +12,8 @@ import { passwordValidator } from '../helpers/passwordValidator'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState({ value: 'bob@mail.com', error: '' })
-  const [password, setPassword] = useState({ value: 'bobpass', error: '' })
+  const [email, setEmail] = useState({ value: 'jalene@mail.com', error: '' })
+  const [password, setPassword] = useState({ value: 'jalenepass', error: '' })
   const [loading, setLoading] = useState(false)
 
   const onLoginPressed = async () => {
@@ -28,7 +28,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(true)
 
     try {
-      const response = await fetch(`https://ffm-application-main.onrender.com/login`, {
+      const response = await fetch(`http://192.168.0.9:8080/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

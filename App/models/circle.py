@@ -28,7 +28,8 @@ class Circle(db.Model):
         return{
             'circleID': self.circleID,
             'circleName': self.circleName,
-            'circleType': self.circleType.value
+            'circleType': self.circleType.value,
+            'circleColor': self.circleColor
         }
 
     def __str__(self):

@@ -10,7 +10,79 @@ import RadialMenu from '../components/RadialMenu';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
+  const [reload, setReload] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [circleType, setCircleType] = useState('');
+  const [circles, setCircles] = useState([]);
+  const [newCurrentCircle, setNewCurrentCircle] = useState([]);
+  const [currentCircle, setCurrentCircle] = useState(null);
+
+  const fetchActiveCircle = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+  
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+  
+      const response = await fetch('http://192.168.0.9:8080/active-circle', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === 'success') {
+        setCurrentCircle(data.activeCircle);
+        setNewCurrentCircle(data.activeCircle);
+        console.log("Updated Current Circle:", data.activeCircle);
+        setCircleType(data.activeCircle.circleType)
+      } else {
+        console.error(data.message);
+      }
+      console.log('Fetch Active Circle Status:', data.status)
+    } catch (error) {
+      console.error("Error Fetching Active Circle:", error);
+    }
+  }
+
+  const setActiveCircle = async (circleID) => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+  
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+  
+      const response = await fetch('http://192.168.0.9:8080/active-circle', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          circleID: circleID,
+        }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok && data.status === 'success') {
+        setReload(prevState => !prevState);
+        fetchActiveCircle();
+      } else {
+        console.error(data.message);
+      }
+      console.log('Set Active Circle Status:', data.status)
+    } catch (error) {
+      console.error("Error Setting Active Circle:", error);
+    }
+  };
 
   const fetchBanks = async () => {
     try {
@@ -22,7 +94,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('https://ffm-application-main.onrender.com/banks', {
+      const response = await fetch('http://192.168.0.9:8080/banks', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -45,15 +117,55 @@ export default function Dashboard({ navigation }) {
     }
   };
 
+  const fetchCircles = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+
+      const response = await fetch('http://192.168.0.9:8080/circles', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        setCircles(data.circles);
+      } else {
+        console.error(data.message);
+      }
+      console.log('Fetch Circles Status:', data.status)
+    } catch (error) {
+      console.error("Error Fetching Circles:", error);
+    }
+  }
+
   useFocusEffect(
     useCallback(() => {
+      fetchActiveCircle();
       fetchBanks();
-    }, [])
+      fetchCircles();
+    }, [reload])
   );
 
   // const handleAddBank = () => {
   //   navigation.navigate('AddBank');
   // };
+
+  const handleViewSwap = async () => {
+    setNewCurrentCircle(null);
+    if (circleType === 'Self') {
+      setCircleType('Group');
+    } else {
+      setCircleType('Self');
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -64,7 +176,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('https://ffm-application-main.onrender.com/logout', {
+      const response = await fetch('http://192.168.0.9:8080/logout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -89,7 +201,6 @@ export default function Dashboard({ navigation }) {
       console.error('Logout Error:', error);
     }
   };
-  
 
   const renderBankItem = ( {item} ) => {
     return (
@@ -104,8 +215,58 @@ export default function Dashboard({ navigation }) {
     );
   };
 
+  const renderCircleItem = ({ item }) => {
+    return (
+      <View style={styles.circleContainer}>
+          <TouchableOpacity 
+              style={[
+                  styles.circle,
+                  { backgroundColor: item.circleColor},
+                  newCurrentCircle?.circleID === item.circleID && styles.activeCircle
+              ]}
+              onPress={() => {
+                setNewCurrentCircle(item);
+                setActiveCircle(item.circleID);
+              }}
+          />
+          <Text style={styles.circleText}>{item.circleName}</Text> 
+      </View>
+    );
+  };
+
   return (
     <InAppBackground>
+      {circleType === 'Group' && (
+      <View style={styles.container}>
+        <View>
+        <TouchableOpacity
+            style={[styles.circle, { backgroundColor: "#306060"}]}
+            onPress={() => handleViewSwap()}
+          />
+          <Text style={styles.circleText}>Groups</Text>
+        </View>
+          <FlatList
+              data={circles.filter(circle => circle.circleType === 'Group')}
+              renderItem={renderCircleItem}
+              keyExtractor={(item, index) => item?.circleID?.toString() ?? index.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+          />
+      </View>
+      )}
+
+      {circleType === 'Self' && (
+            <View style={styles.container}>
+              <View>
+              <TouchableOpacity
+                  style={[styles.circle, { backgroundColor: "#306060"}]}
+                  onPress={() => handleViewSwap()}
+                />
+                <Text style={styles.circleText}>Self</Text>
+              </View>
+            </View>
+      )}
+    <View key={reload ? "reloadKey" : "normalKey"}>
       <View style={styles.headerContainer}>
         <InAppHeader>Dashboard</InAppHeader>
       </View>
@@ -132,6 +293,7 @@ export default function Dashboard({ navigation }) {
         )}
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={handleLogout}>Logout</Button>
+        </View>
         </View>
         <RadialMenu navigation={navigation} />
     </InAppBackground>
@@ -252,4 +414,35 @@ remainingBankCardAmount: {
     color: theme.colors.textSecondary,
     marginLeft: 20,
   },
+
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+
+  circleContainer: {
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+
+  circle: {
+    width: 60,
+    height: 60,
+    borderRadius: 50,
+    marginHorizontal: 10,
+    borderWidth: 3,
+    borderColor: 'transparent',
+  },
+
+  activeCircle: {
+      borderColor: 'white',
+  },
+
+  circleText: {
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+  }
 });

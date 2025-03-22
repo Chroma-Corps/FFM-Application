@@ -32,7 +32,10 @@ def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, c
 
 # Get Goal By ID
 def get_goal(goalID):
+    if goalID is None:
+        return None
     return Goal.query.get(goalID)
+
 
 # Get Goal Based On Circle
 def get_goal_by_circle_json(circleID):

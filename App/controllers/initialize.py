@@ -14,91 +14,86 @@ def initialize():
     db.drop_all()
     db.create_all()
 
-    # Bobberson
-    bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
-    alice = create_user('Alice Bobberson','alice@mail.com', 'alicepass')
-
-    # Chroma Corps
+    # Users - Armstrongs
+    bob = create_user('Bob Armstrong', 'bob@mail.com', 'bobpass')
+    alice = create_user('Alice Armstrong','alice@mail.com', 'alicepass')
     jalene = create_user('Jalene Armstrong', 'jalene@mail.com', 'jalenepass')
-    rynnia = create_user('Rynnia Ryan','rynnia@mail.com', 'rynniapass')
-    tamia = create_user('Tamia Williams', 'tamia@mail.com', 'tamiapass')
 
-    # Circles
-    bob_self = create_circle (
-        userID=bob.id,
-        circleName="Self",
-        circleType=CircleType.SELF,
-        circleColor="#48A6A7"
-    )
-
-    bobberson_circle = create_circle (
+    armstrong_circle = create_circle (
         userID=bob.id,
         circleName="Bobberson",
         circleType=CircleType.GROUP,
-        circleColor="#48A6A7",
+        circleColor="#6A3D9A",
         userIDs=[alice.id, jalene.id]
     )
 
-    chroma_circle = create_circle (
-        userID=jalene.id,
-        circleName="ChromaCorps",
+    create_circle (
+        userID=bob.id,
+        circleName="Test Circle #1",
         circleType=CircleType.GROUP,
-        circleColor="#F8641E",
-        userIDs=[rynnia.id, tamia.id]
+        circleColor="#3A8DFF",
+        userIDs=[alice.id, jalene.id]
     )
 
-    set_active_circle(bob.id, bobberson_circle.circleID)
-    set_active_circle(jalene.id, chroma_circle.circleID)
-
-    # Bank - Bob
-    bob_bank = create_bank (
+    create_circle (
         userID=bob.id,
-        bankTitle="Bob's Bank",
-        bankCurrency="TTD",
-        bankAmount=5000.00,
-        isPrimary=True,
-        userIDs=[],
-        circleID=bob_self.circleID
+        circleName="Test Circle #2",
+        circleType=CircleType.GROUP,
+        circleColor="#F28D35",
+        userIDs=[alice.id, jalene.id]
+    )
+
+    create_circle (
+        userID=bob.id,
+        circleName="Test Circle #3",
+        circleType=CircleType.GROUP,
+        circleColor="#9B2D69",
+        userIDs=[alice.id, jalene.id]
+    )
+
+    create_circle (
+        userID=bob.id,
+        circleName="Test Circle #4",
+        circleType=CircleType.GROUP,
+        circleColor="#56A64B",
+        userIDs=[alice.id, jalene.id]
+    )
+
+    create_circle (
+        userID=bob.id,
+        circleName="Test Circle #5",
+        circleType=CircleType.GROUP,
+        circleColor="#F1C40F",
+        userIDs=[alice.id, jalene.id]
     )
 
     # Bank - Bobberson
-    bobberson_bank = create_bank (
+    armstrong_bank = create_bank (
         userID=bob.id,
-        bankTitle="Bobberson Bank",
+        bankTitle="Armstrong Bank",
         bankCurrency="TTD",
         bankAmount=5000.00,
         isPrimary=True,
-        userIDs=[alice.id],
-        circleID=bobberson_circle.circleID
-    )
-
-    # Bank - Chroma Corps
-    create_bank (
-        userID=jalene.id,
-        bankTitle="Chroma Bank",
-        bankCurrency="TTD",
-        bankAmount=5000.00,
-        isPrimary=True,
-        userIDs=[rynnia.id, tamia.id],
-        circleID=chroma_circle.circleID
+        userIDs=[alice.id, jalene.id],
+        circleID=armstrong_circle.circleID
     )
 
     # Goal
-    bobberson_goal = create_goal (
+    armstrong_goal = create_goal (
         userID=bob.id,
         goalTitle="Vacation Planning",
         targetAmount=1000.00,
         goalType=GoalType.SAVINGS,
         startDate="2025-01-01",
         endDate="2025-01-31",
-        userIDs=[alice.id],
-        circleID=bobberson_circle.circleID
+        userIDs=[alice.id, jalene.id],
+        circleID=armstrong_circle.circleID
     )
 
     create_budget (
         userID=bob.id,
-        bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
+        bankID=armstrong_bank.bankID,
+        circleID=armstrong_circle.circleID,
         budgetTitle="Inclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
@@ -112,7 +107,7 @@ def initialize():
     exclusive_budget = create_budget (
         userID=bob.id,
         bankID=None,
-        circleID=bobberson_circle.circleID,
+        circleID=armstrong_circle.circleID,
         budgetTitle="Exclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
@@ -133,9 +128,9 @@ def initialize():
         transactionDate="2025-02-10",
         transactionTime="10:30",
         budgetID=exclusive_budget.budgetID,
-        bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
-        goalID=bobberson_goal.goalID
+        bankID=armstrong_bank.bankID,
+        goalID=None,
+        circleID=armstrong_circle.circleID,
     )
 
     add_transaction (
@@ -147,7 +142,70 @@ def initialize():
         transactionAmount=200.00,
         transactionDate="2025-03-10",
         transactionTime="09:30",
-        bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
-        goalID=bobberson_goal.goalID
+        bankID=armstrong_bank.bankID,
+        goalID=None,
+        circleID=armstrong_circle.circleID,
+    )
+
+    add_transaction (
+        userID=jalene.id,
+        transactionTitle="Vacay Progress",
+        transactionDesc="Saved a sum of money to contribute towards vacation plans",
+        transactionType=TransactionType.INCOME,
+        transactionCategory=['INCOME'],
+        transactionAmount=200.00,
+        transactionDate="2025-03-10",
+        transactionTime="09:30",
+        bankID=armstrong_bank.bankID,
+        circleID=armstrong_circle.circleID,
+        goalID=armstrong_goal.goalID
+    )
+
+    set_active_circle(bob.id, armstrong_circle.circleID)
+    set_active_circle(jalene.id, armstrong_circle.circleID)
+    set_active_circle(alice.id, armstrong_circle.circleID)
+
+    # Users - Chroma Corps
+    rynnia = create_user('Rynnia Ryan','rynnia@mail.com', 'rynniapass')
+    tamia = create_user('Tamia Williams', 'tamia@mail.com', 'tamiapass')
+
+    chroma_circle = create_circle (
+        userID=jalene.id,
+        circleName="ChromaCorps",
+        circleType=CircleType.GROUP,
+        circleColor="#F8641E",
+        userIDs=[rynnia.id, tamia.id]
+    )
+
+    # Bank - Chroma Corps
+    create_bank (
+        userID=jalene.id,
+        bankTitle="Chroma Bank",
+        bankCurrency="TTD",
+        bankAmount=5000.00,
+        isPrimary=True,
+        userIDs=[rynnia.id, tamia.id],
+        circleID=chroma_circle.circleID
+    )
+
+    set_active_circle(rynnia.id, chroma_circle.circleID)
+    set_active_circle(tamia.id, chroma_circle.circleID)
+
+     # Circles - Personal
+    jalene_self = create_circle (
+        userID=jalene.id,
+        circleName="Self",
+        circleType=CircleType.SELF,
+        circleColor="#48A6A7"
+    )
+
+    # Bank - Jalene
+    create_bank (
+        userID=jalene.id,
+        bankTitle="My Bank",
+        bankCurrency="TTD",
+        bankAmount=0.00,
+        isPrimary=True,
+        userIDs=[],
+        circleID=jalene_self.circleID
     )

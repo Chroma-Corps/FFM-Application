@@ -17,7 +17,8 @@ import {
   AddTransactionScreen,
   TransactionsScreen,
   GoalsScreen,
-  CreateGoalScreen
+  CreateGoalScreen,
+  CreateCircleScreen
 } from './src/screens'
 
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
@@ -62,6 +63,7 @@ export default function App() {
             <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
             <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
+            <Stack.Screen name="CreateCircle" component={CreateCircleScreen} />
 
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
 
