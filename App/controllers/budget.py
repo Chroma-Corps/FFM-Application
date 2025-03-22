@@ -5,7 +5,7 @@ from App.services.datetime import convert_to_date
 from App.controllers.userBudget import create_user_budget, is_budget_owner
 
 # Create A New Budget
-def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, userID, bankID, userIDs=None):
+def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, userID, bankID, circleID, userIDs=None):
     try: 
         if budgetCategory is not None:
             selectedCategory = CategoryService.get_category(budgetCategory)
@@ -21,7 +21,8 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transac
             transactionScope=transactionScope,
             startDate=startDate,
             endDate=endDate,
-            bankID=bankID
+            bankID=bankID,
+            circleID=circleID
         )
         db.session.add(new_budget)
         db.session.commit()
@@ -41,6 +42,10 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transac
 # Get Budget By ID
 def get_budget(budgetID):
     return Budget.query.get(budgetID)
+
+# Get Budget Based On Circle
+def get_budget_by_circle(circleID):
+    return Budget.query.get(circleID)
 
 # Get Budget By ID (JSON)
 def get_budget_json(budgetID):

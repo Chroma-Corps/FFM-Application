@@ -4,7 +4,7 @@ from App.services.datetime import convert_to_date
 from App.controllers.userGoal import create_user_goal, is_goal_owner
 
 # Create A New Goal
-def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, userIDs=None):
+def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, circleID, userIDs=None):
     try: 
         new_goal = Goal (
             goalTitle=goalTitle,
@@ -13,6 +13,7 @@ def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, u
             goalType=goalType,
             startDate=startDate,
             endDate=endDate,
+            circleID=circleID
         )
         db.session.add(new_goal)
         db.session.commit()
@@ -32,6 +33,10 @@ def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, u
 # Get Goal By ID
 def get_goal(goalID):
     return Goal.query.get(goalID)
+
+# Get Goal Based On Circle
+def get_goal_by_circle(circleID):
+    return Goal.query.get(circleID)
 
 # Get Goal By ID (JSON)
 def get_goal_json(goalID):

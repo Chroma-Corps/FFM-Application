@@ -6,7 +6,8 @@ from App.controllers import (
     update_bank,
     delete_bank,
     get_bank_json,
-    get_user_banks_json,
+    get_user,
+    get_circle_banks_json,
     get_all_bank_budgets,
     get_bank_users_json,
     get_all_bank_transactions
@@ -52,7 +53,9 @@ def new_bank():
 def list_user_banks():
     try:
         userID = get_jwt_identity()
-        banks = get_user_banks_json(userID)
+        user = get_user(userID)
+        circleID = user.activeCircleID
+        banks = get_circle_banks_json(circleID)
         return jsonify({"status": "success", "banks": banks}), 200
 
     except Exception as e:

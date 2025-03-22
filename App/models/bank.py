@@ -12,11 +12,16 @@ class Bank(db.Model):
     remainingBankAmount = db.Column(db.Float, nullable=False)
     isPrimary = db.Column(db.Boolean, default=False)
 
+    # Foreign Keys
+    circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
+
     # Relationships
+    circle = db.relationship('Circle', backref='banks', lazy=True) # 1 Circle -> Many Banks
     budgets = db.relationship('Budget', back_populates='banks', cascade='all, delete-orphan')
     user_banks = db.relationship('UserBank', back_populates='bank') # UserBanks
 
-    def __init__(self, bankTitle, bankCurrency, bankAmount, remainingBankAmount, isPrimary):
+    def __init__(self, bankTitle, bankCurrency, bankAmount, remainingBankAmount, isPrimary, circleID):
+        self.circleID = circleID
         self.bankTitle = bankTitle
         self.bankCurrency = bankCurrency
         self.bankAmount = bankAmount
