@@ -44,8 +44,12 @@ def get_budget(budgetID):
     return Budget.query.get(budgetID)
 
 # Get Budget Based On Circle
-def get_budget_by_circle(circleID):
-    return Budget.query.get(circleID)
+def get_budget_by_circle_json(circleID):
+    budgets = Budget.query.filter_by(circleID=circleID).all()
+    if not budgets:
+        return []
+    budgets = [budget.get_json() for budget in budgets]
+    return budgets
 
 # Get Budget By ID (JSON)
 def get_budget_json(budgetID):

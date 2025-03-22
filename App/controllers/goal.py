@@ -35,8 +35,12 @@ def get_goal(goalID):
     return Goal.query.get(goalID)
 
 # Get Goal Based On Circle
-def get_goal_by_circle(circleID):
-    return Goal.query.get(circleID)
+def get_goal_by_circle_json(circleID):
+    goals = Goal.query.filter_by(circleID=circleID).all()
+    if not goals:
+        return []
+    goals = [goal.get_json() for goal in goals]
+    return goals
 
 # Get Goal By ID (JSON)
 def get_goal_json(goalID):

@@ -47,8 +47,8 @@ def initialize():
         userIDs=[rynnia.id, tamia.id]
     )
 
-    set_active_circle(bob.id, bob_self.circleID)
-    set_active_circle(jalene.id, bobberson_circle.circleID)
+    set_active_circle(bob.id, bobberson_circle.circleID)
+    set_active_circle(jalene.id, chroma_circle.circleID)
 
     # Bank - Bob
     bob_bank = create_bank (

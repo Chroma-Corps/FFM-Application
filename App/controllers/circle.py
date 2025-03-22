@@ -1,7 +1,7 @@
-from App.controllers.bank import get_bank_by_circle
-from App.controllers.budget import get_budget_by_circle
-from App.controllers.goal import get_goal_by_circle
-from App.controllers.transaction import get_transaction_by_circle
+from App.controllers.bank import get_bank_by_circle_json
+from App.controllers.budget import get_budget_by_circle_json
+from App.controllers.goal import get_goal_by_circle_json
+from App.controllers.transaction import get_transaction_by_circle_json
 from App.database import db
 from App.models import Circle, UserCircle
 from App.controllers.userCircle import create_user_circle, is_circle_owner
@@ -99,10 +99,10 @@ def delete_circle(userID, circleID):
 # Get All Banks With The Circle
 def get_circle_banks_json(circleID):
     try:
-        circle_bank = get_bank_by_circle(circleID)
+        circle_bank = get_bank_by_circle_json(circleID)
 
         if circle_bank:
-            return [circle_bank.get_json()]
+            return circle_bank
         else:
             return []
 
@@ -113,10 +113,10 @@ def get_circle_banks_json(circleID):
 # Get All Budgets With The Circle
 def get_circle_budgets_json(circleID):
     try:
-        circle_budget = get_budget_by_circle(circleID)
+        circle_budget = get_budget_by_circle_json(circleID)
 
         if circle_budget:
-            return [circle_budget.get_json()]
+            return circle_budget
         else:
             return []
 
@@ -127,10 +127,10 @@ def get_circle_budgets_json(circleID):
 # Get All Goals With The Circle
 def get_circle_goals_json(circleID):
     try:
-        circle_goal = get_goal_by_circle(circleID)
+        circle_goal = get_goal_by_circle_json(circleID)
 
         if circle_goal:
-            return [circle_goal.get_json()]
+            return circle_goal
         else:
             return []
 
@@ -141,10 +141,10 @@ def get_circle_goals_json(circleID):
 # Get All Transactions With The Circle
 def get_circle_transactions_json(circleID):
     try:
-        circle_transaction = get_transaction_by_circle(circleID)
+        circle_transaction = get_transaction_by_circle_json(circleID)
 
         if circle_transaction:
-            return [circle_transaction.get_json()]
+            return circle_transaction
         else:
             return []
 

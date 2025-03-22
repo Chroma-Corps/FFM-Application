@@ -34,8 +34,12 @@ def get_bank(bankID):
     return Bank.query.get(bankID)
 
 # Get Bank Based On Circle
-def get_bank_by_circle(circleID):
-    return Bank.query.get(circleID)
+def get_bank_by_circle_json(circleID):
+    banks = Bank.query.filter_by(circleID=circleID).all()
+    if not banks:
+        return []
+    banks = [bank.get_json() for bank in banks]
+    return banks
 
 # Get Bank By ID (JSON)
 def get_bank_json(bankID):

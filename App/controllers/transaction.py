@@ -48,8 +48,12 @@ def get_transaction(transactionID):
     return Transaction.query.get(transactionID)
 
 # Get Transaction Based On Circle
-def get_transaction_by_circle(circleID):
-    return Transaction.query.get(circleID)
+def get_transaction_by_circle_json(circleID):
+    transactions = Transaction.query.filter_by(circleID=circleID).all()
+    if not transactions:
+        return []
+    transactions = [transaction.get_json() for transaction in transactions]
+    return transactions
 
 # Get Transaction By ID (JSON)
 def get_transaction_json(transactionID):
