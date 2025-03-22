@@ -15,21 +15,24 @@ class Circle(db.Model):
     circleName = db.Column(db.String(120), nullable=False)
     circleType = db.Column(db.Enum(CircleType), nullable=False)
     circleColor = db.Column(db.String(120), nullable=False)
+    circleImage = db.Column(db.String(120), nullable=False)
 
     # Relationships
     user_circles = db.relationship('UserCircle', back_populates='circle') # UserCircle
 
-    def __init__(self, circleName, circleType, circleColor):
+    def __init__(self, circleName, circleType, circleColor, circleImage):
         self.circleName = circleName
         self.circleType = circleType
         self.circleColor = circleColor
+        self.circleImage = circleImage
 
     def get_json(self):
         return{
             'circleID': self.circleID,
             'circleName': self.circleName,
             'circleType': self.circleType.value,
-            'circleColor': self.circleColor
+            'circleColor': self.circleColor,
+            'circleImage': self.circleImage
         }
 
     def __str__(self):

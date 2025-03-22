@@ -7,12 +7,13 @@ from App.models import Circle, UserCircle
 from App.controllers.userCircle import create_user_circle, is_circle_owner
 
 # Create A New Circle
-def create_circle(circleName, circleType, circleColor, userID, userIDs=None):
+def create_circle(circleName, circleType, circleColor, circleImage, userID, userIDs=None):
     try: 
         new_circle = Circle (
             circleName=circleName,
             circleType=circleType,
             circleColor=circleColor,
+            circleImage=circleImage
         )
         db.session.add(new_circle)
         db.session.commit()
@@ -53,7 +54,7 @@ def get_all_circles_json():
     return circles
 
 # Update Existing Circle
-def update_circle(circleID, circleName=None, circleColor=None):
+def update_circle(circleID, circleName=None, circleColor=None, circleImage=None):
     try:
         circle = get_circle(circleID)
 
@@ -62,6 +63,8 @@ def update_circle(circleID, circleName=None, circleColor=None):
                 circle.circleName = circleName
             if circleColor is not None:
                 circle.circleColor = circleColor
+            if circleImage is not None:
+                circle.circleImage = circleImage
             db.session.commit()
 
             print(f"Circle With ID {circleID} Updated Successfully.")

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
+import { Image, View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import Button from '../components/Button';
 import InAppHeader from '../components/InAppHeader';
 import InAppBackground from '../components/InAppBackground';
@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../core/theme';
 import RadialMenu from '../components/RadialMenu';
+import { MaterialIcons } from '@expo/vector-icons'
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
@@ -216,20 +217,31 @@ export default function Dashboard({ navigation }) {
   };
 
   const renderCircleItem = ({ item }) => {
+    const isSelected = newCurrentCircle?.circleID === item.circleID;
     return (
       <View style={styles.circleContainer}>
           <TouchableOpacity 
               style={[
                   styles.circle,
-                  { backgroundColor: item.circleColor},
-                  newCurrentCircle?.circleID === item.circleID && styles.activeCircle
+                  { borderColor: isSelected ? item.circleColor : 'transparent' }
               ]}
               onPress={() => {
                 setNewCurrentCircle(item);
                 setActiveCircle(item.circleID);
               }}
-          />
-          <Text style={styles.circleText}>{item.circleName}</Text> 
+          >
+            {item.circleImage && (
+              <Image source={{ uri: item.circleImage }} style={styles.circleImage} />
+            )}
+            </TouchableOpacity>
+            <Text
+              style={[
+                styles.circleText,
+                { color: isSelected ? item.circleColor : theme.colors.textSecondary } 
+              ]}
+            >
+          {item.circleName}
+        </Text>
       </View>
     );
   };
@@ -242,8 +254,10 @@ export default function Dashboard({ navigation }) {
         <TouchableOpacity
             style={[styles.circle, { backgroundColor: "#306060"}]}
             onPress={() => handleViewSwap()}
-          />
-          <Text style={styles.circleText}>Groups</Text>
+          >
+          <MaterialIcons name={"group"} size={30} color={"white"} style={styles.icon}/>
+        </TouchableOpacity>
+          <Text style={styles.circleText}>Circles</Text>
         </View>
           <FlatList
               data={circles.filter(circle => circle.circleType === 'Group')}
@@ -267,6 +281,7 @@ export default function Dashboard({ navigation }) {
             </View>
       )}
     <View key={reload ? "reloadKey" : "normalKey"}>
+      <View style={styles.lineContainer}></View> 
       <View style={styles.headerContainer}>
         <InAppHeader>Dashboard</InAppHeader>
       </View>
@@ -313,6 +328,15 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     textAlign: 'center',
     marginTop: 10,
+  },
+
+  lineContainer: {
+    borderTopWidth: 2,
+    borderTopColor: '#494949',
+    borderRadius: 50,
+    marginRight: 20,
+    marginLeft: 20,
+    marginTop: 20,
   },
 
   headerContainer: {
@@ -423,6 +447,7 @@ remainingBankCardAmount: {
 
   circleContainer: {
     alignItems: 'center',
+    justifyContent: 'center',
     marginHorizontal: 10,
   },
 
@@ -431,12 +456,10 @@ remainingBankCardAmount: {
     height: 60,
     borderRadius: 50,
     marginHorizontal: 10,
-    borderWidth: 3,
+    borderWidth: 4,
     borderColor: 'transparent',
-  },
-
-  activeCircle: {
-      borderColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   circleText: {
@@ -444,5 +467,11 @@ remainingBankCardAmount: {
     fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.textSecondary,
     textAlign: 'center',
-  }
+  },
+
+  circleImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+  },
 });

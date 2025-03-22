@@ -26,16 +26,18 @@ def new_circle():
         circleName = data.get('circleName')
         circleType = data.get('circleType')
         circleColor = data.get('circleColor')
+        circleImage = data.get('circleImage')
         userID = get_jwt_identity()
         userIDs = data.get('userIDs') or []
 
-        if not all([circleName, circleType, circleColor, userID]):
+        if not all([circleName, circleType, circleColor, circleImage, userID]):
            return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
 
         new_circle = create_circle(
             circleName=circleName,
             circleType=circleType,
             circleColor=circleColor,
+            circleImage=circleImage,
             userID=userID, # Creator Of Circle
             userIDs=userIDs) # Associated Users
 
@@ -120,8 +122,9 @@ def update_user_circle(circleID):
         data = request.get_json()
         circleName = data.get('circleName')
         circleColor = data.get('circleColor')
+        circleImage = data.get('circleImage')
 
-        updated_circle = update_circle(circleID, circleName, circleColor)
+        updated_circle = update_circle(circleID, circleName, circleColor, circleImage)
 
         if updated_circle:
             return jsonify({"status": "success", "message": "Circle Updated Successfully"}), 200

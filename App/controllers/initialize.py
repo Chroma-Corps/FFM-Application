@@ -24,46 +24,7 @@ def initialize():
         circleName="Bobberson",
         circleType=CircleType.GROUP,
         circleColor="#6A3D9A",
-        userIDs=[alice.id, jalene.id]
-    )
-
-    create_circle (
-        userID=bob.id,
-        circleName="Test Circle #1",
-        circleType=CircleType.GROUP,
-        circleColor="#3A8DFF",
-        userIDs=[alice.id, jalene.id]
-    )
-
-    create_circle (
-        userID=bob.id,
-        circleName="Test Circle #2",
-        circleType=CircleType.GROUP,
-        circleColor="#F28D35",
-        userIDs=[alice.id, jalene.id]
-    )
-
-    create_circle (
-        userID=bob.id,
-        circleName="Test Circle #3",
-        circleType=CircleType.GROUP,
-        circleColor="#9B2D69",
-        userIDs=[alice.id, jalene.id]
-    )
-
-    create_circle (
-        userID=bob.id,
-        circleName="Test Circle #4",
-        circleType=CircleType.GROUP,
-        circleColor="#56A64B",
-        userIDs=[alice.id, jalene.id]
-    )
-
-    create_circle (
-        userID=bob.id,
-        circleName="Test Circle #5",
-        circleType=CircleType.GROUP,
-        circleColor="#F1C40F",
+        circleImage="https://picsum.photos/id/82/300/300.jpg",
         userIDs=[alice.id, jalene.id]
     )
 
@@ -174,6 +135,7 @@ def initialize():
         circleName="ChromaCorps",
         circleType=CircleType.GROUP,
         circleColor="#F8641E",
+        circleImage="https://i.postimg.cc/nrzJXWDb/chromacorps.jpg",
         userIDs=[rynnia.id, tamia.id]
     )
 
@@ -191,12 +153,31 @@ def initialize():
     set_active_circle(rynnia.id, chroma_circle.circleID)
     set_active_circle(tamia.id, chroma_circle.circleID)
 
+    create_circle (
+        userID=bob.id,
+        circleName="Test Circle #1",
+        circleType=CircleType.GROUP,
+        circleColor="#3A8DFF",
+        circleImage="https://picsum.photos/id/40/300/300.jpg",
+        userIDs=[alice.id, jalene.id]
+    )
+
+    create_circle (
+        userID=bob.id,
+        circleName="Test Circle #2",
+        circleType=CircleType.GROUP,
+        circleColor="#F28D35",
+        circleImage="https://picsum.photos/id/56/300/300.jpg",
+        userIDs=[alice.id, jalene.id]
+    )
+
      # Circles - Personal
     jalene_self = create_circle (
         userID=jalene.id,
         circleName="Self",
         circleType=CircleType.SELF,
-        circleColor="#48A6A7"
+        circleColor="#48A6A7",
+        circleImage="https://picsum.photos/id/65/300/300.jpg"
     )
 
     # Bank - Jalene
