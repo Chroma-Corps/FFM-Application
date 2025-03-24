@@ -9,6 +9,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import ButtonSmall from '../components/ButtonSmall';
+import CurrencySelectionPopUp from '../components/CurrencySelectionPopUp';
 
 // Importing currency data for now until API is set up. (Rynnia.R)
 import Currencies from '../constants/currencies.json';
@@ -33,8 +34,9 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [selectedTheme, setSelectedTheme] = useState(null);
 
-    //Currency Data 
+    //Currency Data & Popup 
     const [currencyData, setCurrencyData] = useState([]);
+    const [showCurrencyPopup, setShowCurrencyPopup] = useState(false);
 
     const handleBankTitleChange = (title) => {
         setSelectedBankTitle(title);
@@ -51,6 +53,10 @@ export default function CreateBudgetsScreen({ navigation }) {
     const handleSelectCurrencyOption = (currency) => {
         setSelectedCurrency(currency);
     };
+
+    const handleViewCurrenciesPopup = () => {
+        setShowCurrencyPopup(true);
+    }
 
     const handleAddBank = () => {
         if (selectedBankTitle && selectedBankAmount && selectedBudgetType && selectedCurrency) {
@@ -81,7 +87,6 @@ export default function CreateBudgetsScreen({ navigation }) {
     const mainCurrenciesList = currencyData.filter(currency =>
         mainCurrencies.includes(currency.code)
     );
-
 
     const renderCurrencyItem = (currency) => {
         return (
@@ -120,12 +125,20 @@ export default function CreateBudgetsScreen({ navigation }) {
         );
     };
 
-
     return (
         <View style={styles.createBankScreen}>
             <InAppBackground>
 
-                <BackButton goBack={() => navigation.goBack()} />
+                <BackButton goBack={navigation.goBack} />
+
+                {showCurrencyPopup && (
+                    <CurrencySelectionPopUp
+                        currencyData={currencyData}
+                        selectedCurrency={selectedCurrency}
+                        setSelectedCurrency={setSelectedCurrency}
+                        setShowCurrenciesPopup={setShowCurrencyPopup}
+                    />
+                )}
 
                 <View style={styles.createBankDetailsContainer}>
 
@@ -179,7 +192,7 @@ export default function CreateBudgetsScreen({ navigation }) {
 
                     <View style={styles.bankCurrencyOptionsContainer}>
 
-                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency</Text>
+                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency: </Text>
 
                         <View style={styles.currencyContainer}>
                             {mainCurrenciesList.map((currency) => (
@@ -217,11 +230,9 @@ export default function CreateBudgetsScreen({ navigation }) {
                             <ButtonSmall
                                 label="View All Currencies"
                                 style={{ alignSelf: 'center', width: 180, marginTop: 10, paddingVertical: 5 }}
+                                onPress={handleViewCurrenciesPopup}
                             />
                         </View>
-
-
-
                     </View>
 
 

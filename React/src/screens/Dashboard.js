@@ -89,9 +89,9 @@ export default function Dashboard({ navigation }) {
       console.error('Logout Error:', error);
     }
   };
-  
 
-  const renderBankItem = ( {item} ) => {
+
+  const renderBankItem = ({ item }) => {
     return (
       <TouchableOpacity
         style={styles.bankCard}
@@ -109,31 +109,36 @@ export default function Dashboard({ navigation }) {
       <View style={styles.headerContainer}>
         <InAppHeader>Dashboard</InAppHeader>
       </View>
-        
-        <Text style={styles.sectionTitle}>Banks</Text>
-        {loading ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        ) : banks.length === 0 ? (
-          <Text style={styles.defaultText}>You Have No Banks Added Yet!</Text>
-        ) : (
-          <View style={styles.bankItemContainer}>
-            <FlatList
-              data={banks}
-              renderItem={renderBankItem}
-              keyExtractor={(item, index) => item?.bankID?.toString() ?? index.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.flatListContainer}
-            />
-            <Button mode="contained" style={styles.addButton}>
-              <Text style={styles.buttonText}>+</Text>
-            </Button>
-          </View>
-        )}
-        <View style={styles.buttonContainer}>
-          <Button mode="contained" onPress={handleLogout}>Logout</Button>
+
+      <Text style={styles.sectionTitle}>Banks</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      ) : banks.length === 0 ? (
+        <Text style={styles.defaultText}>You Have No Banks Added Yet!</Text>
+      ) : (
+        <View style={styles.bankItemContainer}>
+          <FlatList
+            data={banks}
+            renderItem={renderBankItem}
+            keyExtractor={(item, index) => item?.bankID?.toString() ?? index.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.flatListContainer}
+          />
+          <Button
+            mode="contained"
+            style={styles.addButton}
+            onPress={() => navigation.push('CreateBank')}
+          >
+            <Text style={styles.buttonText}>+</Text>
+          </Button>
+
         </View>
-        <RadialMenu navigation={navigation} />
+      )}
+      <View style={styles.buttonContainer}>
+        <Button mode="contained" onPress={handleLogout}>Logout</Button>
+      </View>
+      <RadialMenu navigation={navigation} />
     </InAppBackground>
   );
 }
@@ -172,7 +177,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     margin: 5,
     padding: 15,
-    borderRadius: 5, 
+    borderRadius: 5,
   },
 
   bankCardTitle: {
@@ -180,23 +185,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: theme.fonts.bold.fontFamily,
     textAlign: 'center',
-},
+  },
 
-bankCardAmount: {
-  color: theme.colors.textSecondary,
-  fontSize: 10,
-  fontFamily: theme.fonts.medium.fontFamily,
-  marginBottom: 5,
-  textAlign: 'center',
-},
+  bankCardAmount: {
+    color: theme.colors.textSecondary,
+    fontSize: 10,
+    fontFamily: theme.fonts.medium.fontFamily,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 
-remainingBankCardAmount: {
-  color: theme.colors.textSecondary,
-  fontSize: 15,
-  fontFamily: theme.fonts.bold.fontFamily,
-  marginBottom: 5,
-  textAlign: 'center',
-},
+  remainingBankCardAmount: {
+    color: theme.colors.textSecondary,
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 
   bankItemContainer: {
     flexDirection: 'row',

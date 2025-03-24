@@ -14,15 +14,12 @@ import {
   BudgetsScreen,
   BudgetDetailsScreen,
   CreateBudgetScreen,
+  CreateBankScreen,
   AddTransactionScreen,
   TransactionsScreen,
   GoalsScreen,
   CreateGoalScreen
 } from './src/screens'
-import BudgetsScreen from './src/screens/BudgetsScreen'
-import CreateBankScreen from './src/screens/CreateBankScreen'
-import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
-import AddTransactionScreen from './src/screens/AddTransactionScreen'
 
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
 
@@ -63,11 +60,13 @@ export default function App() {
             <Stack.Screen name="Goals" component={GoalsScreen} />
             <Stack.Screen name="Transactions" component={TransactionsScreen} />
 
+            <Stack.Screen name="CreateBank" component={CreateBankScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
             <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
 
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
+
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
           </Stack.Navigator>
