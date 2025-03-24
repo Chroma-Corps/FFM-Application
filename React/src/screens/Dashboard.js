@@ -6,6 +6,7 @@ import InAppBackground from '../components/InAppBackground';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../core/theme';
+import RadialMenu from '../components/RadialMenu';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
@@ -21,7 +22,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
+      const response = await fetch('https://ffm-application-main.onrender.com/banks', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -29,12 +30,14 @@ export default function Dashboard({ navigation }) {
         },
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        const data = await response.json();
-        setBanks(data);
+        setBanks(data.banks);
       } else {
-        console.error('Failed To Fetch Banks:', response.statusText);
+        console.error(data.message);
       }
+      console.log('Fetch Banks Status:', data.status)
     } catch (error) {
       console.error("Error Fetching Banks:", error);
     } finally {
@@ -61,7 +64,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('https://ffm-application-midterm.onrender.com/logout', {
+      const response = await fetch('https://ffm-application-main.onrender.com/logout', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -69,18 +72,18 @@ export default function Dashboard({ navigation }) {
         },
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
 
+      if (response.ok) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'StartScreen' }],
         });
 
         AsyncStorage.removeItem('access_token');
-        console.log(data.message); // "Logged Out Successfully"
+        console.log(data.message); // Logged Out Successfully
       } else {
-        console.error('Logout Failed:', response.status);
+        console.log(data.message); // An Error Occurred While Logging Out
       }
     } catch (error) {
       console.error('Logout Error:', error);
@@ -103,7 +106,10 @@ export default function Dashboard({ navigation }) {
 
   return (
     <InAppBackground>
+      <View style={styles.headerContainer}>
         <InAppHeader>Dashboard</InAppHeader>
+      </View>
+        
         <Text style={styles.sectionTitle}>Banks</Text>
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -127,6 +133,7 @@ export default function Dashboard({ navigation }) {
         <View style={styles.buttonContainer}>
           <Button mode="contained" onPress={handleLogout}>Logout</Button>
         </View>
+        <RadialMenu navigation={navigation} />
     </InAppBackground>
   );
 }
@@ -144,6 +151,14 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     textAlign: 'center',
     marginTop: 10,
+  },
+
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    padding: 20
   },
 
   bankItem: {

@@ -1,45 +1,37 @@
-from flask import Blueprint, render_template, jsonify, request, send_from_directory, flash, redirect, url_for
-from flask_jwt_extended import jwt_required, current_user as jwt_current_user
-from.index import index_views
-
-from App.models.user import User
+from flask import Blueprint, jsonify, request
 
 from App.controllers import (
     create_user,
-    get_all_users,
     get_all_users_json,
-    jwt_required
+    get_user_by_email
 )
 
 user_views = Blueprint('user_views', __name__)
 
+# 1. List All Users
 @user_views.route('/allusers', methods=['GET'])
-def get_user_page():
+def get_all_users():
     users = get_all_users_json()
-    return jsonify(users)
+    return jsonify({"status": "success", "users": users})
 
-@user_views.route('/users', methods=['POST'])
-def create_user_action():
-    data = request.form
-    flash(f"User With Email: {data['email']} created!")
-    create_user(data['email'], data['password'])
-    return
-
+# 2. Create New User
 @user_views.route('/register', methods=['POST'])
 def register_action():
-    data = request.get_json()
-    name = data['name']
-    email = data['email']
-    password = data['password']
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
 
-    existing_user = User.query.filter_by(email=email).first()
+        existing_user = get_user_by_email(email)
+        if existing_user:
+            return jsonify({"status": "error", "message": "Uh-Oh! A User With This Email Already Exists!"}), 400
 
-    if existing_user:
-        return jsonify({"message": "A User With This Email Already Exists"}), 400
+        new_user = create_user(name, email, password)
+        if new_user is None:
+            return jsonify({"status":"error", "message":"Failed To Register New User"}), 500
+        return jsonify({"status": "success", "message": "Registered Successfully"}), 201
 
-    newuser = create_user(name, email, password)
-
-    if newuser:
-        return jsonify({"message": "Registration Successful"}), 201
-
-    return jsonify(error="An Unknown Error Occurred"), 500
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": "An Error Occurred During Registration"}), 500

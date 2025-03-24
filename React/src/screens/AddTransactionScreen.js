@@ -16,7 +16,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DropDownPicker from 'react-native-dropdown-picker';
 import Button from '../components/Button';
 import TransactionType from '../constants/TransactionTypes';
-// import TransactionCategories from '../constants/TransactionCategories';
 import BackButton from '../components/BackButton'
 import { theme } from '../core/theme'
 import { ScrollView, KeyboardAvoidingView, FlatList } from 'react-native';
@@ -61,29 +60,52 @@ export default function AddTransactionScreen({ navigation }) {
       };
 
       useEffect(() => {
-              fetch('https://ffm-application-midterm.onrender.com/ffm/categories')
-                  .then(response => response.json())
-                  .then(data => {
-                      const categoryArray = Object.entries(data).map(([key, value], index) => {
-                          const categoryName = value.toLowerCase();
-                          return {
-                              id: index + 1,
-                              name: value,
-                              image: categoryImages[categoryName] || require('../assets/default_img.jpg')  // FallBack
-                          };
-                      });
-                      setCategories(categoryArray);
-                  })
-                  .catch(error => console.error('Error Fetching categories:', error));
-          }, []);
+        fetch('https://ffm-application-main.onrender.com/ffm/categories')
+            .then(response => response.json())
+            .then(data => {
+
+                if (!data || !data.categories || typeof data.categories !== 'object') {
+                    console.error("Invalid data format:", data);
+                    return;
+                }
+
+                const categoryArray = Object.entries(data.categories).map(([key, value], index) => {
+                    if (typeof value !== 'string') {
+                        console.error(`Unexpected value for ${key}:`, value);
+                        value = "Unknown"; // Fallback
+                    }
+
+                    const categoryName = value.toLowerCase();
+                    return {
+                        id: index + 1,
+                        name: value,
+                        image: categoryImages[categoryName] || require('../assets/default_img.jpg') // FallBack
+                    };
+                });
+                setCategories(categoryArray);
+            })
+            .catch(error => console.error('Error Fetching categories:', error));
+        }, []);
 
     const toggleDatepicker = () => {
         setShowPicker(!showPicker);
     };
 
-    const handleCategorySelect = (category) => {
-        setTransactionCategory(category);
-    }
+    const handleCategorySelect = (item) => {
+        const isAlreadySelected = transactionCategory.includes(item.name);
+    
+        if (isAlreadySelected) {
+            setTransactionCategory(prevCategories => 
+                prevCategories.filter(category => category !== item.name)
+            );
+        } else {
+            const capitalizedCategory = item.name.charAt(0).toUpperCase() + item.name.slice(1);
+            setTransactionCategory(prevCategories => [
+                ...prevCategories, 
+                capitalizedCategory
+            ]);
+        }
+    };
 
     const onChange = ({ type }, selectedDate) => {
         if (type == "set") {
@@ -196,14 +218,14 @@ export default function AddTransactionScreen({ navigation }) {
     );
 
     const renderCategories = ({ item }) => {
-        const isSelected = transactionCategory === item.name;
+        const isSelected = transactionCategory.includes(item.name);
         return (
             <TouchableOpacity
           style={[
             styles.radioButton,
             isSelected && styles.radioSelected,
           ]}
-          onPress={() => handleCategorySelect(item.name)}
+          onPress={() => handleCategorySelect(item)}
         >
         <View style={styles.inputRow}>
             <Image source={item.image} style={{ width: 20, height: 20 }} />
@@ -243,7 +265,7 @@ export default function AddTransactionScreen({ navigation }) {
                     return;
                 }
 
-                const response = await fetch(`https://ffm-application-midterm.onrender.com/budgets`, {
+                const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
                     method: 'GET',
                     headers: {
                     'Authorization': `Bearer ${token}`,
@@ -254,10 +276,12 @@ export default function AddTransactionScreen({ navigation }) {
                 const data = await response.json();
 
                 if (response.ok) {
-                    setBudgets(data);
+                    const exclusiveBudgets = data.budgets.filter(budget => budget.transactionScope === 'Exclusive');
+                    setBudgets(exclusiveBudgets);
                 } else {
-                    console.error('Failed to fetch budgets:', response.statusText);
+                    console.error('Failed to fetch budgets:', data.message);
                 }
+                console.log('Fetch Exclusive Budgets Status:', data.status)
             } catch (error) {
                 console.error('Error fetching budgets:', error);
             }
@@ -276,7 +300,7 @@ export default function AddTransactionScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('https://ffm-application-midterm.onrender.com/banks', {
+          const response = await fetch('https://ffm-application-main.onrender.com/banks', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -284,12 +308,14 @@ export default function AddTransactionScreen({ navigation }) {
             },
           });
     
+          const data = await response.json();
+
           if (response.ok) {
-            const data = await response.json();
-            setBanks(data);
+            setBanks(data.banks);
           } else {
-            console.error('Failed To Fetch Banks:', response.statusText);
+            console.error('Failed To Fetch Banks:', data.message);
           }
+          console.log("Fetch Banks Status:", data.status);
         } catch (error) {
           console.error("Error Fetching Banks:", error);
         } finally {
@@ -313,30 +339,32 @@ export default function AddTransactionScreen({ navigation }) {
                 return;
             }
 
-            const response = await fetch(`https://ffm-application-midterm.onrender.com/add-transaction`, {
+            const response = await fetch(`https://ffm-application-main.onrender.com/add-transaction`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
             },
                 body: JSON.stringify({
-                    transactionTitle,
-                    transactionDesc,
+                    transactionTitle: transactionTitle,
+                    transactionDesc: transactionDesc,
                     transactionType: transactionType.trim().toUpperCase(),
-                    transactionCategory: transactionCategory.trim().toUpperCase(),
-                    transactionAmount: transactionAmount.trim(),
+                    transactionCategory: transactionCategory,
+                    transactionAmount: parseFloat(transactionAmount),
                     transactionDate: transactionDate.trim(),
                     transactionTime: transactionTime.trim(),
                     budgetID: selectedBudget,
+                    bankID: selectedBankID,
                 }),
             });
+
             const data = await response.json();
 
             if (response.ok) {
                 alert(data.message)
                 navigation.goBack();
             } else {
-            alert(data.error)
+            alert(data.message)
             }
         } catch (error) {
             console.error(error.message);
@@ -348,6 +376,15 @@ export default function AddTransactionScreen({ navigation }) {
     <View style={styles.screen}>
         <InAppBackground>
         <BackButton goBack={navigation.goBack} />
+            
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
+                <View style={styles.screenContainer}>
+                    <View style={styles.headerContainer}>
+                        <View style={styles.cardTitle}>
+                            <InAppHeader>New Transaction</InAppHeader>
+                        </View>
+                    </View>
+            
             <View style={styles.card}>
                 <View style={styles.inputRow}>
                     <TextInput
@@ -546,9 +583,14 @@ export default function AddTransactionScreen({ navigation }) {
                         </View>
                     )}
                 </View>
-
             </View>
-            <Button mode="contained" onPress={addTransaction}>Add</Button>
+            </View>
+            </ScrollView>
+            <View style={styles.buttonContainer}>
+                <Button mode="contained" onPress={addTransaction}>
+                    Add Transaction
+            </Button>
+            </View>
         </InAppBackground>
     </View>
     );
@@ -562,6 +604,18 @@ export default function AddTransactionScreen({ navigation }) {
         card: {
             margin: 10,
             padding: 10,
+        },
+
+        headerContainer: {
+            flex: 1,
+            flexDirection: 'coloumn',
+        },
+
+        cardTitle: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingLeft: 0,
         },
 
         input: {
