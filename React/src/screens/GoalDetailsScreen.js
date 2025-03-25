@@ -5,6 +5,7 @@ import InAppHeader from '../components/InAppHeader';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import ProgressBar from '../components/ProgressBar';
+import DonutChart from '../components/DonutChart';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -84,15 +85,25 @@ export default function GoalDetailsScreen({ route, navigation }) {
     return (
         <InAppBackground>
             <BackButton goBack={navigation.goBack} />
-            <InAppHeader>Goal Details</InAppHeader>
 
             <View style={styles.container}>
                 <Text style={styles.goalTitle}>{goalDetails?.goalTitle}</Text>
                 <Text style={styles.goalAmount}>Current: ${goalDetails?.currentAmount || 0}</Text>
                 <Text style={styles.goalAmount}>Target: ${goalDetails?.targetAmount}</Text>
                 <Text style={styles.goalPeriod}>{displayGoalPeriod()}</Text>
-                <ProgressBar startDate={goalDetails?.startDate} endDate={goalDetails?.endDate} />
 
+                <View style={styles.graphContainer}>
+                <DonutChart 
+                    currentAmount={goalDetails?.currentAmount || 0} 
+                    targetAmount={goalDetails?.targetAmount || 1} 
+                    radius = {150}
+                    strokeWidth = {40}
+                    color = 'tomato'
+                    delay = {1000}
+                />
+                </View>
+
+                
                 <Button mode="contained" onPress={() => navigation.navigate('EditGoal', { goal: goalDetails })}>
                     Edit Goal
                 </Button>
@@ -130,6 +141,8 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.bold.fontFamily,
         color: theme.colors.primary,
         marginBottom: 10,
+        padding: 15,
+        marginTop: 30,
     },
     goalAmount: {
         fontSize: 20,
