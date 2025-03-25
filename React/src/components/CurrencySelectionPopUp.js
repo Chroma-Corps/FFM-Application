@@ -5,26 +5,26 @@ import { theme } from '../core/theme';
 
 const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCurrency, setShowCurrenciesPopup }) => {
 
-    const handleSelectCurrencyOption = (currency) => {
-        setSelectedCurrency(currency.code);
+    const handleCurrencySelect = (currency) => {
+        setSelectedCurrency(currency);
     };
 
     const renderCurrencyItem = (currency) => {
         return (
             <TouchableOpacity
-                key={currency.code} // Use the unique code for key
+                key={currency.code}
                 style={[
                     styles.currencyBox,
-                    selectedCurrency === currency.code
+                    selectedCurrency === currency
                         ? styles.selectedCurrencyBox
                         : styles.unselectedCurrencyBox,
                 ]}
-                onPress={() => handleSelectCurrencyOption(currency)}
+                onPress={() => handleCurrencySelect(currency)}
             >
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency.code
+                        selectedCurrency === currency
                             ? styles.selectedCurrencyText
                             : styles.unselectedCurrencyText,
                     ]}
@@ -35,12 +35,25 @@ const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCur
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency.code
+                        selectedCurrency === currency
                             ? styles.selectedCurrencyText
                             : styles.unselectedCurrencyText,
+                        { fontSize: 15, textAlign: 'center', marginBottom: 5 },
                     ]}
                 >
                     {currency.symbol}
+                </Text>
+
+                <Text
+                    style={[
+                        styles.currencyText,
+                        selectedCurrency === currency
+                            ? styles.selectedCurrencyText
+                            : styles.unselectedCurrencyText,
+                        { fontSize: 8, textAlign: 'center' },
+                    ]}
+                >
+                    {currency.name}
                 </Text>
             </TouchableOpacity>
         );
@@ -63,7 +76,6 @@ const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCur
 
                     <Text style={styles.modalTitle}>Select Currency</Text>
 
-                    {/* Scrollable Currency Items */}
                     <ScrollView contentContainerStyle={styles.scrollContent}>
                         <View style={styles.currencyContainer}>
                             {sortedCurrencyData && sortedCurrencyData.length > 0 ? (
@@ -119,7 +131,6 @@ const styles = StyleSheet.create({
         color: theme.colors.textSecondary,
         marginBottom: 15,
     },
-
 
     currencyContainer: {
         flexDirection: 'row',
