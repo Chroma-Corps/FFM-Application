@@ -63,15 +63,23 @@ export default function GoalDetailsScreen({ route, navigation }) {
         fetchGoalTransactions();
     }, [goalID]);
 
-    const formatDate = (date) => {
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const [year, month, day] = date.split("-");
-        return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+    const formatDate = (dateString) => {
+        if (!dateString) return "--";
+    
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "--"; // Handle invalid dates
+    
+        return date.toLocaleDateString("en-US", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
     };
 
     const displayGoalPeriod = () => {
-        if (!goalDetails) return "--";
-        return `${formatDate(goalDetails.startDate)} - ${formatDate(goalDetails.endDate)}`;
+        if (!goalDetails || !goalDetails.startDate || !goalDetails.endDate) return "--";
+        return `Goal Period:\n${formatDate(goalDetails.startDate)} - ${formatDate(goalDetails.endDate)}`;
     };
 
     if (loading) {
@@ -88,8 +96,14 @@ export default function GoalDetailsScreen({ route, navigation }) {
 
             <View style={styles.container}>
                 <Text style={styles.goalTitle}>{goalDetails?.goalTitle}</Text>
-                <Text style={styles.goalAmount}>Current: ${goalDetails?.currentAmount || 0}</Text>
-                <Text style={styles.goalAmount}>Target: ${goalDetails?.targetAmount}</Text>
+                <View style={styles.goalAmountContainer}>
+                    <Text style={styles.currentAmount}>
+                        {goalDetails?.bankCurrency} {goalDetails?.currentAmount || 0} 
+                    </Text>
+                    <Text style={styles.targetAmount}>
+                        / {goalDetails?.bankCurrency} {goalDetails?.targetAmount}
+                    </Text>
+                </View>
                 <Text style={styles.goalPeriod}>{displayGoalPeriod()}</Text>
 
                 <View style={styles.graphContainer}>
@@ -105,7 +119,7 @@ export default function GoalDetailsScreen({ route, navigation }) {
                     ) : (
                         <ActivityIndicator size="large" color={theme.colors.primary} />
                     )}
-            </View>
+                </View>
 
 
                 
@@ -137,9 +151,21 @@ export default function GoalDetailsScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
+    goalAmountContainer: {
+        flexDirection: 'row',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        flexWrap: 'wrap',
+        width: '100%',
+        textAlign: 'center',
+        
+    },
+    
+    graphContainer: {
         alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%', 
+        marginVertical: 10,
     },
     goalTitle: {
         fontSize: 24,
@@ -154,10 +180,23 @@ const styles = StyleSheet.create({
         color: theme.colors.surface,
         marginBottom: 10,
     },
+    currentAmount: {
+        fontSize: 35, 
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: theme.colors.textSecondary,
+        
+    },
+    targetAmount: {
+        fontSize: 25, 
+        fontFamily: theme.fonts.medium.fontFamily,
+        color: theme.colors.primary,
+    },
     goalPeriod: {
-        fontSize: 16,
+        fontSize: 18,
         color: theme.colors.description,
         marginBottom: 20,
+        marginTop: 20,
+        marginLeft: 15,
     },
     transactionsContainer: {
         padding: 20,
