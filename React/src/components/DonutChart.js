@@ -17,7 +17,7 @@ export default function DonutChart({
     delay,
  }) 
  {
-    const progress = Math.min((currentAmount / targetAmount) * 100, 100); // Cap at 100%
+    const progress = targetAmount > 0 ? Math.min((currentAmount / targetAmount) * 100, 100) : 100; // Cap at 100%
     const animatedValue = React.useRef(new Animated.Value(0)).current;
     const halfCircle = radius + strokeWidth;
     const circumference = 2 * Math.PI * radius;

@@ -93,15 +93,20 @@ export default function GoalDetailsScreen({ route, navigation }) {
                 <Text style={styles.goalPeriod}>{displayGoalPeriod()}</Text>
 
                 <View style={styles.graphContainer}>
-                <DonutChart 
-                    currentAmount={goalDetails?.currentAmount || 0} 
-                    targetAmount={goalDetails?.targetAmount || 1} 
-                    radius = {150}
-                    strokeWidth = {40}
-                    color = 'tomato'
-                    delay = {1000}
-                />
-                </View>
+                            {goalDetails && goalDetails.currentAmount !== undefined && goalDetails.targetAmount !== undefined ? (
+                    <DonutChart 
+                            currentAmount={goalDetails.currentAmount} 
+                            targetAmount={goalDetails.targetAmount} 
+                            radius={150}
+                            strokeWidth={40}
+                            color="#48A6A7"
+                            delay={1000}
+                    />
+                    ) : (
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                    )}
+            </View>
+
 
                 
                 <Button mode="contained" onPress={() => navigation.navigate('EditGoal', { goal: goalDetails })}>
@@ -139,7 +144,7 @@ const styles = StyleSheet.create({
     goalTitle: {
         fontSize: 24,
         fontFamily: theme.fonts.bold.fontFamily,
-        color: theme.colors.primary,
+        color: theme.colors.textSecondary,
         marginBottom: 10,
         padding: 15,
         marginTop: 30,
@@ -161,6 +166,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontFamily: theme.fonts.bold.fontFamily,
         marginBottom: 10,
+        color: theme.colors.textSecondary,
     },
     transactionItem: {
         padding: 15,
