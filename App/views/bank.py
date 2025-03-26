@@ -61,6 +61,7 @@ def list_user_banks():
 
 # 3. Retrieve A Specific Bank
 @bank_views.route('/bank/<int:bankID>', methods=['GET'])
+@jwt_required()
 def get_bank_details(bankID):
     try:
         bank_data = get_bank_json(bankID)
@@ -72,6 +73,7 @@ def get_bank_details(bankID):
 
 # 4. Retrieve Bank Transactions
 @bank_views.route('/bank/<int:bankID>/transactions', methods=['GET'])
+@jwt_required()
 def get_bank_transactions(bankID):
     try:
         transactions = get_all_bank_transactions(bankID)

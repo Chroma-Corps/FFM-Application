@@ -11,6 +11,7 @@ import {
   RegisterScreen,
   ResetPasswordScreen,
   Dashboard,
+  BankDetailsScreen,
   BudgetsScreen,
   BudgetDetailsScreen,
   CreateBudgetScreen,

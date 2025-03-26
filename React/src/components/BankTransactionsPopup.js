@@ -93,7 +93,8 @@ const styles = StyleSheet.create({
     closeIcon: {
         position: "absolute",
         right: 10,
-        padding: 18,
+        top: 10,
+        padding: 10,
     },
 
     scrollView: {

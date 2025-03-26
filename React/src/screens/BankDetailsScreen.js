@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
@@ -9,13 +10,6 @@ import EditButton from '../components/EditButton';
 import TransactionType from '../constants/TransactionTypes';
 import BankTransactionsPopup from '../components/BankTransactionsPopup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-
-{/* <Icon
-                  name={isExpense ? "arrow-down" : "arrow-up"}
-                  size={18}
-                  color={isExpense ? theme.colors.expense : theme.colors.income}
-                /> */}
-
 
 export default function BankDetailsScreen({ navigation, route }) {
     const { bankID } = route.params;
@@ -32,7 +26,6 @@ export default function BankDetailsScreen({ navigation, route }) {
 
     const [showBankTransactionsPopup, setShowBankTransactionsPopup] = useState(false);
 
-
     const [loading, setLoading] = useState(true);
 
 
@@ -40,15 +33,34 @@ export default function BankDetailsScreen({ navigation, route }) {
         const fetchBankDetails = async () => {
 
             try {
-                const response = await fetch(`https://ffm-application-midterm.onrender.com/bank/${bankID}`);
-                if (response.ok) {
-                    const bankData = await response.json();
-                    setBankDetails(bankData);
-                } else {
-                    console.error('Failed to fetch bank details:', response.statusText);
+                setLoading(true);
+                const token = await AsyncStorage.getItem("access_token");
+
+                if (!token) {
+                    console.error('No Token Found');
+                    return;
                 }
+
+                const response = await fetch(`https://ffm-application-main.onrender.com/bank/${bankID}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const bankData = await response.json();
+
+                if (response.ok) {
+                    setBankDetails(bankData.bank);
+                } else {
+                    console.error(bankData.message);
+                }
+
+                console.log('Fetch Bank Details Status:', bankData.status)
+
             } catch (error) {
-                console.error('Error fetching bank details:', error);
+                console.error('Error Fetching Bank Details:', error);
             } finally {
                 setLoading(false);
             }
@@ -56,14 +68,33 @@ export default function BankDetailsScreen({ navigation, route }) {
 
         const fetchBankTransactions = async () => {
             try {
-                const response = await fetch(`https://ffm-application-midterm.onrender.com/bank/${bankID}/transactions`);
+
+                setLoading(true);
+                const token = await AsyncStorage.getItem("access_token");
+
+                if (!token) {
+                    console.error('No Token Found');
+                    return;
+                }
+
+                const response = await fetch(`https://ffm-application-main.onrender.com/bank/${bankID}/transactions`, {
+                    methods: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const transactionData = await response.json();
 
                 if (response.ok) {
-                    const transactionData = await response.json();
-                    setBankTransactions(transactionData);
+                    setBankTransactions(transactionData.transactions);
                 } else {
-                    console.error('Failed to Fetch Bank Transactions:', response.status,);
+                    console.error(transactionData.message);
                 }
+
+                console.log('Fetch Bank Transactions Status:', transactionData.status)
+
             } catch (error) {
                 console.error('Error Fetching Bank Transactions:', error);
             } finally {
@@ -107,55 +138,7 @@ export default function BankDetailsScreen({ navigation, route }) {
         }
     }, [bankTransactions]);
 
-    const getTopCategories = (filteredTransactions) => {
-        if (!Array.isArray(filteredTransactions)) {
-            console.error("filteredTransactions is not an array:", filteredTransactions);
-            return [];
-        }
-
-        const topCategoriesMap = {};
-
-        filteredTransactions.forEach(transaction => {
-            const category = transaction.transactionCategory;
-            const amount = parseFloat(transaction.transactionAmount.replace(/[^0-9.]/g, "")) || 0;
-
-            if (!topCategoriesMap[category]) {
-                topCategoriesMap[category] = { count: 0, totalAmount: 0, transactions: [] };
-            }
-
-            topCategoriesMap[category].count += 1;
-            topCategoriesMap[category].totalAmount += amount;
-            topCategoriesMap[category].transactions.push(transaction);
-        });
-        // Return the top 3 categories (descending), Includes: (1)Category (2)Count (3)Associated Transactions in a Nested List
-        return Object.keys(topCategoriesMap)
-            .sort((a, b) => topCategoriesMap[b].count - topCategoriesMap[a].count)
-            .map(category => ({
-                category,
-                count: topCategoriesMap[category].count,
-                totalAmount: topCategoriesMap[category].totalAmount,
-                transactions: topCategoriesMap[category].transactions
-            }))
-            .slice(0, 3);
-    };
-
-    useEffect(() => {
-        if (bankTransactions.length > 0) {
-            const filteredTransactions = bankTransactions.filter(transaction =>
-                selectedOption === 'Income'
-                    ? transaction.transactionType.toLowerCase() === 'income'
-                    : transaction.transactionType.toLowerCase() === 'expense'
-            );
-
-            setTopCategories(getTopCategories(filteredTransactions));  // Use filteredTransactions here
-        }
-    }, [selectedOption, bankTransactions]);  // Trigger when `selectedOption` or `bankTransactions` changes
-
-
     const handleOptionPress = (option) => {
-
-        console.log('Button pressed:', option);
-
         setSelectedOption(option);
         setTopCategories(getTopCategories());
     };
@@ -164,36 +147,100 @@ export default function BankDetailsScreen({ navigation, route }) {
         setShowBankTransactionsPopup(true);
     };
 
-    const renderTopTransactions = (transactions) => {
-        if (!transactions || !Array.isArray(transactions)) {
+    const filteredTransactions = bankTransactions.filter(transaction =>
+        transaction.transactionType && (
+            selectedOption === 'Income'
+                ? transaction.transactionType.toLowerCase() === 'income'
+                : transaction.transactionType.toLowerCase() === 'expense'
+        )
+    );
+
+    console.log("Filtered Transactions:", filteredTransactions);
+
+    const getTopCategories = (filteredTransactions) => {
+        if (!filteredTransactions) return [];
+
+        const topCategoriesMap = {};
+
+        filteredTransactions.forEach(transaction => {
+
+            const amount = parseFloat(transaction.transactionAmount.replace("TT$", "").trim()) || 0;
+            const category = Array.isArray(transaction.transactionCategory) ? transaction.transactionCategory[0] : transaction.transactionCategory || "Uncategorized";
+            const type = transaction.transactionType.trim().toLowerCase();
+
+            if (!topCategoriesMap[category]) {
+                topCategoriesMap[category] = {
+                    Income: { totalAmount: 0, count: 0, transactions: [] },
+                    Expense: { totalAmount: 0, count: 0, transactions: [] }
+                };
+            }
+
+            if (type === 'income') {
+                topCategoriesMap[category].Income.totalAmount += amount;
+                topCategoriesMap[category].Income.count += 1;
+                topCategoriesMap[category].Income.transactions.push(transaction);
+
+            } else if (type === 'expense') {
+                topCategoriesMap[category].Expense.totalAmount += amount;
+                topCategoriesMap[category].Expense.count += 1;
+                topCategoriesMap[category].Expense.transactions.push(transaction);
+            }
+        });
+
+        const result = Object.keys(topCategoriesMap)
+            .map(category => ({
+                name: category,
+                income: {
+                    totalAmount: topCategoriesMap[category].Income.totalAmount,
+                    count: topCategoriesMap[category].Income.count,
+                    transactions: topCategoriesMap[category].Income.transactions
+                },
+                expense: {
+                    totalAmount: topCategoriesMap[category].Expense.totalAmount,
+                    count: topCategoriesMap[category].Expense.count,
+                    transactions: topCategoriesMap[category].Expense.transactions
+                }
+            }))
+            .sort((a, b) =>
+                (b.income.totalAmount + b.expense.totalAmount) - (a.income.totalAmount + a.expense.totalAmount)
+            )
+            .slice(0, 3);
+
+        return result;
+    };
+
+    useEffect(() => {
+        setTopCategories(getTopCategories(filteredTransactions));
+    }, [bankTransactions, selectedOption]);
+
+    const renderTopTransactions = (categories) => {
+        if (!categories) {
             return <Text style={[styles.defaultText, { fontSize: 15 }]}>No transactions available</Text>;
         }
 
-        return transactions.map((transaction, index) => {
+        return categories.map((category, index) => {
+
+            const categoryData = selectedOption === 'income' ? category.income : category.expense;
 
             return (
                 <View key={index} style={styles.transactionRow}>
                     <View style={styles.transactionCategoryTitleContainer}>
+
                         <View style={styles.transactionCountCircle}>
                             <Text style={[styles.defaultText, { fontSize: 15 }]}>
-                                {transaction.count || 0}
+                                {categoryData.count}
                             </Text>
                         </View>
+
                         <Text style={[styles.defaultText, { fontSize: 15 }]}>
-                            {transaction.category}
+                            {category.name}
                         </Text>
                     </View>
 
                     <View style={styles.transactionAmountContainer}>
 
-                        {/* This logic is inverted untill the problem is fixed */}
-                        <Icon
-                            name={transaction.type === 'expense' ? "arrow-up" : "arrow-down"}
-                            size={18}
-                            color={transaction.type === 'expense' ? '#80c582' : '#e57373'}
-                        />
                         <Text style={[styles.defaultText, { fontSize: 15 }]}>
-                            {transaction.totalAmount ? `$${transaction.totalAmount.toFixed(2)}` : 'N/A'}
+                            ${categoryData.totalAmount.toFixed(2)}
                         </Text>
                     </View>
                 </View>
@@ -320,6 +367,15 @@ export default function BankDetailsScreen({ navigation, route }) {
 const styles = StyleSheet.create({
     bankDetailsScreen: {
         flex: 1,
+    },
+
+    defaultText: {
+        fontSize: 15,
+        fontFamily: theme.fonts.medium.fontFamily,
+        color: 'white',
+        lineHeight: 21,
+        textAlign: 'center',
+        paddingTop: 100
     },
 
     bankDetailsContainer: {

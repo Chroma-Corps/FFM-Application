@@ -38,6 +38,7 @@ export default function Dashboard({ navigation }) {
         console.error(data.message);
       }
       console.log('Fetch Banks Status:', data.status)
+
     } catch (error) {
       console.error("Error Fetching Banks:", error);
     } finally {

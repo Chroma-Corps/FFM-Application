@@ -400,114 +400,187 @@ export default function AddTransactionScreen({ navigation }) {
                                     placeholderTextColor="white"
                                 />
                                 <View style={styles.radioContainer}>
-                                    {categories.length > 0 ? (
-                                        <FlatList
-                                            data={categories}
-                                            renderItem={renderCategories}
-                                            keyExtractor={(item) => item.id.toString()}
-                                            horizontal
-                                            showsHorizontalScrollIndicator={false}
-                                            contentContainerStyle={styles.scrollContainer}
-                                        />
-                                    ) : (
-                                        <Text>Loading Categories...</Text>
-                                    )}
-                                </View>
-
-                                <View>
-                                    <Text style={styles.sectionTitle}>Banks</Text>
-                                    {loading ? (
-                                        <ActivityIndicator size="large" color={theme.colors.primary} />
-                                    ) : banks.length === 0 ? (
-                                        <Text style={styles.defaultText}>You Have No Banks</Text>
-                                    ) : (
-
-                                        <FlatList
-                                            data={banks}
-                                            renderItem={renderBankCard}
-                                            keyExtractor={(item) => item?.bankID}
-                                            horizontal
-                                            showsHorizontalScrollIndicator={false}
-                                            contentContainerStyle={styles.scrollContainer}
-                                        />
-                                    )}
-                                </View>
-                                {showPicker && (
-                                    <DateTimePicker
-                                        mode="date"
-                                        display="spinner"
-                                        value={date}
-                                        onChange={onChange}
-                                        style={styles.datePicker}
-                                    />
-                                )}
-
-                                {showPicker && Platform.OS === "ios" &&
-                                    (
-                                        <View
-                                            style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
-                                            <TouchableOpacity style={[
-                                                styles.button,
-                                                styles.pickerButton,
-                                                { backgroundColor: theme.colors.primary },
-                                            ]}
-                                                onPress={toggleDatepicker}
-                                            >
-                                                <Text style={{ color: "white" }}>Cancel</Text>
-                                            </TouchableOpacity>
-
-                                            <TouchableOpacity style={[
-                                                styles.button,
-                                                styles.pickerButton,
-                                                { backgroundColor: theme.colors.primary },
-                                            ]}
-                                                onPress={confirmIOSDate}
-                                            >
-                                                <Text style={{ color: "white" }}>Confirm</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
-
-                                {!showPicker && (
-                                    <Pressable
-                                        onPress={toggleDatepicker}
-                                    >
-                                        <TextInput
-                                            placeholder="Date"
-                                            value={transactionDate}
-                                            onChangeText={onChange}
-                                            style={styles.input}
-                                            editable={false}
-                                            onPressIn={toggleDatepicker}
-                                        />
-                                    </Pressable>
-                                )}
-
-
-                                {showTimePicker && (
-                                    <DateTimePicker
-                                        mode="time"
-                                        display="spinner"
-                                        value={time}
-                                        onChange={onTimeChange}
-                                        style={styles.datePicker}
-                                    />
-                                )}
-
-                                {showTimePicker && Platform.OS === "ios" && (
-                                    <View style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
+                                    {Object.values(TransactionType).map((type) => (
                                         <TouchableOpacity
-                                            style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
-                                            onPress={toggleTimepicker}
+                                            key={type}
+                                            style={[
+                                                styles.radioButton,
+                                                transactionType === type && styles.radioSelected,
+                                            ]}
+                                            onPress={() => setTransactionType(type)}
+                                        >
+                                            <Text style={transactionType === type ? styles.radioTextSelected : styles.radioText}>
+                                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            </View>
+                            <View>
+                                <TextInput
+                                    placeholder="Title"
+                                    value={transactionTitle}
+                                    onChangeText={setTransactionTitle}
+                                    style={styles.input}
+                                />
+                                <TextInput
+                                    placeholder="Description"
+                                    value={transactionDesc}
+                                    onChangeText={setTransactionDesc}
+                                    style={styles.input}
+                                />
+                            </View>
+                            <View style={styles.radioContainer}>
+                                {categories.length > 0 ? (
+                                    <FlatList
+                                        data={categories}
+                                        renderItem={renderCategories}
+                                        keyExtractor={(item) => item.id.toString()}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={styles.scrollContainer}
+                                    />
+                                ) : (
+                                    <Text>Loading Categories...</Text>
+                                )}
+                            </View>
+
+                            <View>
+                                <Text style={styles.sectionTitle}>Banks</Text>
+                                {loading ? (
+                                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                                ) : banks.length === 0 ? (
+                                    <Text style={styles.defaultText}>You Have No Banks</Text>
+                                ) : (
+
+                                    <FlatList
+                                        data={banks}
+                                        renderItem={renderBankCard}
+                                        keyExtractor={(item) => item?.bankID}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={styles.scrollContainer}
+                                    />
+                                )}
+                            </View>
+                            {showPicker && (
+                                <DateTimePicker
+                                    mode="date"
+                                    display="spinner"
+                                    value={date}
+                                    onChange={onChange}
+                                    style={styles.datePicker}
+                                />
+                            )}
+
+                            {showPicker && Platform.OS === "ios" &&
+                                (
+                                    <View
+                                        style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
+                                        <TouchableOpacity style={[
+                                            styles.button,
+                                            styles.pickerButton,
+                                            { backgroundColor: theme.colors.primary },
+                                        ]}
+                                            onPress={toggleDatepicker}
                                         >
                                             <Text style={{ color: "white" }}>Cancel</Text>
                                         </TouchableOpacity>
 
-                                        <TouchableOpacity
-                                            style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
-                                            onPress={confirmIOSTime}
+                                        <TouchableOpacity style={[
+                                            styles.button,
+                                            styles.pickerButton,
+                                            { backgroundColor: theme.colors.primary },
+                                        ]}
+                                            onPress={confirmIOSDate}
                                         >
                                             <Text style={{ color: "white" }}>Confirm</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+
+                            {!showPicker && (
+                                <Pressable
+                                    onPress={toggleDatepicker}
+                                >
+                                    <TextInput
+                                        placeholder="Date"
+                                        value={transactionDate}
+                                        onChangeText={onChange}
+                                        style={styles.input}
+                                        editable={false}
+                                        onPressIn={toggleDatepicker}
+                                    />
+                                </Pressable>
+                            )}
+
+
+                            {showTimePicker && (
+                                <DateTimePicker
+                                    mode="time"
+                                    display="spinner"
+                                    value={time}
+                                    onChange={onTimeChange}
+                                    style={styles.datePicker}
+                                />
+                            )}
+
+                            {showTimePicker && Platform.OS === "ios" && (
+                                <View style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
+                                    <TouchableOpacity
+                                        style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
+                                        onPress={toggleTimepicker}
+                                    >
+                                        <Text style={{ color: "white" }}>Cancel</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
+                                        onPress={confirmIOSTime}
+                                    >
+                                        <Text style={{ color: "white" }}>Confirm</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
+                            {!showTimePicker && (
+                                <Pressable onPress={toggleTimepicker}>
+                                    <TextInput
+                                        placeholder="Time"
+                                        value={transactionTime}
+                                        onChangeText={setTransactionTime}
+                                        style={styles.input}
+                                        editable={false}
+                                        onPressIn={toggleTimepicker}
+                                    />
+                                </Pressable>
+                            )}
+
+                            <View style={styles.container}>
+                                <FlatList
+                                    data={budgets}
+                                    renderItem={renderBudgets}
+                                    keyExtractor={(item) => item?.budgetID}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={styles.radioContainer}
+                                />
+                            </View>
+
+                            <View>
+                                <Text style={styles.sectionTitle}>Attach Document (Optional)</Text>
+
+                                {/* onPress={pickDocument} */}
+                                <TouchableOpacity style={styles.attachmentButton}>
+                                    <Text style={styles.attachmentButtonText}>Choose File</Text>
+                                </TouchableOpacity>
+
+                                {selectedFile && (
+                                    <View style={styles.filePreview}>
+                                        <Icon name="file-document-outline" size={20} color="gray" />
+                                        <Text style={styles.fileName}>{selectedFile.name}</Text>
+                                        <TouchableOpacity onPress={() => setSelectedFile(null)}>
+                                            <Icon name="close-circle" size={18} color="red" />
                                         </TouchableOpacity>
                                     </View>
                                 )}
