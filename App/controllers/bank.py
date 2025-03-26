@@ -1,33 +1,40 @@
 from App.database import db
-from App.models import Bank
-from App.models.transaction import Transaction
+from App.models import Bank, Budget, UserBank
 from App.services.currency import CurrencyService
+from App.controllers.userBank import create_user_bank, is_bank_owner
 
 # Create A New Bank
-def create_bank(userID, bankTitle, bankCurrency, bankAmount):
+def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=None):
     try:
         new_bank = Bank (
-            userID=userID,
             bankTitle=bankTitle,
             bankCurrency=bankCurrency,
             bankAmount=bankAmount,
-            remainingBankAmount=bankAmount
+            remainingBankAmount=bankAmount,
+            isPrimary=isPrimary
         )
         db.session.add(new_bank)
         db.session.commit()
+
+        create_user_bank(userID, new_bank.bankID)
+
+        if userIDs:
+            for otherUserID in userIDs:
+                create_user_bank(otherUserID, new_bank.bankID)
         return new_bank
+
     except Exception as e:
         db.session.rollback()
         print(f"Fail To Create Bank: {e}")
         return None
 
 # Get Bank By ID
-def get_bank(id):
-    return Bank.query.get(id)
+def get_bank(bankID):
+    return Bank.query.get(bankID)
 
 # Get Bank By ID (JSON)
-def get_bank_json(id):
-    bank = Bank.query.get(id)
+def get_bank_json(bankID):
+    bank = Bank.query.get(bankID)
     if bank:
         return bank.get_json()
     return None
@@ -44,30 +51,40 @@ def get_all_banks_json():
     banks = [bank.get_json() for bank in banks]
     return banks
 
-# Get Banks for Specific User (JSON)
-def get_user_banks_json(user_id):
-    banks = Bank.query.filter_by(userID=user_id).all()
-    if not banks:
-        return []
-    banks = [bank.get_json() for bank in banks]
-    return banks
-
 # Update Existing Bank
-def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None):
-    bank = Bank.query.get(bankID)
-    if not bank:
+def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None, isPrimary=None):
+    try:
+        bank = get_bank(bankID)
+
+        if not bank:
+            print(f"No Bank Found With ID {bankID}")
+            return None
+
+        if bank:
+            if bankTitle:
+                bank.bankTitle = bankTitle
+            if bankCurrency:
+                bank.bankCurrency = CurrencyService.fetch_currency(bankCurrency)
+            if bankAmount is not None:
+                bank.bankAmount = bankAmount
+                bank.remainingBankAmount = bankAmount
+            if isPrimary is not None:
+                bank.isPrimary = isPrimary
+            db.session.commit()
+
+            print(f"Bank With ID {bankID} Updated Successfully.")
+            return bank
         return None
 
-    if bankTitle:
-        bank.bankTitle = bankTitle
-    if bankCurrency:
-        bank.bankCurrency = CurrencyService.fetch_currency(bankCurrency)
-    if bankAmount is not None:
-        bank.bankAmount = bankAmount
-        bank.remainingBankAmount = bankAmount
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Update Bank: {e}")
+        return None
 
-    db.session.commit()
-    return bank
+# Get Budgets Associated With A Bank
+def get_all_bank_budgets(bankID):
+    budgets = Budget.query.filter_by(bankID=bankID).all()
+    return [budget.get_json() for budget in budgets]
 
 # Get Bank Transactions
 def get_bank_transactions(bankID):
@@ -82,11 +99,24 @@ def get_bank_transactions_json(bankID):
     return transactions
 
 # Delete Bank
-def delete_bank(bank_id):
-    bank = Bank.query.get(bank_id)
-    if not bank:
-        return None
+def delete_bank(userID, bankID):
+    try:
+        if not is_bank_owner(userID, bankID):
+            return "Unauthorized"
 
-    db.session.delete(bank)
-    db.session.commit()
-    return bank
+        bank = get_bank(bankID)
+        if not bank:
+            return None
+
+        user_banks = UserBank.query.filter_by(bankID=bankID).all()
+        for user_bank in user_banks:
+            db.session.delete(user_bank)
+
+        db.session.delete(bank)
+        db.session.commit()
+        return True
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Delete Bank: {e}")
+        return None

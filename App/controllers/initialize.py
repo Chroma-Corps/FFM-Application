@@ -1,80 +1,86 @@
-import datetime
+from App.controllers.goal import create_goal
+from App.database import db
 from App.controllers.bank import create_bank
 from App.controllers.budget import create_budget
 from App.controllers.transaction import add_transaction
 from App.controllers.user import create_user
-from App.database import db
-from App.models.budget import BudgetType
+from App.models.budget import BudgetType, TransactionScope
+from App.models.goal import GoalType
 from App.models.transaction import TransactionType
 
 def initialize():
     db.drop_all()
     db.create_all()
     bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
-    alice = create_user('Alice Wonderland','alice@mail.com', 'alicepass')
+    alice = create_user('Alice Bobberson','alice@mail.com', 'alicepass')
 
-    # Banks
-    bob_bank1 = create_bank(bob.id, "Bank 1", "ttd", 5000.00)
-    bob_bank2 = create_bank(bob.id, "Bank 2", "usd", 5000.00)
-    alice_bank = create_bank(alice.id, "Bank 1", "usd", 1500.00)
-
-    # Budgets
-    expense_budet = create_budget (
-        budgetTitle="Expense Budget", 
-        budgetAmount=150.25, 
-        budgetType=BudgetType.EXPENSE,
-        budgetCategory="groceries",
-        startDate="2025-01-01",
-        endDate="2025-01-31",
+    # Bank
+    new_bank = create_bank (
         userID=bob.id,
-        bankID=bob_bank1.bankID
+        bankTitle="Bob's Bank",
+        bankCurrency="TTD",
+        bankAmount=5000.00,
+        isPrimary=True
     )
 
-    savings_budget = create_budget( 
-        budgetTitle="Savings Budget",
-        budgetAmount=50.00,
-        budgetType=BudgetType.SAVINGS,
-        budgetCategory=None,
-        startDate="2025-02-01",
-        endDate="2025-02-28",
+    # Goal
+    family_goal = create_goal (
         userID=bob.id,
-        bankID=bob_bank2.bankID
+        goalTitle="Vacation Planning",
+        targetAmount=1000.00,
+        goalType=GoalType.SAVINGS,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
     create_budget (
-        budgetTitle="Budget `",
+        userID=bob.id,
+        bankID=new_bank.bankID,
+        budgetTitle="Inclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
-        budgetCategory="shopping",
-        startDate="2025-03-01",
-        endDate="2025-03-31",
-        userID=alice.id,
-        bankID=alice_bank.bankID
+        budgetCategory=['SHOPPING', 'TRANSIT', 'ENTERTAINMENT'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id]
     )
 
-    # Transactions
+    exclusive_budget = create_budget (
+        userID=bob.id,
+        bankID=None,
+        budgetTitle="Exclusive Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=[],
+        transactionScope=TransactionScope.EXCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id]
+    )
+
     add_transaction (
         userID=bob.id,
-        transactionTitle="Expense Transaction",
-        transactionDesc="An Expense Transaction",
+        transactionTitle="Transit Transaction",
+        transactionDesc="",
         transactionType=TransactionType.EXPENSE,
-        transactionCategory="shopping",
-        transactionAmount=50.00,
-        transactionDate="2025-01-25",
-        transactionTime="11:30",
-        budgetID=expense_budet.budgetID,
-        bankID=bob_bank1.bankID
+        transactionCategory=['TRANSIT'],
+        transactionAmount=20.00,
+        transactionDate="2025-02-10",
+        transactionTime="10:30",
+        budgetID=exclusive_budget.budgetID,
+        bankID=new_bank.bankID
     )
 
     add_transaction (
         userID=bob.id,
-        transactionTitle="Savings Transaction",
-        transactionDesc="An Savings Transaction",
-        transactionType=TransactionType.INCOME,
-        transactionCategory="income",
-        transactionAmount=50.00,
-        transactionDate="2025-02-05",
-        transactionTime="11:30",
-        budgetID=savings_budget.budgetID,
-        bankID=bob_bank2.bankID
+        transactionTitle="Entertainment Transaction",
+        transactionDesc="",
+        transactionType=TransactionType.EXPENSE,
+        transactionCategory=['ENTERTAINMENT'],
+        transactionAmount=200.00,
+        transactionDate="2025-03-10",
+        transactionTime="09:30",
+        bankID=new_bank.bankID
     )

@@ -11,17 +11,16 @@ import {
   RegisterScreen,
   ResetPasswordScreen,
   Dashboard,
-
+  BudgetsScreen,
+  BudgetDetailsScreen,
+  CreateBudgetScreen,
+  AddTransactionScreen,
+  TransactionsScreen,
+  GoalsScreen,
+  CreateGoalScreen
 } from './src/screens'
 
-import BankDetailsScreen from './src/screens/BankDetailsScreen'
-import BudgetsScreen from './src/screens/BudgetsScreen'
-import CreateBudgetsScreen from './src/screens/CreateBudgetScreen'
-import AddTransactionScreen from './src/screens/AddTransactionScreen'
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
-import BudgetDetailsScreen from './src/screens/BudgetDetailsScreen'
-import TransactionsScreen from './src/screens/TransactionsScreen'
-
 
 const Stack = createStackNavigator()
 
@@ -53,14 +52,19 @@ export default function App() {
             <Stack.Screen name="StartScreen" component={StartScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+
             <Stack.Screen name="Dashboard" component={Dashboard} />
             <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />
             <Stack.Screen name="Budgets" component={BudgetsScreen} />
-            <Stack.Screen name="CreateBudget" component={CreateBudgetsScreen} />
-            <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
-            <Stack.Screen name="TransactionsScreen" component={TransactionsScreen} />
+            <Stack.Screen name="Goals" component={GoalsScreen} />
+            <Stack.Screen name="Transactions" component={TransactionsScreen} />
+
+            <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
+            <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
-            <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+
+            <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
           </Stack.Navigator>

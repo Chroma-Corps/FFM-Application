@@ -15,7 +15,7 @@ import RadialMenu from '../components/RadialMenu';
 
 const filters = ['All', 'Savings', 'Expense'];
 
-export default function BudgetsScreen({ navigation }) {
+export default function GoalsScreen({ navigation }) {
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/goals`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -41,21 +41,21 @@ export default function BudgetsScreen({ navigation }) {
       const data = await response.json();
 
       if (response.ok) {
-        setData(data.budgets);
+        setData(data.goals);
       } else {
         console.error(data.message);
       }
-      console.log('Fetch Budgets Status:', data.status)
+      console.log('Fetch Goals Status:', data.status)
     } catch (error) {
-      console.error('Error Fetching Budgets:', error);
+      console.error('Error Fetching Goals:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredBudgets = selectedFilter === 'All'
+  const filteredGoals = selectedFilter === 'All'
     ? data
-    : data.filter((budget) => budget.budgetType === selectedFilter);
+    : data.filter((goal) => goal.goalType === selectedFilter);
 
   const handleFilterPress = (filter) => {
     setSelectedFilter(filter);
@@ -68,75 +68,31 @@ export default function BudgetsScreen({ navigation }) {
   );
 
   const renderData = (item) => {
-    const budgetColorTheme = item.color || '#9ACBD0';
-
-    const renderCategories = (budgetCategories) => {
-      const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png')
-      };
-
-      const categoriesToDisplay = budgetCategories && budgetCategories.length > 0
-        ? budgetCategories
-        : [];
-
-      const displayedCategories = categoriesToDisplay.slice(0, 3);
-      const categoryLimit = categoriesToDisplay.length > 3;
-
-      const categoryWithImages = displayedCategories.map((category, index) => {
-        const categoryName = category.toLowerCase();
-        return {
-          image: categoryImages[categoryName] || require('../assets/default_img.jpg') // Fallback image
-        };
-      });
-
-      return (
-        <View style={styles.categoryList}>
-          {categoryWithImages.map((category, index) => (
-            <View key={category.name || index} style={styles.categoryItem}>
-              <Image source={category.image} style={styles.categoryIcon} />
-              <Text style={styles.categoryText}>{category.name}</Text>
-            </View>
-          ))}
-          {categoryLimit && <Text style={styles.cardText}>...</Text>}
-        </View>
-      );
-    };
+    const goalColorTheme = item.color || '#9ACBD0';
 
     return (
       <TouchableOpacity
-        onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
+        // onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}
       >
-        <Card style={[styles.card, { borderColor: budgetColorTheme }]}>
+        <Card style={[styles.card, { borderColor: goalColorTheme }]}>
           <View style={styles.cardContentContainer}>
-            <View style={[styles.colorStrip, { backgroundColor: budgetColorTheme }]} />
+            <View style={[styles.colorStrip, { backgroundColor: goalColorTheme }]} />
 
             <View style={styles.cardContent}>
               <View style={styles.cardHeaderContainer}>
-                <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
-                <View>
-                  {item.budgetCategory ? (
-                    renderCategories(item.budgetCategory)
-                  ) : (
-                    <Text>None</Text>
-                  )}
-                </View>
+                <Text style={styles.cardTitle}>{item.goalTitle}</Text>
               </View>
 
               <View style={styles.cardDetailsContainer}>
                 <Text style={styles.cardText}>
-                  <Text style={styles.remainingBudgetAmountText}>{item.remainingBudgetAmount} </Text>
-                  left of {item.budgetAmount}
+                  <Text style={styles.remainingGoalAmountText}>{item.currentAmount} </Text>
+                  left of {item.targetAmount}
                 </Text>
 
                 <ProgressBar
                   startDate={item.startDate}
                   endDate={item.endDate}
-                  budgetColorTheme={budgetColorTheme}
+                  goalColorTheme={goalColorTheme}
                 />
 
                 <Text style={styles.insightsText}>
@@ -151,15 +107,15 @@ export default function BudgetsScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.budgetsScreen}>
+    <View style={styles.goalsScreen}>
       <InAppBackground>
         <View style={styles.headerContainer}>
-          <InAppHeader>Budgets</InAppHeader>
+          <InAppHeader>Goals</InAppHeader>
           <NotificationBell />
         </View>
 
         <Text style={styles.descriptionText}>
-          This is your budgeting hub—keep an eye on your spending and stay on track!
+            This is your goal-setting hub—track your progress and stay on target!
         </Text>
 
         <View style={styles.filterContainer}>
@@ -173,25 +129,25 @@ export default function BudgetsScreen({ navigation }) {
           ))}
         </View>
 
-        {loading ? (
+          {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
-        ) : filteredBudgets.length === 0 ? (
-          <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
-        ) : (
-          <FlatList
-            data={filteredBudgets}
-            renderItem={({ item }) => renderData(item)}
-            keyExtractor={item => `${item.budgetID}`}
-          />
-        )}
-        <RadialMenu navigation={navigation} />
+          ) : filteredGoals.length === 0 ? (
+          <Text style={styles.defaultText}>You Have No Goals Yet!</Text>
+          ) : (
+            <FlatList
+              data={filteredGoals}
+              renderItem={({ item }) => renderData(item)}
+              keyExtractor={item => `${item.goalID}`}
+            />
+          )}
+          <RadialMenu navigation={navigation} />
       </InAppBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  budgetsScreen: {
+    goalsScreen: {
     flex: 1,
   },
 
@@ -286,7 +242,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.medium.fontFamily,
   },
 
-  remainingBudgetAmountText: {
+  remainingGoalAmountText: {
     fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.secondary,
   },

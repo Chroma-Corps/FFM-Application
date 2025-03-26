@@ -1,11 +1,6 @@
-from flask import Blueprint, render_template, jsonify, request, flash, send_from_directory, flash, redirect, url_for
-from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies, get_jwt_identity, verify_jwt_in_request
-from.index import index_views
-from App.models.user import User
-from App.controllers import (
-    login
-)
-from App.database import db
+from App.controllers.auth import login
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import unset_jwt_cookies
 
 auth_views = Blueprint('auth_views', __name__)
 
@@ -14,25 +9,32 @@ auth_views = Blueprint('auth_views', __name__)
 def login_action():
     try:
         data = request.get_json()
-        if not data or 'email' not in data or 'password' not in data:
-            return jsonify({"error":'Email And Password Are Required'}), 400
+        email = data.get('email')
+        password = data.get('password')
+    
+        if not all([email, password]):
+            return jsonify({"status": "error", "message":"Email And Password Are Required"}), 400
         
-        token = login(data['email'], data['password'])
-        if not token:
-            return jsonify({"error": "Bad email Or Password Given"}), 401
-        return jsonify(access_token=token), 200
+        token = login(
+            email=email,
+            password=password)
+
+        if token is None:
+            return jsonify({"status": "error", "message": "Bad Email Or Password Given"}), 401
+        return jsonify({"status": "success", "message": "Logged In Successfully", "access_token": token}), 200
+
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"An Error Occurred: {e}")
         return jsonify(error="An Error Occurred While Logging In"), 500
 
 """Logout"""
 @auth_views.route('/logout', methods=['POST'])
 def logout_action():
     try:
-        response = jsonify(message="Logged Out Successfully")
+        response = jsonify({"status": "success", "message": "Logged Out Successfully"})
         unset_jwt_cookies(response)
         return response, 200
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify(error="An Error Occurred While Logging Out"), 500
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": "An Error Occurred While Logging Out"}), 500
