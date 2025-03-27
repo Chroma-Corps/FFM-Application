@@ -18,7 +18,8 @@ import {
   TransactionsScreen,
   GoalsScreen,
   CreateGoalScreen,
-  CreateCircleScreen
+  CreateCircleScreen,
+  SettingsScreen
 } from './src/screens'
 
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
@@ -44,7 +45,7 @@ export default function App() {
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="StartScreen"
+            initialRouteName="LoginScreen"
             screenOptions={{
               headerShown: false,
             }}
@@ -68,6 +69,7 @@ export default function App() {
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </PaperProvider>

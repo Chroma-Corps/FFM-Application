@@ -8,15 +8,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../core/theme';
 import RadialMenu from '../components/RadialMenu';
 import { MaterialIcons } from '@expo/vector-icons'
+import StreakIcon from '../assets/icons/streak.svg';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
+  const [streak, setStreak] = useState([]);
   const [reload, setReload] = useState(false);
   const [loading, setLoading] = useState(true);
   const [circleType, setCircleType] = useState('');
   const [circles, setCircles] = useState([]);
   const [newCurrentCircle, setNewCurrentCircle] = useState([]);
   const [currentCircle, setCurrentCircle] = useState(null);
+  const days = ["Su", "M", "Tu", "W", "Th", "F", "Sa"];
 
   const fetchActiveCircle = async () => {
     try {
@@ -40,7 +43,7 @@ export default function Dashboard({ navigation }) {
       if (response.ok && data.status === 'success') {
         setCurrentCircle(data.activeCircle);
         setNewCurrentCircle(data.activeCircle);
-        console.log("Updated Current Circle:", data.activeCircle);
+        // console.log("Updated Current Circle:", data.activeCircle);
         setCircleType(data.activeCircle.circleType)
       } else {
         console.error(data.message);
@@ -159,47 +162,16 @@ export default function Dashboard({ navigation }) {
   //   navigation.navigate('AddBank');
   // };
 
+  const handleSettings = () => {
+    navigation.navigate('Settings')
+  }
+
   const handleViewSwap = async () => {
     setNewCurrentCircle(null);
     if (circleType === 'Self') {
       setCircleType('Group');
     } else {
       setCircleType('Self');
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      const token = await AsyncStorage.getItem("access_token");
-
-      if (!token) {
-        console.error('No Token Found');
-        return;
-      }
-
-      const response = await fetch('http://192.168.0.9:8080/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'StartScreen' }],
-        });
-
-        AsyncStorage.removeItem('access_token');
-        console.log(data.message); // Logged Out Successfully
-      } else {
-        console.log(data.message); // An Error Occurred While Logging Out
-      }
-    } catch (error) {
-      console.error('Logout Error:', error);
     }
   };
 
@@ -246,6 +218,11 @@ export default function Dashboard({ navigation }) {
     );
   };
 
+  // const getFontSize = (count) => {
+  //   const length = count.toString().length;
+  //   return length > 3 ? 40 : 45;
+  // }
+
   return (
     <InAppBackground>
       {circleType === 'Group' && (
@@ -280,17 +257,45 @@ export default function Dashboard({ navigation }) {
               </View>
             </View>
       )}
+
     <View key={reload ? "reloadKey" : "normalKey"}>
       <View style={styles.lineContainer}></View> 
-      <View style={styles.headerContainer}>
-        <InAppHeader>Dashboard</InAppHeader>
-      </View>
-        
-        <Text style={styles.sectionTitle}>Banks</Text>
+        <View style={styles.headerContainer}>
+          <InAppHeader>Dashboard</InAppHeader>
+          <TouchableOpacity onPress={handleSettings}>
+             <MaterialIcons name="settings" size={30} color="white" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.streakContainer}>
+            <TouchableOpacity
+              style={[styles.streakCircle, { backgroundColor: theme.colors.primary}]}
+            >
+              <Text style={styles.streakCountText}>
+                {streak.streakCount > 0 ? streak.streakCount : 0}
+              </Text>
+            </TouchableOpacity>
+          <View style={styles.streakInfo}>
+            <View style={styles.streakHeader}>
+              <Text style={styles.sectionTitle}>Streaks</Text>
+              <StreakIcon />
+            </View>
+            <View style={styles.streakMiniCirclesContainer}>
+              {days.map((day, index) => (
+                <View key={index} style={{ alignItems: 'center'}}>
+                  <View style={[styles.streakMiniCircles, { backgroundColor: theme.colors.primary }]}>
+                    <MaterialIcons name="check" size={20} color="white" />
+                  </View>
+                  <Text style={styles.streakDayText}>{day}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+        <Text style={[styles.sectionTitle, {marginTop: 25}]}>Wallets</Text>
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
         ) : banks.length === 0 ? (
-          <Text style={styles.defaultText}>You Have No Banks Added Yet!</Text>
+          <Text style={styles.defaultText}>You Have No Wallets Added Yet!</Text>
         ) : (
           <View style={styles.bankItemContainer}>
             <FlatList
@@ -306,9 +311,14 @@ export default function Dashboard({ navigation }) {
             </Button>
           </View>
         )}
-        <View style={styles.buttonContainer}>
-          <Button mode="contained" onPress={handleLogout}>Logout</Button>
+       {circleType === 'Group' && (
+        <View>
+          <Text style={styles.sectionTitle}>Most Recent Activity</Text>
+          <TouchableOpacity style={styles.viewCircleContainer}>
+            <Text style={styles.viewCircleText}>View Circle</Text>
+          </TouchableOpacity>
         </View>
+      )}
         </View>
         <RadialMenu navigation={navigation} />
     </InAppBackground>
@@ -387,7 +397,6 @@ remainingBankCardAmount: {
   bankItemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
     width: '100%',
     padding: 10,
     borderRadius: 8,
@@ -425,15 +434,16 @@ remainingBankCardAmount: {
 
   bankCard: {
     backgroundColor: '#333',
-    padding: 15,
+    padding: 10,
     borderRadius: 8,
     marginHorizontal: 10,
     width: 175,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   sectionTitle: {
-    fontSize: 25,
+    fontSize: 20,
     fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.textSecondary,
     marginLeft: 20,
@@ -443,6 +453,59 @@ remainingBankCardAmount: {
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 10,
+  },
+
+  streakContainer: {
+    flexDirection: 'row',
+    alignItems:'center',
+    alignContent:'space-evenly'
+  },
+
+  streakInfo: {
+    flexDirection: 'column',
+    gap: 10,
+  },
+
+  streakHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
+    gap: 10,
+  },
+
+  streakCircle: {
+    width: 80,
+    height:80,
+    borderRadius: 50,
+    color: theme.colors.primary,
+    marginLeft: 20,
+  },
+
+  streakCountText: {
+    fontSize: 45,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
+    alignSelf: 'center'
+  },
+
+  streakMiniCirclesContainer: {
+    flexDirection: 'row',
+  },
+
+  streakMiniCircles: {
+    width: 25,
+    height:25,
+    borderRadius: 50,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+
+  streakDayText: {
+    fontSize: 10,
+    marginLeft: 10,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
   },
 
   circleContainer: {
@@ -473,5 +536,20 @@ remainingBankCardAmount: {
     width: '100%',
     height: '100%',
     borderRadius: 50,
+  },
+
+  viewCircleContainer: {
+    padding: 10,
+    alignSelf: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    width: '30%',
+    backgroundColor: "#306060",
+  },
+
+  viewCircleText: {
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
   },
 });
