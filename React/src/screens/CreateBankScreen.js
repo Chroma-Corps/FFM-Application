@@ -9,11 +9,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import ButtonSmall from '../components/ButtonSmall';
+import Toggle from '../components/Toggle';
 import CurrencySelectionPopUp from '../components/CurrencySelectionPopUp';
 import Currencies from '../constants/currencies.json';
 import Colors from '../constants/colors.json';
 
-const mainCurrencies = ['USD', 'EUR', 'TTD', 'CAD', 'AUD', 'JPY'];
+const mainCurrencies = ['GBP', 'EUR', 'USD', 'TTD', 'JPY', 'CAD'];
 const colorData = Object.values(Colors);
 
 export default function CreateBudgetsScreen({ navigation }) {
@@ -22,9 +23,10 @@ export default function CreateBudgetsScreen({ navigation }) {
     //Bank Details
     const [selectedBankTitle, setSelectedBankTitle] = useState(null);
     const [selectedBankAmount, setSelectedBankAmount] = useState(null);
-    const [selectedBudgetType, setSelectedBudgetType] = useState(null);
+    // const [selectedBudgetType, setSelectedBudgetType] = useState(null);
+    const [isPrimary, setIsPrimary] = useState(false);
     const [selectedCurrency, setSelectedCurrency] = useState('');
-    const [selectedTheme, setSelectedTheme] = useState(Colors.teal.hex);
+    const [selectedTheme, setSelectedTheme] = useState('');
 
     //Currency Data & Popup 
     const [currencyData, setCurrencyData] = useState([]);
@@ -50,7 +52,12 @@ export default function CreateBudgetsScreen({ navigation }) {
         setShowCurrencyPopup(true);
     }
 
+    const handleToggleChange = (isOn) => {
+        setIsPrimary(isOn);
+    }
+
     const handleAddBank = async () => {
+
         const token = await AsyncStorage.getItem('access_token');
 
         if (!token) {
@@ -64,7 +71,10 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
 
         try {
-            const response = await fetch(`https://ffm-application-main.onrender.com/create-budget`, {
+
+            setLoading(true);
+
+            const response = await fetch(`https://ffm-application-main.onrender.com/create-bank`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -74,19 +84,30 @@ export default function CreateBudgetsScreen({ navigation }) {
                     bankTitle: selectedBankTitle.trim(),
                     currency: selectedCurrency,
                     bankAmount: selectedBankAmount,
-                    isPrimary: true
+                    isPrimary: isPrimary,
+                    userIDs: []  // You can keep this empty array if you don't need it
                 })
             });
+
+            console.log('Response Status:', response.status);  // Log response status code
+            const responseData = await response.json();  // Parse JSON response
+            console.log('Response Data:', responseData);  // Log the response data
+
+            setLoading(false);
 
             if (response.ok) {
                 Alert.alert('Success', 'Bank Added Successfully');
                 navigation.navigate('Dashboard');
             } else {
+                const errorResponse = await response.json();
+                console.error('Error response:', errorResponse);
                 Alert.alert('Error', 'Failed To Add Bank');
             }
 
         } catch (error) {
-            console.error(error);
+            setLoading(false);
+            console.error('Error:', error);
+            Alert.alert('Error', 'Something went wrong. Please try again later :(.');
         }
     };
 
@@ -203,36 +224,10 @@ export default function CreateBudgetsScreen({ navigation }) {
                         </View>
                     </View>
 
-                    <View style={styles.bankTypeOptionsContainer}>
-                        <Button
-                            mode="outlined"
-                            style={[
-                                styles.button,
-                                selectedBudgetType === 'Personal' ? styles.selectedButton : styles.button
-                            ]}
-                            onPress={() => handleBudgetTypeOption('Personal')}
-                            labelStyle={selectedBudgetType === 'Personal' ? styles.selectedButtonText : styles.unselectedButtonText}
-                        >
-                            Personal
-                        </Button>
-
-                        <Button
-                            mode="outlined"
-                            style={[
-                                styles.button,
-                                selectedBudgetType === 'Family' ? styles.selectedButton : styles.button
-                            ]}
-                            onPress={() => handleBudgetTypeOption('Family')}
-                            labelStyle={selectedBudgetType === 'Family' ? styles.selectedButtonText : styles.unselectedButtonText}
-                        >
-                            Family
-                        </Button>
-                    </View>
-
                     <View style={styles.bankCurrencyOptionsContainer}>
 
 
-                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency ( {selectedCurrency.symbol} )</Text>
+                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency ( {selectedCurrency.code} )</Text>
 
                         <View style={styles.currencyContainer}>
                             {mainCurrenciesList.map((currency) => (
@@ -251,6 +246,19 @@ export default function CreateBudgetsScreen({ navigation }) {
                         </View>
                     </View>
 
+                    <View style={styles.bankTypeOptionsContainer}>
+                        <Text style={[styles.defaultText, { fontSize: 20 }]}>Bank Options</Text>
+                        <View style={styles.optionContainer}>
+                            <Text style={[styles.defaultText, { fontSize: 18 }]}>Primary Bank :
+                            </Text>
+                            <View style={styles.toggleContainer}>
+                                <Toggle
+                                    isPrimary={isPrimary}
+                                    onToggleChange={handleToggleChange}
+                                />
+                            </View>
+                        </View>
+                    </View>
 
                     <View style={styles.bankThemeOptionsContainer}>
 
@@ -337,7 +345,7 @@ const styles = StyleSheet.create({
     },
 
     shortInput: {
-        width: 80,
+        width: 120,
         textAlign: 'center',
         borderBottomWidth: 1.5,
         borderBottomColor: '#fff',
@@ -345,11 +353,25 @@ const styles = StyleSheet.create({
 
     bankTypeOptionsContainer: {
         width: '98%',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-around',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        justifyContent: 'flex-start',
+        marginLeft: 30,
+        marginTop: 20,
+    },
+
+    optionContainer: {
+        flexDirection: 'row',  // Keeps text and toggle on the same row
+        alignItems: 'center',  // Ensures the text and toggle are aligned
+        justifyContent: 'flex-start', // Aligns items to the left
         marginTop: 10,
     },
+
+    toggleContainer: {
+        marginTop: 5,  // Adjusts space between the text and toggle if necessary
+        marginLeft: 10,
+    },
+
 
     button: {
         flex: 1,

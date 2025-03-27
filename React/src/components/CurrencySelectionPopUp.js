@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, TouchableOpacity, Modal, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Modal, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { theme } from '../core/theme';
 
 const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCurrency, setShowCurrenciesPopup }) => {
+    const [searchQuery, setSearchQuery] = useState('');
 
     const handleCurrencySelect = (currency) => {
         setSelectedCurrency(currency);
@@ -59,8 +60,14 @@ const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCur
         );
     };
 
+    // Filter currencies based on the search query
+    const filteredCurrencyData = currencyData.filter(currency =>
+        currency.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        currency.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     // Sorting the currencies alphabetically
-    const sortedCurrencyData = [...currencyData].sort((a, b) => a.code.localeCompare(b.code));
+    const sortedCurrencyData = [...filteredCurrencyData].sort((a, b) => a.code.localeCompare(b.code));
 
     return (
         <Modal transparent={true} visible={true} animationType='fade'>
@@ -76,12 +83,24 @@ const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCur
 
                     <Text style={styles.modalTitle}>Select Currency</Text>
 
+                    {/* Search Bar */}
+                    <View style={styles.searchContainer}>
+                        <Icon name="magnify" size={20} color="white" />
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search Currency..."
+                            placeholderTextColor={theme.colors.textSecondary}
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                        />
+                    </View>
+
                     <ScrollView contentContainerStyle={styles.scrollContent}>
-                        <View style={styles.currencyContainer}>
+                        <View style={[styles.currencyContainer]}>
                             {sortedCurrencyData && sortedCurrencyData.length > 0 ? (
                                 sortedCurrencyData.map((currency) => renderCurrencyItem(currency))
                             ) : (
-                                <Text>No currencies available</Text>
+                                <Text style={styles.defaultText}>No results found</Text>
                             )}
                         </View>
                     </ScrollView>
@@ -130,6 +149,25 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.bold.fontFamily,
         color: theme.colors.textSecondary,
         marginBottom: 15,
+    },
+
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',  // Semi-transparent grey
+        borderRadius: 25,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        width: '100%',
+    },
+
+    searchInput: {
+        marginLeft: 10,
+        fontFamily: theme.fonts.regular.fontFamily,
+        fontSize: 14,
+        color: 'white',
+        flex: 1,
     },
 
     currencyContainer: {
