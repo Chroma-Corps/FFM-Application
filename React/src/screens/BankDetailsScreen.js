@@ -140,7 +140,6 @@ export default function BankDetailsScreen({ navigation, route }) {
 
     const handleOptionPress = (option) => {
         setSelectedOption(option);
-        setTopCategories(getTopCategories());
     };
 
     const handleViewAllTransactions = () => {
@@ -155,7 +154,6 @@ export default function BankDetailsScreen({ navigation, route }) {
         )
     );
 
-    console.log("Filtered Transactions:", filteredTransactions);
 
     const getTopCategories = (filteredTransactions) => {
         if (!filteredTransactions) return [];
@@ -164,9 +162,9 @@ export default function BankDetailsScreen({ navigation, route }) {
 
         filteredTransactions.forEach(transaction => {
 
-            const amount = parseFloat(transaction.transactionAmount.replace("TT$", "").trim()) || 0;
+            const amount = parseFloat(transaction.transactionAmount.replace(/[^\d.-]/g, "").trim()) || 0;
             const category = Array.isArray(transaction.transactionCategory) ? transaction.transactionCategory[0] : transaction.transactionCategory || "Uncategorized";
-            const type = transaction.transactionType.trim().toLowerCase();
+            const type = transaction.transactionType ? transaction.transactionType.trim().toLowerCase() : "";
 
             if (!topCategoriesMap[category]) {
                 topCategoriesMap[category] = {
@@ -220,7 +218,7 @@ export default function BankDetailsScreen({ navigation, route }) {
 
         return categories.map((category, index) => {
 
-            const categoryData = selectedOption === 'income' ? category.income : category.expense;
+            const categoryData = selectedOption === 'Income' ? category.income : category.expense;
 
             return (
                 <View key={index} style={styles.transactionRow}>
@@ -239,8 +237,17 @@ export default function BankDetailsScreen({ navigation, route }) {
 
                     <View style={styles.transactionAmountContainer}>
 
-                        <Text style={[styles.defaultText, { fontSize: 15 }]}>
-                            ${categoryData.totalAmount.toFixed(2)}
+                        <Icon
+                            name={selectedOption === 'Income' ? "arrow-up" : "arrow-down"} // Arrow-down for positive, arrow-up for negative
+                            size={18}
+                            color={selectedOption === 'Income' ? '#80c582' : '#e57373'} // Red for expense, green for income
+                        />
+
+                        <Text style={[
+                            styles.defaultText,
+                            { fontSize: 15, color: selectedOption === 'Income' ? '#80c582' : '#e57373' }
+                        ]}>
+                            {currencySymbol} {categoryData.totalAmount.toFixed(2)}
                         </Text>
                     </View>
                 </View>
@@ -474,4 +481,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 10,
     },
+
+    transactionCountCircle: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        borderWidth: 2,
+        borderColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 10,
+        backgroundColor: 'transparent',
+    }
 });
