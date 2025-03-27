@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import Button from '../components/Button'
@@ -10,6 +10,19 @@ import EditButton from '../components/EditButton';
 import TransactionType from '../constants/TransactionTypes';
 import BankTransactionsPopup from '../components/BankTransactionsPopup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import DonutChart from '../components/DonutChart';
+
+//Get a random color for donut chart (Rynnia.R)
+const getRandomColor = () => {
+    // Randomly generate a color from warm tones
+    const r = Math.floor(Math.random() * 128) + 128; // Red is between 128 and 255
+    const g = Math.floor(Math.random() * 128);       // Green is between 0 and 127
+    const b = Math.floor(Math.random() * 64);        // Blue is between 0 and 63
+
+    // Return the RGB color as a hex string
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+};
+
 
 export default function BankDetailsScreen({ navigation, route }) {
     const { bankID } = route.params;
@@ -23,11 +36,11 @@ export default function BankDetailsScreen({ navigation, route }) {
     const [expenseAmount, setExpenseAmount] = useState(0);
     const [currencySymbol, setCurrencySymbol] = useState('');
     const [topCategories, setTopCategories] = useState([]);
+    const [bankCategories, setBankCategories] = useState([]);
 
     const [showBankTransactionsPopup, setShowBankTransactionsPopup] = useState(false);
 
     const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const fetchBankDetails = async () => {
@@ -154,8 +167,7 @@ export default function BankDetailsScreen({ navigation, route }) {
         )
     );
 
-
-    const getTopCategories = (filteredTransactions) => {
+    const getBankCategories = (filteredTransactions) => {
         if (!filteredTransactions) return [];
 
         const topCategoriesMap = {};
@@ -202,13 +214,16 @@ export default function BankDetailsScreen({ navigation, route }) {
             .sort((a, b) =>
                 (b.income.totalAmount + b.expense.totalAmount) - (a.income.totalAmount + a.expense.totalAmount)
             )
-            .slice(0, 3);
 
         return result;
     };
 
     useEffect(() => {
-        setTopCategories(getTopCategories(filteredTransactions));
+        const bankCategoriesResult = getBankCategories(filteredTransactions);
+        const topThreeCategories = bankCategoriesResult.slice(0, 3);
+
+        setBankCategories(bankCategoriesResult)
+        setTopCategories(topThreeCategories);
     }, [bankTransactions, selectedOption]);
 
     const renderTopTransactions = (categories) => {
@@ -276,6 +291,40 @@ export default function BankDetailsScreen({ navigation, route }) {
         );
     }
 
+    const donutData = bankCategories.map(category => {
+        const incomeAmount = category.income.count || 0;
+        const expenseAmount = category.expense.count || 0;
+
+        return {
+            name: category.name,
+            value: selectedOption === 'Income' ? incomeAmount : expenseAmount, // Conditionally set the value
+            color: getRandomColor(),
+        };
+    }).filter(data => data.value > 0);
+
+    let donutChart;
+
+    if (selectedOption === 'Income') {
+        donutChart = (
+            <DonutChart
+                widthAndHeight={250}
+                series={[
+                    { value: 430, color: '#fbd203' },
+                    { value: 321, color: '#ffb300' },
+                    { value: 185, color: '#ff9100' },
+                    { value: 123, color: '#ff6c00' },
+                ]}
+            />
+        );
+    } else {
+        donutChart = (
+            <DonutChart
+                widthAndHeight={250}
+                series={donutData.map(data => ({ value: data.value, color: data.color }))}
+            />
+        );
+    }
+
     return (
 
         <View style={styles.bankDetailsScreen} >
@@ -286,86 +335,92 @@ export default function BankDetailsScreen({ navigation, route }) {
 
                 {showBankTransactionsPopup && (
                     <BankTransactionsPopup
+                        selectedOption={selectedOption}
                         bankTransactions={bankTransactions}
                         setShowBankTransactionsPopup={setShowBankTransactionsPopup}
                     />
                 )}
+                <ScrollView style={styles.scrollViewContainer}>
+                    <View style={styles.bankDetailsContainer}>
+                        <View style={styles.headerContainer}>
+                            <Text style={[styles.defaultText, { fontSize: 40 }]}>{bankDetails.bankTitle}</Text>
+                            <Text style={[styles.defaultText, { fontSize: 30 }]}>{bankDetails.remainingBankAmount}</Text>
 
-                <View style={styles.bankDetailsContainer}>
-                    <View style={styles.headerContainer}>
-                        <Text style={[styles.defaultText, { fontSize: 40 }]}>{bankDetails.bankTitle}</Text>
-                        <Text style={[styles.defaultText, { fontSize: 30 }]}>{bankDetails.remainingBankAmount}</Text>
+                            <View style={styles.transactionsListingContainer}>
+
+                                <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>All Time</Text>
+
+                                <View style={styles.transactionRow}>
+                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>Income (x{incomeCount})</Text>
+                                    <View style={styles.line} />
+                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>{currencySymbol} {incomeAmount}</Text>
+                                </View>
+
+                                <View style={styles.transactionRow}>
+                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>Expense (x{expenseCount})</Text>
+                                    <View style={styles.line} />
+                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>{currencySymbol} {expenseAmount}</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.statisticsOptionsContainer}>
+                            <Button
+                                mode={selectedOption === 'Income' ? 'contained' : 'outlined'}
+                                onPress={() => handleOptionPress('Income')}
+                                style={[
+                                    styles.button,
+                                    selectedOption === 'Income' && styles.incomeSelected,
+                                    selectedOption !== 'Income' && styles.defaultButton,
+                                ]}
+                                labelStyle={styles.text}
+                            >
+                                Income
+                            </Button>
+                            <Button
+                                mode={selectedOption === 'Expense' ? 'contained' : 'outlined'}
+                                onPress={() => handleOptionPress('Expense')}
+                                style={[
+                                    styles.button,
+                                    selectedOption === 'Expense' && styles.expenseSelected,
+                                    selectedOption !== 'Expense' && styles.defaultButton,
+                                ]}
+                                labelStyle={styles.text}
+                            >
+                                Expense
+                            </Button>
+                        </View>
+
+                        <View style={styles.bankStatisticsContainer}>
+
+                            <View style={{ height: 250, width: 250 }}>
+                                {donutChart}
+                            </View>
+
+                            <Text style={[styles.defaultText, { fontSize: 15 }]}>Graph key Goes Here</Text>
+
+
+                            <View style={styles.graphKeyContainer}>
+                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
+                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
+                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
+                            </View>
+                        </View>
+
+                        <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>Transaction Overview</Text>
 
                         <View style={styles.transactionsListingContainer}>
+                            {renderTopTransactions(topCategories)}
+                        </View>
 
-                            <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>All Time</Text>
-
-                            <View style={styles.transactionRow}>
-                                <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>Income (x{incomeCount})</Text>
-                                <View style={styles.line} />
-                                <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>{currencySymbol} {incomeAmount}</Text>
-                            </View>
-
-                            <View style={styles.transactionRow}>
-                                <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>Expense (x{expenseCount})</Text>
-                                <View style={styles.line} />
-                                <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>{currencySymbol} {expenseAmount}</Text>
-                            </View>
+                        <View>
+                            <ButtonSmall
+                                label="View All Transactions"
+                                onPress={handleViewAllTransactions}
+                            />
                         </View>
                     </View>
-
-                    <View style={styles.statisticsOptionsContainer}>
-                        <Button
-                            mode={selectedOption === 'Income' ? 'contained' : 'outlined'}
-                            onPress={() => handleOptionPress('Income')}
-                            style={[
-                                styles.button,
-                                selectedOption === 'Income' && styles.incomeSelected,
-                                selectedOption !== 'Income' && styles.defaultButton,
-                            ]}
-                            labelStyle={styles.text}
-                        >
-                            Income
-                        </Button>
-                        <Button
-                            mode={selectedOption === 'Expense' ? 'contained' : 'outlined'}
-                            onPress={() => handleOptionPress('Expense')}
-                            style={[
-                                styles.button,
-                                selectedOption === 'Expense' && styles.expenseSelected,
-                                selectedOption !== 'Expense' && styles.defaultButton,
-                            ]}
-                            labelStyle={styles.text}
-                        >
-                            Expense
-                        </Button>
-                    </View>
-
-                    <View style={styles.bankStatisticsContainer}>
-                        <Text style={[styles.defaultText, { fontSize: 15 }]}>Graph Goes Here</Text>
-
-                        <Text style={[styles.defaultText, { fontSize: 15 }]}>Graph key Goes Here</Text>
-
-                        <View style={styles.graphKeyContainer}>
-                            <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
-                            <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
-                            <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
-                        </View>
-                    </View>
-
-                    <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>Transaction Overview</Text>
-
-                    <View style={styles.transactionsListingContainer}>
-                        {renderTopTransactions(topCategories)}
-                    </View>
-
-                    <View>
-                        <ButtonSmall
-                            label="View All Transactions"
-                            onPress={handleViewAllTransactions}
-                        />
-                    </View>
-                </View>
+                </ScrollView>
             </InAppBackground>
         </View>
     );
@@ -447,6 +502,9 @@ const styles = StyleSheet.create({
 
     bankStatisticsContainer: {
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
     },
 
     graphKeyContainer: {

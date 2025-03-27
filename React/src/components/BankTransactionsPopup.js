@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Modal, Text, StyleSheet, ScrollView, Image } fr
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { theme } from '../core/theme';
 
-const BankTransactionsPopup = ({ bankTransactions, setShowBankTransactionsPopup }) => {
+const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTransactionsPopup }) => {
     let previousTransactionDate = '';
     const transactionsByDate = [];
 
@@ -54,8 +54,8 @@ const BankTransactionsPopup = ({ bankTransactions, setShowBankTransactionsPopup 
                                             <Image source={require('../assets/default_img.jpg')} style={styles.transactionImage} />
 
                                             <View style={styles.transactionDetails}>
-                                                <Text style={styles.defaultText}>{transaction.transactionTitle}</Text>
-                                                <Text style={styles.defaultText}>{transaction.transactionAmount}</Text>
+                                                <Text style={[styles.defaultText, { maxWidth: '70%', justifyContent: 'flex-start', textAlign: 'left' }]}>{transaction.transactionTitle}</Text>
+                                                <Text style={[styles.defaultText, { color: transaction.transactionType === 'Income' ? '#80c582' : '#e57373' }]}>{transaction.transactionAmount}</Text>
                                             </View>
                                         </View>
                                     ))}
