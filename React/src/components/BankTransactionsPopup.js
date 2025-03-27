@@ -22,6 +22,18 @@ const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTr
 
     transactionsByDate.reverse();
 
+    const getCategoryImage = (category) => {
+        const categoryImages = {
+            bills: require('../assets/icons/bills.png'),
+            entertainment: require('../assets/icons/entertainment.png'),
+            groceries: require('../assets/icons/groceries.png'),
+            income: require('../assets/icons/income.png'),
+            shopping: require('../assets/icons/shopping.png'),
+            transit: require('../assets/icons/transit.png'),
+        };
+        return categoryImages[category.toLowerCase()] || require('../assets/default_img.jpg');
+    };
+
     return (
         <Modal transparent={true} visible={true} animationType='fade'>
             <View style={styles.modalOverlay}>
@@ -48,17 +60,21 @@ const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTr
 
                                     <Text style={[styles.transactionDate, { color: theme.colors.secondary }]}>{dateGroup.date}</Text>
 
-                                    {dateGroup.transactions.map((transaction, transactionIndex) => (
-                                        <View key={transactionIndex} style={styles.transactionRow}>
+                                    {dateGroup.transactions.map((transaction, transactionIndex) => {
+                                        const categoryImage = getCategoryImage(transaction.transactionCategory[0]);
 
-                                            <Image source={require('../assets/default_img.jpg')} style={styles.transactionImage} />
+                                        return (
+                                            <View key={transactionIndex} style={styles.transactionRow}>
 
-                                            <View style={styles.transactionDetails}>
-                                                <Text style={[styles.defaultText, { maxWidth: '70%', justifyContent: 'flex-start', textAlign: 'left' }]}>{transaction.transactionTitle}</Text>
-                                                <Text style={[styles.defaultText, { color: transaction.transactionType === 'Income' ? '#80c582' : '#e57373' }]}>{transaction.transactionAmount}</Text>
+                                                <Image source={categoryImage} style={styles.transactionImage} />
+
+                                                <View style={styles.transactionDetails}>
+                                                    <Text style={[styles.defaultText, { maxWidth: '70%', justifyContent: 'flex-start', textAlign: 'left' }]}>{transaction.transactionTitle}</Text>
+                                                    <Text style={[styles.defaultText, { color: transaction.transactionType === 'Income' ? '#80c582' : '#e57373' }]}>{transaction.transactionAmount}</Text>
+                                                </View>
                                             </View>
-                                        </View>
-                                    ))}
+                                        );
+                                    })}
                                 </View>
                             ))
                         ) : (
@@ -70,6 +86,7 @@ const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTr
             </View>
         </Modal>
     );
+
 };
 
 const styles = StyleSheet.create({

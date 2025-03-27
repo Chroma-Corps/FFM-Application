@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import Button from '../components/Button'
@@ -12,16 +12,24 @@ import BankTransactionsPopup from '../components/BankTransactionsPopup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DonutChart from '../components/DonutChart';
 
-//Get a random color for donut chart (Rynnia.R)
-const getRandomColor = () => {
-    // Randomly generate a color from warm tones
-    const r = Math.floor(Math.random() * 128) + 128; // Red is between 128 and 255
-    const g = Math.floor(Math.random() * 128);       // Green is between 0 and 127
-    const b = Math.floor(Math.random() * 64);        // Blue is between 0 and 63
+//Random genreated colors for the donut chart until colors are assigned to a category (Rynnia.R)
+const pieChartColors = [
+    '#FF6B6B', // Soft Red
+    '#FF8E72', // Warm Orange
+    '#FFA600', // Gold
+    '#FFD166', // Soft Yellow
+    '#06D6A0', // Mint Green
+    '#1B9AAA', // Teal Blue
+    '#2A9D8F', // Deep Turquoise
+    '#118AB2', // Light Blue
+    '#E63946', // Deep Red
+    '#F4A261', // Peach
+];
 
-    // Return the RGB color as a hex string
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+const getRandomColor = () => {
+    return pieChartColors[Math.floor(Math.random() * pieChartColors.length)];
 };
+
 
 
 export default function BankDetailsScreen({ navigation, route }) {
@@ -291,38 +299,38 @@ export default function BankDetailsScreen({ navigation, route }) {
         );
     }
 
-    const donutData = bankCategories.map(category => {
+    const defaultColor = '#d3d3d3';
+
+    const categoryImages = {
+        bills: require('../assets/icons/bills.png'),
+        entertainment: require('../assets/icons/entertainment.png'),
+        groceries: require('../assets/icons/groceries.png'),
+        income: require('../assets/icons/income.png'),
+        shopping: require('../assets/icons/shopping.png'),
+        transit: require('../assets/icons/transit.png')
+    };
+
+    let donutData = bankCategories.map(category => {
         const incomeAmount = category.income.count || 0;
         const expenseAmount = category.expense.count || 0;
+        const categoryName = category.name.toLowerCase();
 
         return {
             name: category.name,
-            value: selectedOption === 'Income' ? incomeAmount : expenseAmount, // Conditionally set the value
+            value: selectedOption === 'Income' ? incomeAmount : expenseAmount,
             color: getRandomColor(),
+            label: {
+                text: category.name, // Add text label first (testing if images are supported)
+                image: categoryImages[categoryName] || require('../assets/default_img.jpg'), // Image as a label
+            }
         };
     }).filter(data => data.value > 0);
 
-    let donutChart;
+    if (donutData.length === 0) {
+        donutData = [{ value: 1, color: defaultColor, label: { text: 'No Data', fontSize: 10 } }];
 
-    if (selectedOption === 'Income') {
-        donutChart = (
-            <DonutChart
-                widthAndHeight={250}
-                series={[
-                    { value: 430, color: '#fbd203' },
-                    { value: 321, color: '#ffb300' },
-                    { value: 185, color: '#ff9100' },
-                    { value: 123, color: '#ff6c00' },
-                ]}
-            />
-        );
-    } else {
-        donutChart = (
-            <DonutChart
-                widthAndHeight={250}
-                series={donutData.map(data => ({ value: data.value, color: data.color }))}
-            />
-        );
+    } else if (donutData.length === 1) {
+        donutData[0].value = 1;
     }
 
     return (
@@ -394,16 +402,30 @@ export default function BankDetailsScreen({ navigation, route }) {
                         <View style={styles.bankStatisticsContainer}>
 
                             <View style={{ height: 250, width: 250 }}>
-                                {donutChart}
-                            </View>
+                                <DonutChart
+                                    widthAndHeight={250}
+                                    series={donutData.map(data => ({
+                                        value: data.value,
+                                        color: data.color,
+                                    }))}
+                                />
 
-                            <Text style={[styles.defaultText, { fontSize: 15 }]}>Graph key Goes Here</Text>
+                            </View>
 
 
                             <View style={styles.graphKeyContainer}>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
-                                <Text style={[styles.defaultText, { fontSize: 15 }]}>Key</Text>
+                                {donutData.map((data, index) => (
+                                    <View key={index} style={styles.keyRow}>
+                                        <View style={[styles.colorBlock, { backgroundColor: data.color }]} />
+
+                                        <Image
+                                            source={data.label.image}
+                                            style={styles.keyImage}
+                                        />
+
+                                        <Text style={[styles.defaultText, { fontSize: 12 }]}>{data.name}</Text>
+                                    </View>
+                                ))}
                             </View>
                         </View>
 
@@ -501,7 +523,6 @@ const styles = StyleSheet.create({
     },
 
     bankStatisticsContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
         alignItems: 'center',
         justifyContent: 'center',
         width: '100%',
@@ -510,6 +531,28 @@ const styles = StyleSheet.create({
     graphKeyContainer: {
         flexDirection: 'row',
         justifyContent: 'space-around',
+        flexWrap: 'wrap',
+        paddingVertical: 10,
+    },
+
+    keyRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 10,
+        marginVertical: 5,
+    },
+
+    colorBlock: {
+        width: 20,
+        height: 20,
+        marginRight: 5,
+        borderRadius: 8,
+    },
+
+    keyImage: {
+        width: 30,
+        height: 30,
+        marginRight: 5,
     },
 
     transactionsListingContainer: {
