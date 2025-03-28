@@ -199,9 +199,9 @@ export default function Dashboard({ navigation }) {
     }, [reload])
   );
 
-  // const handleAddBank = () => {
-  //   navigation.navigate('AddBank');
-  // };
+  const handleAddBank = () => {
+    navigation.navigate('CreateBank');
+  };
 
   const handleSettings = () => {
     navigation.navigate('Settings')
@@ -352,7 +352,7 @@ export default function Dashboard({ navigation }) {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.flatListContainer}
             />
-            <Button mode="contained" style={styles.addButton}>
+            <Button onPress={handleAddBank} mode="contained" style={styles.addButton}>
               <Text style={styles.buttonText}>+</Text>
             </Button>
           </View>

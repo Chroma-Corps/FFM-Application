@@ -23,7 +23,6 @@ export default function CreateBudgetsScreen({ navigation }) {
     //Bank Details
     const [selectedBankTitle, setSelectedBankTitle] = useState(null);
     const [selectedBankAmount, setSelectedBankAmount] = useState(null);
-    // const [selectedBudgetType, setSelectedBudgetType] = useState(null);
     const [isPrimary, setIsPrimary] = useState(false);
     const [selectedCurrency, setSelectedCurrency] = useState('');
     const [selectedTheme, setSelectedTheme] = useState('');
@@ -40,24 +39,86 @@ export default function CreateBudgetsScreen({ navigation }) {
         setSelectedBankAmount(amount);
     }
 
-    const handleBudgetTypeOption = (type) => {
-        setSelectedBudgetType(type);
-    };
-
     const handleSelectCurrencyOption = (currency) => {
         setSelectedCurrency(currency);
     };
+
+    const handleToggleChange = (value) => {
+        setIsPrimary(value);
+    };
+
+    console.log('Is Primary:', isPrimary);
 
     const handleViewCurrenciesPopup = () => {
         setShowCurrencyPopup(true);
     }
 
-    const handleToggleChange = (isOn) => {
-        setIsPrimary(isOn);
-    }
+
+    const fetchActiveCircle = async () => {
+        const token = await AsyncStorage.getItem('access_token');
+
+        if (!token) {
+            console.error('No Token Found');
+            return null;
+        }
+
+        try {
+            const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            console.log('Raw Response:', data);
+
+            if (response.ok) {
+                const activeCircleID = data.activeCircle.circleID;
+                console.log('Active Circle ID:', activeCircleID);
+                return activeCircleID;
+            } else {
+                console.error('Error fetching active circle:', data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching active circle:', error);
+            return null;
+        }
+    };
+
+    const fetchCircleUsers = async (circleID) => {
+        const token = await AsyncStorage.getItem('access_token');
+
+        if (!token) {
+            console.error('No Token Found');
+            return [];
+        }
+
+        try {
+            const response = await fetch(`https://ffm-application-main.onrender.com/circle/${circleID}/users`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const userIds = data.users.map(user => user.id);
+                return userIds;
+            } else {
+                console.error('Error fetching circle users:', data.message);
+                return [];
+            }
+        } catch (error) {
+            console.error('Error fetching circle users:', error);
+            return [];
+        }
+    };
 
     const handleAddBank = async () => {
-
         const token = await AsyncStorage.getItem('access_token');
 
         if (!token) {
@@ -65,16 +126,22 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
         }
 
-        if (!selectedBankTitle || !selectedBankAmount || !selectedBudgetType || !selectedCurrency) {
+        if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency) {
             Alert.alert('Error', 'Please Fill In All Fields');
             return;
         }
 
         try {
 
-            setLoading(true);
+            const circleID = await fetchActiveCircle();
+            if (!circleID) {
+                Alert.alert('Error', 'No active circle found.');
+                return;
+            }
 
-            const response = await fetch(`https://ffm-application-main.onrender.com/create-bank`, {
+            const userIDs = await fetchCircleUsers(circleID);
+
+            const response = await fetch('https://ffm-application-main.onrender.com/create-bank', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -82,34 +149,32 @@ export default function CreateBudgetsScreen({ navigation }) {
                 },
                 body: JSON.stringify({
                     bankTitle: selectedBankTitle.trim(),
-                    currency: selectedCurrency,
-                    bankAmount: selectedBankAmount,
+                    bankCurrency: selectedCurrency.code,
+                    bankAmount: parseFloat(selectedBankAmount),
                     isPrimary: isPrimary,
-                    userIDs: []  // You can keep this empty array if you don't need it
+                    userIDs: userIDs
                 })
             });
 
-            console.log('Response Status:', response.status);  // Log response status code
-            const responseData = await response.json();  // Parse JSON response
-            console.log('Response Data:', responseData);  // Log the response data
+            const responseData = await response.json();
 
-            setLoading(false);
+            // Log the response data to understand what's being returned
+            console.log('Response Data:', responseData);
 
             if (response.ok) {
                 Alert.alert('Success', 'Bank Added Successfully');
-                navigation.navigate('Dashboard');
+                navigation.goBack();
             } else {
-                const errorResponse = await response.json();
-                console.error('Error response:', errorResponse);
                 Alert.alert('Error', 'Failed To Add Bank');
+                navigation.goBack();
             }
 
         } catch (error) {
-            setLoading(false);
             console.error('Error:', error);
-            Alert.alert('Error', 'Something went wrong. Please try again later :(.');
+            Alert.alert('Error', 'Something went wrong. Please try again later.');
         }
     };
+
 
     useEffect(() => {
         const formattedCurrencies = Object.entries(Currencies).map(([code, currency], index) => {
