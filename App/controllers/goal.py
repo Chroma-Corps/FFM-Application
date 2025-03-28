@@ -1,11 +1,14 @@
 from App.database import db
 from App.models import Goal, UserGoal
+from App.controllers.user import get_user_json
 from App.services.datetime import convert_to_date
 from App.controllers.userGoal import create_user_goal, is_goal_owner
 
 # Create A New Goal
-def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, circleID, userIDs=None):
-    try: 
+def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, userIDs=None):
+    try:
+        user = get_user_json(userID)
+
         new_goal = Goal (
             goalTitle=goalTitle,
             targetAmount=targetAmount,
@@ -13,7 +16,7 @@ def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, c
             goalType=goalType,
             startDate=startDate,
             endDate=endDate,
-            circleID=circleID
+            circleID=user["activeCircle"]
         )
         db.session.add(new_goal)
         db.session.commit()

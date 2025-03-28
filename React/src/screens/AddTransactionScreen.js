@@ -38,7 +38,9 @@ export default function AddTransactionScreen({ navigation }) {
     const [transactionTime, setTransactionTime] = useState('');
     const [open, setOpen] = useState(false);
     const [selectedBudget, setSelectedBudget] = useState(null);
+    const [selectedGoal, setSelectedGoal] = useState(null);
     const [budgets, setBudgets] = useState(null);
+    const [goals, setGoals] = useState(null);
     const [banks, setBanks] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -257,6 +259,26 @@ export default function AddTransactionScreen({ navigation }) {
         </TouchableOpacity>
     );
 
+    const renderGoals = ({ item }) => (
+        <TouchableOpacity
+            style={[
+                styles.radioButton,
+                selectedGoal === item.goalID && styles.radioSelected,
+            ]}
+            onPress={() => setSelectedGoal(item.goalID)}
+        >
+            <Text
+                style={
+                    selectedGoal === item.goalID
+                        ? styles.radioTextSelected
+                        : styles.radioText
+                }
+            >
+                {item.goalTitle.charAt(0).toUpperCase() + item.goalTitle.slice(1)}
+            </Text>
+        </TouchableOpacity>
+    );
+
     useEffect(() => {
         const fetchBudgets = async () => {
             try {
@@ -281,15 +303,49 @@ export default function AddTransactionScreen({ navigation }) {
                     const exclusiveBudgets = data.budgets.filter(budget => budget.transactionScope === 'Exclusive');
                     setBudgets(exclusiveBudgets);
                 } else {
-                    console.error('Failed to fetch budgets:', data.message);
+                    console.error('Failed To Fetch Budgets:', data.message);
                 }
                 console.log('Fetch Exclusive Budgets Status:', data.status)
             } catch (error) {
-                console.error('Error fetching budgets:', error);
+                console.error('Error Fetching Budgets:', error);
             }
         };
 
         fetchBudgets();
+    }, []);
+
+    useEffect(() => {
+        const fetchGoals = async () => {
+            try {
+                const token = await AsyncStorage.getItem('access_token');
+
+                if (!token) {
+                    console.error('No Token Found');
+                    return;
+                }
+
+                const response = await fetch(`https://ffm-application-main.onrender.com/goals`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setGoals(data.goals);
+                } else {
+                    console.error('Failed To Fetch Goals:', data.message);
+                }
+                console.log('Fetch Goals Status:', data.status)
+            } catch (error) {
+                console.error('Error Fetching Goals:', error);
+            }
+        };
+
+        fetchGoals();
     }, []);
 
     const fetchBanks = async () => { // Awaiting Banks JSON To Return BankID
@@ -357,6 +413,7 @@ export default function AddTransactionScreen({ navigation }) {
                     transactionTime: transactionTime.trim(),
                     budgetID: selectedBudget,
                     bankID: selectedBankID,
+                    goalID: selectedGoal,
                 }),
             });
 
@@ -430,6 +487,7 @@ export default function AddTransactionScreen({ navigation }) {
                                     style={styles.input}
                                 />
                             </View>
+                            <Text style={styles.sectionTitle}>Categories</Text>
                             <View style={styles.radioContainer}>
                                 {categories.length > 0 ? (
                                     <FlatList
@@ -446,7 +504,7 @@ export default function AddTransactionScreen({ navigation }) {
                             </View>
 
                             <View>
-                                <Text style={styles.sectionTitle}>Banks</Text>
+                                <Text style={styles.sectionTitle}>Wallets</Text>
                                 {loading ? (
                                     <ActivityIndicator size="large" color={theme.colors.primary} />
                                 ) : banks.length === 0 ? (
@@ -463,6 +521,7 @@ export default function AddTransactionScreen({ navigation }) {
                                     />
                                 )}
                             </View>
+                            <Text style={styles.sectionTitle}>Date & Time</Text>
                             {showPicker && (
                                 <DateTimePicker
                                     mode="date"
@@ -555,12 +614,24 @@ export default function AddTransactionScreen({ navigation }) {
                                     />
                                 </Pressable>
                             )}
-
+                            <Text style={styles.sectionTitle}>Exclusive Budgets</Text>
                             <View style={styles.container}>
                                 <FlatList
                                     data={budgets}
                                     renderItem={renderBudgets}
                                     keyExtractor={(item) => item?.budgetID}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={styles.radioContainer}
+                                />
+                            </View>
+
+                            <Text style={styles.sectionTitle}>Goals</Text>
+                            <View style={styles.container}>
+                                <FlatList
+                                    data={goals}
+                                    renderItem={renderGoals}
+                                    keyExtractor={(item) => item?.goalID}
                                     horizontal
                                     showsHorizontalScrollIndicator={false}
                                     contentContainerStyle={styles.radioContainer}
