@@ -72,40 +72,40 @@ export default function BudgetsScreen({ navigation }) {
 
     const renderCategories = (budgetCategories) => {
       const categoryImages = {
-          bills: require('../assets/icons/bills.png'),
-          entertainment: require('../assets/icons/entertainment.png'),
-          groceries: require('../assets/icons/groceries.png'),
-          income: require('../assets/icons/income.png'),
-          shopping: require('../assets/icons/shopping.png'),
-          transit: require('../assets/icons/transit.png')
+        bills: require('../assets/icons/bills.png'),
+        entertainment: require('../assets/icons/entertainment.png'),
+        groceries: require('../assets/icons/groceries.png'),
+        income: require('../assets/icons/income.png'),
+        shopping: require('../assets/icons/shopping.png'),
+        transit: require('../assets/icons/transit.png')
       };
 
       const categoriesToDisplay = budgetCategories && budgetCategories.length > 0
-          ? budgetCategories
-          : [];
+        ? budgetCategories
+        : [];
 
       const displayedCategories = categoriesToDisplay.slice(0, 3);
       const categoryLimit = categoriesToDisplay.length > 3;
 
       const categoryWithImages = displayedCategories.map((category, index) => {
-          const categoryName = category.toLowerCase();
-          return {
-              image: categoryImages[categoryName] || require('../assets/default_img.jpg') // Fallback image
-          };
+        const categoryName = category.toLowerCase();
+        return {
+          image: categoryImages[categoryName] || require('../assets/default_img.jpg') // Fallback image
+        };
       });
 
       return (
-          <View style={styles.categoryList}>
-              {categoryWithImages.map((category, index) => (
-                  <View key={category.name || index} style={styles.categoryItem}>
-                      <Image source={category.image} style={styles.categoryIcon} />
-                      <Text style={styles.categoryText}>{category.name}</Text>
-                  </View>
-              ))}
-              {categoryLimit && <Text style={styles.cardText}>...</Text>}
-          </View>
+        <View style={styles.categoryList}>
+          {categoryWithImages.map((category, index) => (
+            <View key={category.name || index} style={styles.categoryItem}>
+              <Image source={category.image} style={styles.categoryIcon} />
+              <Text style={styles.categoryText}>{category.name}</Text>
+            </View>
+          ))}
+          {categoryLimit && <Text style={styles.cardText}>...</Text>}
+        </View>
       );
-  };
+    };
 
     return (
       <TouchableOpacity
@@ -120,9 +120,9 @@ export default function BudgetsScreen({ navigation }) {
                 <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
                 <View>
                   {item.budgetCategory ? (
-                      renderCategories(item.budgetCategory)
+                    renderCategories(item.budgetCategory)
                   ) : (
-                      <Text>None</Text>
+                    <Text>None</Text>
                   )}
                 </View>
               </View>
@@ -173,18 +173,18 @@ export default function BudgetsScreen({ navigation }) {
           ))}
         </View>
 
-          {loading ? (
+        {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          ) : filteredBudgets.length === 0 ? (
+        ) : filteredBudgets.length === 0 ? (
           <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
-          ) : (
-            <FlatList
-              data={filteredBudgets}
-              renderItem={({ item }) => renderData(item)}
-              keyExtractor={item => `${item.budgetID}`}
-            />
-          )}
-          <RadialMenu navigation={navigation} />
+        ) : (
+          <FlatList
+            data={filteredBudgets}
+            renderItem={({ item }) => renderData(item)}
+            keyExtractor={item => `${item.budgetID}`}
+          />
+        )}
+        <RadialMenu navigation={navigation} />
       </InAppBackground>
     </View>
   );

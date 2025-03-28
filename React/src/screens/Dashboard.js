@@ -119,6 +119,7 @@ export default function Dashboard({ navigation }) {
         console.error(data.message);
       }
       console.log('Fetch Banks Status:', data.status)
+
     } catch (error) {
       console.error("Error Fetching Banks:", error);
     } finally {
@@ -207,19 +208,20 @@ export default function Dashboard({ navigation }) {
   }
 
   const handleViewSwap = async () => {
-    if (circleType === 'Self') {
-      setCircleType('Group');
-      setActiveCircle(prevCircle.circleID);
-    } else {
+    if (circleType === 'Group' && selfCircle && selfCircle.circleID) {
       setCircleType('Self');
       setActiveCircle(selfCircle.circleID);
+    } else {
+      setCircleType('Group');
+      setActiveCircle(prevCircle.circleID);
     }
   };
 
-  const renderBankItem = ( {item} ) => {
+
+  const renderBankItem = ({ item }) => {
     return (
       <TouchableOpacity
-        style={styles.bankCard}
+        onPress={() => navigation.push('BankDetailsScreen', { bankID: item.bankID })} style={styles.bankCard}
       >
         <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
         <Text style={styles.bankCardAmount}>
@@ -364,7 +366,7 @@ export default function Dashboard({ navigation }) {
         </View>
       )}
         </View>
-        <RadialMenu navigation={navigation} />
+      <RadialMenu navigation={navigation} />
     </InAppBackground>
   );
 }
@@ -412,7 +414,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     margin: 5,
     padding: 15,
-    borderRadius: 5, 
+    borderRadius: 5,
   },
 
   bankCardTitle: {
@@ -420,23 +422,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: theme.fonts.bold.fontFamily,
     textAlign: 'center',
-},
+  },
 
-bankCardAmount: {
-  color: theme.colors.textSecondary,
-  fontSize: 10,
-  fontFamily: theme.fonts.medium.fontFamily,
-  marginBottom: 5,
-  textAlign: 'center',
-},
+  bankCardAmount: {
+    color: theme.colors.textSecondary,
+    fontSize: 10,
+    fontFamily: theme.fonts.medium.fontFamily,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 
-remainingBankCardAmount: {
-  color: theme.colors.textSecondary,
-  fontSize: 15,
-  fontFamily: theme.fonts.bold.fontFamily,
-  marginBottom: 5,
-  textAlign: 'center',
-},
+  remainingBankCardAmount: {
+    color: theme.colors.textSecondary,
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 
   bankItemContainer: {
     flexDirection: 'row',

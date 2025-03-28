@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Bank, Budget, UserBank
+from App.models import Bank, Budget, UserBank, Transaction
 from App.services.currency import CurrencyService
 from App.controllers.userBank import create_user_bank, is_bank_owner
 
@@ -94,6 +94,18 @@ def update_bank(bankID, bankTitle=None, bankCurrency=None, bankAmount=None, isPr
 def get_all_bank_budgets(bankID):
     budgets = Budget.query.filter_by(bankID=bankID).all()
     return [budget.get_json() for budget in budgets]
+
+# Get Bank Transactions
+def get_bank_transactions(bankID):
+    return Transaction.query.filter_by(bankID=bankID).all()
+
+# Get Bank Transactions (JSON)
+def get_bank_transactions_json(bankID):
+    transactions = Transaction.query.filter_by(bankID=bankID).all()
+    if not transactions:
+        return []
+    transactions = [transaction.get_json() for transaction in transactions]
+    return transactions
 
 # Delete Bank
 def delete_bank(userID, bankID):

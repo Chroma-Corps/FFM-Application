@@ -7,7 +7,6 @@ import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
-import CircleGraph from '../components/CircleGraph';
 import BudgetsScreen from './BudgetsScreen';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
@@ -57,16 +56,16 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
     if (loading) {
         return (
-          <View style={styles.centered}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
         );
-      }
-    
+    }
+
     if (!budgetDetails) {
         return (
             <View style={styles.centered}>
-            <Text>No Budget Details Available</Text>
+                <Text>No Budget Details Available</Text>
             </View>
         );
     }

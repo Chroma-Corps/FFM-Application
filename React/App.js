@@ -11,6 +11,7 @@ import {
   RegisterScreen,
   ResetPasswordScreen,
   Dashboard,
+  BankDetailsScreen,
   BudgetsScreen,
   BudgetDetailsScreen,
   CreateBudgetScreen,
@@ -57,6 +58,7 @@ export default function App() {
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
 
             <Stack.Screen name="Dashboard" component={Dashboard} />
+            <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />
             <Stack.Screen name="Budgets" component={BudgetsScreen} />
             <Stack.Screen name="Goals" component={GoalsScreen} />
             <Stack.Screen name="Transactions" component={TransactionsScreen} />
