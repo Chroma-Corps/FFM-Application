@@ -27,6 +27,13 @@ def get_user_by_email(email):
 def get_user(userID):
     return User.query.get(userID)
 
+# Get User By ID (JSON)
+def get_user_json(userID):
+    user = User.query.get(userID)
+    if not user:
+        return []
+    return user.get_json()
+
 # Get All Users
 def get_all_users():
     return User.query.all()

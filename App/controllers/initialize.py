@@ -1,25 +1,26 @@
-from App.controllers.circle import create_circle, get_circle
-from App.controllers.goal import create_goal
 from App.database import db
+from App.controllers.goal import create_goal
 from App.controllers.bank import create_bank
+from App.controllers.circle import create_circle
 from App.controllers.budget import create_budget
 from App.controllers.transaction import add_transaction
 from App.controllers.user import create_user, set_active_circle
-from App.models.budget import BudgetType, TransactionScope
-from App.models.circle import CircleType
+
 from App.models.goal import GoalType
+from App.models.circle import CircleType
 from App.models.transaction import TransactionType
+from App.models.budget import BudgetType, TransactionScope
 
 def initialize():
     db.drop_all()
     db.create_all()
 
-    # Users - Armstrongs
-    bob = create_user('Bob Armstrong', 'bob@mail.com', 'bobpass')
-    alice = create_user('Alice Armstrong','alice@mail.com', 'alicepass')
+    # Users
+    bob = create_user('Bob Bobberson', 'bob@mail.com', 'bobpass')
+    alice = create_user('Alice Bobberson','alice@mail.com', 'alicepass')
     jalene = create_user('Jalene Armstrong', 'jalene@mail.com', 'jalenepass')
 
-    armstrong_circle = create_circle (
+    bobberson_circle = create_circle (
         userID=bob.id,
         circleName="Bobberson",
         circleType=CircleType.GROUP,
@@ -29,18 +30,18 @@ def initialize():
     )
 
     # Bank - Bobberson
-    armstrong_bank = create_bank (
+    bobberson_bank = create_bank (
         userID=bob.id,
-        bankTitle="Armstrong Bank",
+        bankTitle="Bobberson Bank",
         bankCurrency="TTD",
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[alice.id, jalene.id],
-        circleID=armstrong_circle.circleID
+        circleID=bobberson_circle.circleID
     )
 
     # Goal
-    armstrong_goal = create_goal (
+    bobberson_goal = create_goal (
         userID=bob.id,
         goalTitle="Vacation Planning",
         targetAmount=1000.00,
@@ -48,13 +49,13 @@ def initialize():
         startDate="2025-01-01",
         endDate="2025-01-31",
         userIDs=[alice.id, jalene.id],
-        circleID=armstrong_circle.circleID
+        circleID=bobberson_circle.circleID
     )
 
     create_budget (
         userID=bob.id,
-        bankID=armstrong_bank.bankID,
-        circleID=armstrong_circle.circleID,
+        bankID=bobberson_bank.bankID,
+        circleID=bobberson_circle.circleID,
         budgetTitle="Inclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
@@ -68,7 +69,7 @@ def initialize():
     exclusive_budget = create_budget (
         userID=bob.id,
         bankID=None,
-        circleID=armstrong_circle.circleID,
+        circleID=bobberson_circle.circleID,
         budgetTitle="Exclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
@@ -89,9 +90,9 @@ def initialize():
         transactionDate="2025-02-10",
         transactionTime="10:30",
         budgetID=exclusive_budget.budgetID,
-        bankID=armstrong_bank.bankID,
+        bankID=bobberson_bank.bankID,
         goalID=None,
-        circleID=armstrong_circle.circleID,
+        circleID=bobberson_circle.circleID,
     )
 
     add_transaction (
@@ -103,9 +104,9 @@ def initialize():
         transactionAmount=200.00,
         transactionDate="2025-03-10",
         transactionTime="09:30",
-        bankID=armstrong_bank.bankID,
+        bankID=bobberson_bank.bankID,
         goalID=None,
-        circleID=armstrong_circle.circleID,
+        circleID=bobberson_circle.circleID,
     )
 
     add_transaction (
@@ -117,14 +118,14 @@ def initialize():
         transactionAmount=200.00,
         transactionDate="2025-03-10",
         transactionTime="09:30",
-        bankID=armstrong_bank.bankID,
-        circleID=armstrong_circle.circleID,
-        goalID=armstrong_goal.goalID
+        bankID=bobberson_bank.bankID,
+        circleID=bobberson_circle.circleID,
+        goalID=bobberson_goal.goalID
     )
 
-    set_active_circle(bob.id, armstrong_circle.circleID)
-    set_active_circle(jalene.id, armstrong_circle.circleID)
-    set_active_circle(alice.id, armstrong_circle.circleID)
+    set_active_circle(bob.id, bobberson_circle.circleID)
+    set_active_circle(jalene.id, bobberson_circle.circleID)
+    set_active_circle(alice.id, bobberson_circle.circleID)
 
     # Users - Chroma Corps
     rynnia = create_user('Rynnia Ryan','rynnia@mail.com', 'rynniapass')
@@ -168,7 +169,7 @@ def initialize():
         circleType=CircleType.GROUP,
         circleColor="#F28D35",
         circleImage="https://picsum.photos/id/56/300/300.jpg",
-        userIDs=[alice.id, jalene.id]
+        userIDs=[alice.id]
     )
 
      # Circles - Personal
@@ -183,9 +184,9 @@ def initialize():
     # Bank - Jalene
     create_bank (
         userID=jalene.id,
-        bankTitle="My Bank",
+        bankTitle="Jalene's Personal Bank",
         bankCurrency="TTD",
-        bankAmount=0.00,
+        bankAmount=100.00,
         isPrimary=True,
         userIDs=[],
         circleID=jalene_self.circleID

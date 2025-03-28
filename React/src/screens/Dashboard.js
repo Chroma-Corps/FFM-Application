@@ -12,13 +12,17 @@ import StreakIcon from '../assets/icons/streak.svg';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
+  const [userName, setUserName] = useState([]);
   const [streak, setStreak] = useState([]);
   const [reload, setReload] = useState(false);
   const [loading, setLoading] = useState(true);
   const [circleType, setCircleType] = useState('');
   const [circles, setCircles] = useState([]);
   const [newCurrentCircle, setNewCurrentCircle] = useState([]);
+  const [selfCircle, setSelfCircle] = useState([]);
   const [currentCircle, setCurrentCircle] = useState(null);
+  const [prevCircle, setPrevCircle] = useState(null);
+  const [defaultCirle, setDefaultCircle] = useState(null);
   const days = ["Su", "M", "Tu", "W", "Th", "F", "Sa"];
 
   const fetchActiveCircle = async () => {
@@ -30,7 +34,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
   
-      const response = await fetch('http://192.168.0.9:8080/active-circle', {
+      const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -41,6 +45,7 @@ export default function Dashboard({ navigation }) {
       const data = await response.json();
 
       if (response.ok && data.status === 'success') {
+        setPrevCircle(currentCircle);
         setCurrentCircle(data.activeCircle);
         setNewCurrentCircle(data.activeCircle);
         // console.log("Updated Current Circle:", data.activeCircle);
@@ -63,7 +68,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
   
-      const response = await fetch('http://192.168.0.9:8080/active-circle', {
+      const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -98,7 +103,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.9:8080/banks', {
+      const response = await fetch('https://ffm-application-main.onrender.com/banks', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -121,6 +126,36 @@ export default function Dashboard({ navigation }) {
     }
   };
 
+  const fetchUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+
+      const response = await fetch('https://ffm-application-main.onrender.com/user', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUserName(data.user.name);
+      } else {
+        console.error(data.message);
+      }
+      console.log('Fetch User Status:', data.status)
+    } catch (error) {
+      console.error("Error Fetching User:", error);
+    }
+  };
+
   const fetchCircles = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
@@ -130,7 +165,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.9:8080/circles', {
+      const response = await fetch('https://ffm-application-main.onrender.com/circles', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -141,6 +176,10 @@ export default function Dashboard({ navigation }) {
 
       if (response.ok) {
         setCircles(data.circles);
+        const self = data.circles.find(circle => circle.circleType === 'Self');
+        if (self) {
+          setSelfCircle(self);
+        }
       } else {
         console.error(data.message);
       }
@@ -153,6 +192,7 @@ export default function Dashboard({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       fetchActiveCircle();
+      fetchUser();
       fetchBanks();
       fetchCircles();
     }, [reload])
@@ -167,11 +207,12 @@ export default function Dashboard({ navigation }) {
   }
 
   const handleViewSwap = async () => {
-    setNewCurrentCircle(null);
     if (circleType === 'Self') {
       setCircleType('Group');
+      setActiveCircle(prevCircle.circleID);
     } else {
       setCircleType('Self');
+      setActiveCircle(selfCircle.circleID);
     }
   };
 
@@ -228,33 +269,36 @@ export default function Dashboard({ navigation }) {
       {circleType === 'Group' && (
       <View style={styles.container}>
         <View>
-        <TouchableOpacity
-            style={[styles.circle, { backgroundColor: "#306060"}]}
-            onPress={() => handleViewSwap()}
-          >
-          <MaterialIcons name={"group"} size={30} color={"white"} style={styles.icon}/>
-        </TouchableOpacity>
-          <Text style={styles.circleText}>Circles</Text>
-        </View>
-          <FlatList
-              data={circles.filter(circle => circle.circleType === 'Group')}
-              renderItem={renderCircleItem}
-              keyExtractor={(item, index) => item?.circleID?.toString() ?? index.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-          />
+          <TouchableOpacity
+              style={[styles.circle, { backgroundColor: "#306060"}]}
+              onPress={() => handleViewSwap()}
+            >
+            <MaterialIcons name={"group"} size={30} color={"white"} style={styles.icon}/>
+          </TouchableOpacity>
+            <Text style={styles.circleText}>Circles</Text>
+          </View>
+            <FlatList
+                data={circles.filter(circle => circle.circleType === 'Group')}
+                renderItem={renderCircleItem}
+                keyExtractor={(item, index) => item?.circleID?.toString() ?? index.toString()}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+            />
       </View>
       )}
 
       {circleType === 'Self' && (
             <View style={styles.container}>
               <View>
-              <TouchableOpacity
-                  style={[styles.circle, { backgroundColor: "#306060"}]}
-                  onPress={() => handleViewSwap()}
-                />
+                <TouchableOpacity
+                    style={[styles.circle, { backgroundColor: "#306060"}]}
+                    onPress={() => handleViewSwap()}
+                  >
+                  <MaterialIcons name={"person"} size={30} color={"white"} style={styles.icon}/>
+                  </TouchableOpacity>
                 <Text style={styles.circleText}>Self</Text>
               </View>
+              <Text style={styles.selfViewText}>Hi, {userName}</Text>
             </View>
       )}
 
@@ -552,4 +596,11 @@ remainingBankCardAmount: {
     fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.textSecondary,
   },
+
+  selfViewText: {
+    fontSize: 25,
+    marginLeft: 10,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.textSecondary,
+  }
 });

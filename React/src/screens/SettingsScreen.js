@@ -18,7 +18,7 @@ export default function SettingsScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('http://192.168.0.9:8080/logout', {
+          const response = await fetch('https://ffm-application-main.onrender.com/logout', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,
