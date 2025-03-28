@@ -1,7 +1,8 @@
 from App.database import db
+from App.controllers.goal import get_goal
 from App.controllers.bank import get_bank
 from App.controllers.budget import get_budget
-from App.controllers.goal import get_goal
+from App.controllers.user import get_user_json
 from App.services.category import CategoryService
 from App.controllers.userBudget import get_user_budgets_json
 from App.services.datetime import convert_to_date, convert_to_time
@@ -9,12 +10,14 @@ from App.models import Transaction, TransactionType, Budget, TransactionScope
 from App.controllers.userTransaction import create_user_transaction, is_transaction_owner, get_user_transaction_by_transaction_id
 
 # Add A New Transaction
-def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, circleID, userID, goalID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
+def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, goalID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
     try:
         userIDs = userIDs or []
-        transaction_data, error = transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, circleID, goalID)
+        transaction_data, error = transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID)
         if error:
             return None, error
+
+        user = get_user_json(userID)
 
         new_transaction = Transaction(
             transactionTitle=transaction_data['transactionTitle'],
@@ -26,7 +29,7 @@ def add_transaction(transactionTitle, transactionDesc, transactionType, transact
             transactionTime=transaction_data['transactionTime'],
             budgetID=transaction_data['budgetID'],
             bankID=transaction_data['bankID'],
-            circleID=transaction_data['circleID'],
+            circleID=user['activeCircle'],
             goalID=transaction_data['goalID']
         )
         db.session.add(new_transaction)
@@ -296,10 +299,11 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
         db.session.rollback()
         raise ValueError(f"Error adjusting inclusive budgets: {str(e)}")
 
-def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, circleID, goalID):
+def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID):
     try:
         adjust_bank_balance(bankID, transactionType, transactionAmount)
-        adjust_goal_balance(goalID, transactionType, transactionAmount)
+        if goalID is not None:
+            adjust_goal_balance(goalID, transactionType, transactionAmount)
         adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount)
         if budgetID is not None:
             adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount)
@@ -316,7 +320,6 @@ def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, tran
             'transactionTime': transactionTime,
             'budgetID': budgetID,  # Can be None
             'bankID': bankID,
-            'circleID': circleID,
             'goalID': goalID
         }
         return transaction_data, None

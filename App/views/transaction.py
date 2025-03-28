@@ -28,6 +28,7 @@ def new_transaction():
         transactionTime = data.get('transactionTime')
         budgetID = data.get('budgetID')
         bankID = data.get('bankID')
+        goalID = data.get('goalID')
         userIDs = data.get('userIDs') or []
 
         if not all([userID, transactionTitle, transactionType,
@@ -49,7 +50,8 @@ def new_transaction():
             userID=userID,
             userIDs=userIDs,
             budgetID=budgetID,
-            bankID=bankID
+            bankID=bankID,
+            goalID=goalID
         )
 
         if error_message:
