@@ -4,14 +4,15 @@ from App.services.currency import CurrencyService
 from App.controllers.userBank import create_user_bank, is_bank_owner
 
 # Create A New Bank
-def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=None):
+def create_bank(userID, circleID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=None):
     try:
         new_bank = Bank (
             bankTitle=bankTitle,
             bankCurrency=bankCurrency,
             bankAmount=bankAmount,
             remainingBankAmount=bankAmount,
-            isPrimary=isPrimary
+            isPrimary=isPrimary,
+            circleID=circleID
         )
         db.session.add(new_bank)
         db.session.commit()
@@ -31,6 +32,14 @@ def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=
 # Get Bank By ID
 def get_bank(bankID):
     return Bank.query.get(bankID)
+
+# Get Bank Based On Circle
+def get_bank_by_circle_json(circleID):
+    banks = Bank.query.filter_by(circleID=circleID).all()
+    if not banks:
+        return []
+    banks = [bank.get_json() for bank in banks]
+    return banks
 
 # Get Bank By ID (JSON)
 def get_bank_json(bankID):

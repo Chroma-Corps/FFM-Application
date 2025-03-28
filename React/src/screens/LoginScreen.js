@@ -12,8 +12,8 @@ import { passwordValidator } from '../helpers/passwordValidator'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState({ value: 'bob@mail.com', error: '' })
-  const [password, setPassword] = useState({ value: 'bobpass', error: '' })
+  const [email, setEmail] = useState({ value: 'jalene@mail.com', error: '' })
+  const [password, setPassword] = useState({ value: 'jalenepass', error: '' })
   const [loading, setLoading] = useState(false)
 
   const onLoginPressed = async () => {
