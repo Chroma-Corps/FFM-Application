@@ -208,12 +208,12 @@ export default function Dashboard({ navigation }) {
   }
 
   const handleViewSwap = async () => {
-    if (circleType === 'Self') {
-      setCircleType('Group');
-      setActiveCircle(prevCircle.circleID);
-    } else {
+    if (circleType === 'Group' && selfCircle && selfCircle.circleID) {
       setCircleType('Self');
       setActiveCircle(selfCircle.circleID);
+    } else {
+      setCircleType('Group');
+      setActiveCircle(prevCircle.circleID);
     }
   };
 
@@ -287,7 +287,6 @@ export default function Dashboard({ navigation }) {
                 showsHorizontalScrollIndicator={false}
             />
       </View>
-
       )}
 
       {circleType === 'Self' && (
@@ -367,10 +366,6 @@ export default function Dashboard({ navigation }) {
         </View>
       )}
         </View>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button mode="contained" onPress={handleLogout}>Logout</Button>
-      </View>
       <RadialMenu navigation={navigation} />
     </InAppBackground>
   );

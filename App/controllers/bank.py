@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Bank, Budget, UserBank
+from App.models import Bank, Budget, UserBank, Transaction
 from App.services.currency import CurrencyService
 from App.controllers.userBank import create_user_bank, is_bank_owner
 
