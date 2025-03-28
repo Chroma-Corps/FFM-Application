@@ -3,7 +3,8 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from App.controllers import (
     get_transaction_json,
-    get_user_transactions_json,
+    get_circle_transactions_json,
+    get_user,
     add_transaction,
     void_transaction,
     update_transaction
@@ -71,7 +72,9 @@ def new_transaction():
 def list_user_transactions():
     try:
         userID = get_jwt_identity()
-        transactions = get_user_transactions_json(userID)
+        user = get_user(userID)
+        circleID = user.activeCircleID
+        transactions = get_circle_transactions_json(circleID)
         return jsonify({"status":"success", "transactions": transactions}), 200
 
     except Exception as e:

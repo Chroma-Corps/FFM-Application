@@ -12,8 +12,8 @@ import { passwordValidator } from '../helpers/passwordValidator'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState({ value: 'bob@mail.com', error: '' })
-  const [password, setPassword] = useState({ value: 'bobpass', error: '' })
+  const [email, setEmail] = useState({ value: 'jalene@mail.com', error: '' })
+  const [password, setPassword] = useState({ value: 'jalenepass', error: '' })
   const [loading, setLoading] = useState(false)
 
   const onLoginPressed = async () => {
@@ -92,17 +92,17 @@ export default function LoginScreen({ navigation }) {
         errorText={password.error}
         secureTextEntry
       />
-          <View style={styles.forgotPassword}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('ResetPasswordScreen')}
-            >
-              <Text style={styles.link}>Forgot Password?</Text>
-            </TouchableOpacity>
-          </View>
+      <View style={styles.forgotPassword}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ResetPasswordScreen')}
+        >
+          <Text style={styles.link}>Forgot Password?</Text>
+        </TouchableOpacity>
+      </View>
 
-          <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
-          <Text style={styles.orText}>- Or Login With -</Text>
-          <Button mode="outlined" icon="google">Google</Button>
+      <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
+      <Text style={styles.orText}>- Or Login With -</Text>
+      <Button mode="outlined" icon="google">Google</Button>
       <View style={[styles.row, { marginTop: 50 }]}>
         <Text style={styles.signUpLabel}>Don't Have An Account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('RegisterScreen')}>

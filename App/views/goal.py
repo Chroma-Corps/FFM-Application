@@ -5,6 +5,8 @@ from App.controllers import (
     create_goal,
     delete_goal,
     update_goal,
+    get_user,
+    get_circle_goals_json,
     get_goal_json,
     get_goal_users_json,
     get_user_goals_json,
@@ -53,7 +55,9 @@ def new_goal():
 def list_user_goals():
     try:
         userID = get_jwt_identity()
-        goals = get_user_goals_json(userID)
+        user = get_user(userID)
+        circleID = user.activeCircleID
+        goals = get_circle_goals_json(circleID)
         return jsonify({"status": "success", "goals": goals}), 200
 
     except Exception as e:

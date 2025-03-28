@@ -31,11 +31,16 @@ class Budget(db.Model):
     endDate = db.Column(db.Date,nullable=False)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
 
+    # Foreign Keys
+    circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
+
     # Relationships
+    circle = db.relationship('Circle', backref='budgets', lazy=True) # 1 Circle -> Many Budgets
     banks = db.relationship('Bank', back_populates='budgets')
     user_budgets = db.relationship('UserBudget', back_populates='budget') # UserBudget
 
-    def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, bankID):
+    def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, bankID, circleID):
+        self.circleID = circleID
         self.bankID = bankID
         self.budgetTitle = budgetTitle
         self.budgetAmount = budgetAmount
@@ -75,11 +80,11 @@ class Budget(db.Model):
 
     def __str__(self):
         amount = CurrencyService.format_currency(self.budgetAmount, self.banks.bankCurrency)
-        return f"{self.budgetTitle} ({self.budgetType.value} | {', '.join(self.budgetCategory)} {self.transactionScope}) {amount} (Start: {self.startDate}, End: {self.endDate})"
+        return f"{self.budgetTitle} ({self.budgetType.value} | {', '.join(self.budgetCategory)} {self.transactionScope.value}) {amount} (Start: {self.startDate}, End: {self.endDate})"
 
     def __repr__(self):
         return (
             f"Budget(budgetID={self.budgetID}, budgetTitle='{self.budgetTitle}', budgetAmount={self.budgetAmount}, "
-            f"budgetType='{self.budgetType}', budgetCategory={self.budgetCategory}, transactionScope='{self.transactionScope}', "
+            f"budgetType='{self.budgetType.value}', budgetCategory={self.budgetCategory}, transactionScope='{self.transactionScope.value}', "
             f"startDate='{self.startDate}', endDate='{self.endDate}')"
         )

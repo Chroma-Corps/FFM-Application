@@ -6,7 +6,8 @@ from App.controllers import (
     update_bank,
     delete_bank,
     get_bank_json,
-    get_user_banks_json,
+    get_user,
+    get_circle_banks_json,
     get_all_bank_budgets,
     get_bank_users_json,
     get_all_bank_transactions
@@ -52,7 +53,9 @@ def new_bank():
 def list_user_banks():
     try:
         userID = get_jwt_identity()
-        banks = get_user_banks_json(userID)
+        user = get_user(userID)
+        circleID = user.activeCircleID
+        banks = get_circle_banks_json(circleID)
         return jsonify({"status": "success", "banks": banks}), 200
 
     except Exception as e:
@@ -61,6 +64,7 @@ def list_user_banks():
 
 # 3. Retrieve A Specific Bank
 @bank_views.route('/bank/<int:bankID>', methods=['GET'])
+@jwt_required()
 def get_bank_details(bankID):
     try:
         bank_data = get_bank_json(bankID)
@@ -72,6 +76,7 @@ def get_bank_details(bankID):
 
 # 4. Retrieve Bank Transactions
 @bank_views.route('/bank/<int:bankID>/transactions', methods=['GET'])
+@jwt_required()
 def get_bank_transactions(bankID):
     try:
         transactions = get_all_bank_transactions(bankID)

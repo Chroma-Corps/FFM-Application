@@ -25,16 +25,22 @@ class Transaction(db.Model):
 
     # Foreign Keys
     budgetID = db.Column(db.Integer, db.ForeignKey('budget.budgetID'), nullable=True)
+    goalID = db.Column(db.Integer, db.ForeignKey('goal.goalID'), nullable=True)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=False)
+    circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
 
     # Relationships
     budget = db.relationship('Budget', backref='transactions', lazy=True) # 1 Budget -> Many Transactions
+    goal = db.relationship('Goal', backref='transactions', lazy=True) # 1 Goal -> Many Transactions
     bank = db.relationship('Bank', backref='transactions', lazy=True) # 1 Bank -> Many Transactions
+    circle = db.relationship('Circle', backref='transactions', lazy=True) # 1 Circle -> Many Transactions
     user_transactions = db.relationship('UserTransaction', back_populates='transaction') # UserTransaction
 
-    def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate=None, transactionTime=None, budgetID=None, bankID=None):
+    def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, circleID, bankID, goalID=None, budgetID=None):
         self.bankID = bankID
         self.budgetID = budgetID
+        self.goalID = goalID
+        self.circleID = circleID
         self.transactionTitle = transactionTitle
         self.transactionDesc = transactionDesc
         self.transactionType = transactionType

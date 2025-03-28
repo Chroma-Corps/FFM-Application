@@ -22,10 +22,15 @@ class Goal(db.Model):
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
 
+    # Foreign Keys
+    circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
+
     # Relationships
     user_goals = db.relationship('UserGoal', back_populates='goal') # UserGoal
+    circle = db.relationship('Circle', backref='goals', lazy=True) # 1 Circle -> Many Goals
 
-    def __init__(self, goalTitle, targetAmount, currentAmount, goalType, startDate, endDate):
+    def __init__(self, goalTitle, targetAmount, currentAmount, goalType, startDate, endDate, circleID):
+        self.circleID = circleID
         self.goalTitle = goalTitle
         self.targetAmount = targetAmount
         self.currentAmount = currentAmount
@@ -74,6 +79,6 @@ class Goal(db.Model):
     def __repr__(self):
         return (
             f"Goal(goalID={self.goalID}, goalTitle='{self.goalTitle}', targetAmount={self.targetAmount}, "
-            f"goalType='{self.goalType}', "
+            f"goalType='{self.goalType.value}', "
             f"startDate='{self.startDate}', endDate='{self.endDate}')"
         )
