@@ -41,7 +41,6 @@ def initialize():
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[alice.id, jalene.id],
-        circleID=bobberson_circle.circleID
     )
 
     # Goal
@@ -142,7 +141,6 @@ def initialize():
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[rynnia.id, tamia.id],
-        circleID=chroma_circle.circleID
     )
 
     set_active_circle(rynnia.id, chroma_circle.circleID)
@@ -183,5 +181,4 @@ def initialize():
         bankAmount=100.00,
         isPrimary=True,
         userIDs=[],
-        circleID=jalene_self.circleID
     )
