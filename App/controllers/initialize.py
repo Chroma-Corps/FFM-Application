@@ -53,7 +53,6 @@ def initialize():
         startDate="2025-01-01",
         endDate="2025-01-31",
         userIDs=[alice.id, jalene.id],
-        circleID=bobberson_circle.circleID
     )
 
     create_budget (
@@ -94,7 +93,6 @@ def initialize():
         budgetID=exclusive_budget.budgetID,
         bankID=bobberson_bank.bankID,
         goalID=None,
-        circleID=bobberson_circle.circleID,
     )
 
     add_transaction (
@@ -108,7 +106,6 @@ def initialize():
         transactionTime="09:30",
         bankID=bobberson_bank.bankID,
         goalID=None,
-        circleID=bobberson_circle.circleID,
     )
 
     add_transaction (
@@ -121,7 +118,6 @@ def initialize():
         transactionDate="2025-03-10",
         transactionTime="09:30",
         bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
         goalID=bobberson_goal.goalID
     )
 

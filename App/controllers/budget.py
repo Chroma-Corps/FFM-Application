@@ -1,6 +1,6 @@
-from App.controllers.user import get_user_json
 from App.database import db
 from App.models import Budget, UserBudget
+from App.controllers.user import get_user_json
 from App.services.category import CategoryService
 from App.services.datetime import convert_to_date
 from App.controllers.userBudget import create_user_budget, is_budget_owner
