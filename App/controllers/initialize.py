@@ -29,6 +29,10 @@ def initialize():
         userIDs=[alice.id, jalene.id]
     )
 
+    set_active_circle(bob.id, bobberson_circle.circleID)
+    set_active_circle(jalene.id, bobberson_circle.circleID)
+    set_active_circle(alice.id, bobberson_circle.circleID)
+
     # Bank - Bobberson
     bobberson_bank = create_bank (
         userID=bob.id,
@@ -55,7 +59,6 @@ def initialize():
     create_budget (
         userID=bob.id,
         bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
         budgetTitle="Inclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
@@ -69,7 +72,6 @@ def initialize():
     exclusive_budget = create_budget (
         userID=bob.id,
         bankID=None,
-        circleID=bobberson_circle.circleID,
         budgetTitle="Exclusive Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
@@ -122,10 +124,6 @@ def initialize():
         circleID=bobberson_circle.circleID,
         goalID=bobberson_goal.goalID
     )
-
-    set_active_circle(bob.id, bobberson_circle.circleID)
-    set_active_circle(jalene.id, bobberson_circle.circleID)
-    set_active_circle(alice.id, bobberson_circle.circleID)
 
     # Users - Chroma Corps
     rynnia = create_user('Rynnia Ryan','rynnia@mail.com', 'rynniapass')

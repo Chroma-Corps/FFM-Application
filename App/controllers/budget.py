@@ -1,3 +1,4 @@
+from App.controllers.user import get_user_json
 from App.database import db
 from App.models import Budget, UserBudget
 from App.services.category import CategoryService
@@ -5,12 +6,14 @@ from App.services.datetime import convert_to_date
 from App.controllers.userBudget import create_user_budget, is_budget_owner
 
 # Create A New Budget
-def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, userID, bankID, circleID, userIDs=None):
+def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, userID, bankID, userIDs=None):
     try: 
         if budgetCategory is not None:
             selectedCategory = CategoryService.get_category(budgetCategory)
         else:
             selectedCategory = None
+
+        user = get_user_json(userID)
 
         new_budget = Budget (
             budgetTitle=budgetTitle,
@@ -22,7 +25,7 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transac
             startDate=startDate,
             endDate=endDate,
             bankID=bankID,
-            circleID=circleID
+            circleID=user["activeCircle"]
         )
         db.session.add(new_budget)
         db.session.commit()
