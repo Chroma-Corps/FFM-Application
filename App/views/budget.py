@@ -5,9 +5,10 @@ from App.controllers import (
     create_budget,
     delete_budget,
     update_budget,
+    get_user,
     get_budget_json,
     get_budget_users_json,
-    get_user_budgets_json,
+    get_circle_budgets_json,
     get_all_budget_transactions
 )
 
@@ -59,7 +60,9 @@ def new_budget():
 def list_user_budgets():
     try:
         userID = get_jwt_identity()
-        budgets = get_user_budgets_json(userID)
+        user = get_user(userID)
+        circleID = user.activeCircleID
+        budgets = get_circle_budgets_json(circleID)
         return jsonify({"status": "success", "budgets": budgets}), 200
 
     except Exception as e:

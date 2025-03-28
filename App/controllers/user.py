@@ -1,4 +1,4 @@
-from App.models import User
+from App.models import User, Circle
 from App.database import db
 
 # Create A New User
@@ -7,7 +7,8 @@ def create_user(name, email, password):
         newuser = User(
             name=name,
             email=email,
-            password=password
+            password=password,
+            activeCircleID=None
         )
         db.session.add(newuser)
         db.session.commit()
@@ -25,6 +26,13 @@ def get_user_by_email(email):
 # Get User By ID
 def get_user(userID):
     return User.query.get(userID)
+
+# Get User By ID (JSON)
+def get_user_json(userID):
+    user = User.query.get(userID)
+    if not user:
+        return []
+    return user.get_json()
 
 # Get All Users
 def get_all_users():
@@ -59,4 +67,20 @@ def update_user(userID, newName=None, newEmail=None, newPassword=None):
     except Exception as e:
         db.session.rollback()
         print(f"Failed To Update User: {e}")
+        return None
+
+def set_active_circle(userID, circleID):
+    user = User.query.get(userID)
+    circle = Circle.query.get(circleID)
+
+    if user and circle:
+        user.activeCircleID = circle.circleID
+        db.session.commit()
+
+def get_active_circle(userID):
+    user = User.query.get(userID)
+
+    if user and user.active_circle:
+        return user.active_circle
+    else:
         return None
