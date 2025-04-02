@@ -1,11 +1,11 @@
 import { StyleSheet, View, ImageBackground, Dimensions, Image } from 'react-native';
-import Animated, { 
-    Extrapolation, 
-    interpolate, 
-    interpolateColor, 
-    useSharedValue, 
-    useAnimatedStyle, 
-    useAnimatedScrollHandler 
+import Animated, {
+    Extrapolation,
+    interpolate,
+    interpolateColor,
+    useSharedValue,
+    useAnimatedStyle,
+    useAnimatedScrollHandler
 } from 'react-native-reanimated';
 import React from 'react';
 
@@ -48,7 +48,7 @@ const PaginationDot = ({ index, scrollX }) => {
             Extrapolation.CLAMP
         )
         return {
-            width: widthAnimation, 
+            width: widthAnimation,
             opacity: opacityAnimation
         }
     })
@@ -97,12 +97,12 @@ const CarouselCard = ({ item, id, scrollX, total }) => {
             clampedScrollX,
             inputRange,
             [ITEM_WIDTH * 0.2, 0, ITEM_WIDTH * 0.4],
-            Extrapolation.CLAMP 
+            Extrapolation.CLAMP
         )
         return {
             transform: [{ translateX: trasnlate }]
         }
-    })    
+    })
     return (
         <Animated.View
             style={[
@@ -189,14 +189,14 @@ const styles = StyleSheet.create({
         height: ITEM_HEIGHT,
         overflow: 'hidden',
     },
-  
+
     imageBackgroundStyle: {
         resizeMode: 'contain',
         width: '100%',
         height: '100%',
         overflow: 'hidden',
     },
-  
+
     imageBackgroundView: {
         paddingHorizontal: 20,
         paddingVertical: 20,
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         gap: 2
     },
-  
+
     caroselCardView: {
         width: ITEM_WIDTH,
         height: ITEM_HEIGHT,
