@@ -40,38 +40,49 @@ export default function SetupStartScreen({ navigation }) {
                     </Paragraph>
                 </View>
 
+                <View style={{ marginTop: 30 }}>
+                    <Text style={styles.descriptionTitle}>Select Your Account Type</Text>
+                    <View style={styles.container}>
 
-                <View style={styles.container}>
-                    <Card
-                        id="Self"
-                        source={require('../assets/personal_icon.png')}
-                        text="Personal"
-                        isSelected={selectedCircleType === 'Self'}
-                    />
+                        <Card
+                            id="Self"
+                            source={require('../assets/personal_icon.png')}
+                            text="Personal"
+                            isSelected={selectedCircleType === 'Self'}
+                        />
 
-                    <Card
-                        id="Group"
-                        source={require('../assets/family_icon.png')}
-                        text="Family"
-                        isSelected={selectedCircleType === 'Group'}
-                    />
+                        <Card
+                            id="Group"
+                            source={require('../assets/family_icon.png')}
+                            text="Family"
+                            isSelected={selectedCircleType === 'Group'}
+                        />
+                    </View>
                 </View>
 
                 <View style={styles.descriptionContainer}>
                     {selectedCircleType === 'Self' && (
-                        <Text style={styles.descriptionText}>
-                            A personal account is for individual use. You can manage your own finances and keep track of your expenses.
-                        </Text>
+                        <View>
+                            <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5, }]}>Personal Circle</Text>
+                            <Text style={styles.descriptionText}>
+                                This circle is for managing your personal finances.
+                                Set budgeting goals, track expenses, and stay on top of your financial progress
+                            </Text>
+                        </View>
                     )}
                     {selectedCircleType === 'Group' && (
-                        <Text style={styles.descriptionText}>
-                            A family account is for shared use among family members. You can manage your household finances and keep track of your expenses together.
-                        </Text>
+                        <View>
+                            <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5, }]}>Family Cirlce</Text>
+                            <Text style={styles.descriptionText}>
+                                This circle is for managing shared household finances.
+                                Set joint budgeting goals, track family expenses, and stay on the same page with everyone’s spending
+                            </Text>
+                        </View>
                     )}
                 </View>
 
                 <ArrowButton direction="left" onPress={() => navigation.navigate('StartScreen')} />
-                <ArrowButton direction="right" onPress={() => navigation.navigate('SetupCircleScreen')} />
+                <ArrowButton direction="right" onPress={() => navigation.navigate('SetupBankScreen')} />
 
             </Background >
         </View >
@@ -86,7 +97,7 @@ const styles = StyleSheet.create({
     },
 
     container: {
-        marginTop: 80,
+        marginTop: 0,
         flexDirection: 'row',
         justifyContent: 'space-around',
         padding: 20,
@@ -110,6 +121,7 @@ const styles = StyleSheet.create({
 
     selected: {
         borderColor: theme.colors.primary,
+        backgroundColor: theme.colors.primary,
     },
 
     unselected: {
@@ -119,6 +131,13 @@ const styles = StyleSheet.create({
     descriptionContainer: {
         marginTop: 20,
         paddingHorizontal: 20,
+    },
+
+    descriptionTitle: {
+        fontFamily: theme.fonts.bold.fontFamily,
+        fontSize: 24,
+        textAlign: 'center',
+        marginBottom: 10,
     },
 
     descriptionText: {

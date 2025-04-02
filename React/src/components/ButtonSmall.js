@@ -18,13 +18,11 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 8,
-        borderWidth: 1,
         backgroundColor: theme.colors.primary,
         marginHorizontal: 5,
     },
     selected: {
         backgroundColor: theme.colors.primary,
-        borderColor: 'black',
     },
     text: {
         color: "#000",

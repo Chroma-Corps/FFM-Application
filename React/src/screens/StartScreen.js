@@ -24,7 +24,6 @@ export default function StartScreen({ navigation }) {
 
           <Image
             source={require('../assets/start_screen_image.png')}
-            style={styles.image}
           />
 
           <Paragraph>
