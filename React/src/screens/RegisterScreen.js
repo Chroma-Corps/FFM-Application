@@ -18,50 +18,57 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false)
 
   const onSignUpPressed = async () => {
-    const nameError = nameValidator(name.value)
-    const emailError = emailValidator(email.value)
-    const passwordError = passwordValidator(password.value)
-    if (emailError || passwordError || nameError) {
-      setName({ ...name, error: nameError })
-      setEmail({ ...email, error: emailError })
-      setPassword({ ...password, error: passwordError })
-      return
-    }
+    // Commenting out the validation checks
+    // const nameError = nameValidator(name.value)
+    // const emailError = emailValidator(email.value)
+    // const passwordError = passwordValidator(password.value)
+    // if (emailError || passwordError || nameError) {
+    //   setName({ ...name, error: nameError })
+    //   setEmail({ ...email, error: emailError })
+    //   setPassword({ ...password, error: passwordError })
+    //   return
+    // }
 
     setLoading(true)
 
     try {
-      const response = await fetch(`https://ffm-application-main.onrender.com/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.value,
-          email: email.value,
-          password: password.value,
-        }),
-      })
+      // Skipping the HTTP request to register the user
+      // const response = await fetch(`https://ffm-application-main.onrender.com/register`, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({
+      //     name: name.value,
+      //     email: email.value,
+      //     password: password.value,
+      //   }),
+      // })
 
-      const data = await response.json()
+      // Directly set pass to true to skip registration flow
+      const pass = true;
+      // const data = await response.json()  // Not needed
 
-      if(response.ok) {
-        console.log(data.message)
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'LoginScreen' }],
-        })
+      if (pass) {
+        console.log("User registration successful");
+        // Redirect immediately to the SelectCircleTypeScreen
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{ name: 'SelectCircleTypeScreen' }],
+        // })
+        navigation.navigate('SelectCircleTypeScreen');
       } else {
-        console.error(data.message)
-        alert(data.message || 'Registration Failed, Please Try Again')
+        console.error('Registration Failed');
+        alert('Registration Failed, Please Try Again');
       }
-    } catch(error) {
+    } catch (error) {
       console.error('Error Registering', error)
       alert('An Error Occurred, Please Try Again Later')
     } finally {
       setLoading(false)
     }
   }
+
 
   return (
     <Background>
@@ -105,7 +112,7 @@ export default function RegisterScreen({ navigation }) {
         Sign Up
       </Button>
       <Text style={styles.orText}>- Or SignUp With -</Text>
-          <Button mode="outlined" icon="google">Google</Button>
+      <Button mode="outlined" icon="google">Google</Button>
       <View style={[styles.row, { marginTop: 50 }]}>
         <Text style={styles.loginLabel}>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('LoginScreen')}>

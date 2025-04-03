@@ -2,11 +2,11 @@ import { React, useState } from 'react'
 import Background from '../components/Background'
 import Header from '../components/Header'
 import Paragraph from '../components/Paragraph'
-import ArrowButton from '../components/ArrowButton'
+import Button from '../components/Button'
 import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { theme } from '../core/theme'
 
-export default function SetupStartScreen({ navigation }) {
+export default function SelectCircleTypeScreen({ navigation }) {
 
     const [selectedCircleType, setSelectedCircleType] = useState(null);
 
@@ -60,30 +60,43 @@ export default function SetupStartScreen({ navigation }) {
                     </View>
                 </View>
 
-                <View style={styles.descriptionContainer}>
-                    {selectedCircleType === 'Self' && (
-                        <View>
-                            <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5, }]}>Personal Circle</Text>
-                            <Text style={styles.descriptionText}>
-                                This circle is for managing your personal finances.
-                                Set budgeting goals, track expenses, and stay on top of your financial progress
-                            </Text>
-                        </View>
-                    )}
-                    {selectedCircleType === 'Group' && (
-                        <View>
-                            <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5, }]}>Family Cirlce</Text>
-                            <Text style={styles.descriptionText}>
-                                This circle is for managing shared household finances.
-                                Set joint budgeting goals, track family expenses, and stay on the same page with everyone’s spending
-                            </Text>
+                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 50 }}>
+                    <View style={styles.descriptionContainer}>
+                        {selectedCircleType === 'Self' && (
+                            <View>
+                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Personal Circle</Text>
+                                <Text style={styles.descriptionText}>
+                                    This circle is for managing your personal finances.
+                                    Set budgeting goals, track expenses, and stay on top of your financial progress.
+                                </Text>
+                            </View>
+                        )}
+                        {selectedCircleType === 'Group' && (
+                            <View>
+                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Family Circle</Text>
+                                <Text style={styles.descriptionText}>
+                                    This circle is for managing shared household finances.
+                                    Set joint budgeting goals, track family expenses, and stay on the same page with everyone’s spending.
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+
+                    {selectedCircleType && (
+                        <View style={{ alignSelf: 'center', width: '50%', marginTop: 40 }}>
+                            <Button
+                                mode="contained"
+                                onPress={() =>
+                                    selectedCircleType === 'Self'
+                                        ? navigation.navigate('SetupPersonalCircleScreen')
+                                        : navigation.navigate('SetupFamilyCircleScreen')
+                                }
+                            >
+                                Next
+                            </Button>
                         </View>
                     )}
                 </View>
-
-                <ArrowButton direction="left" onPress={() => navigation.navigate('StartScreen')} />
-                <ArrowButton direction="right" onPress={() => navigation.navigate('SetupBankScreen')} />
-
             </Background >
         </View >
     )

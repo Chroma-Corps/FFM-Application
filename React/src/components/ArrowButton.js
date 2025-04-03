@@ -32,7 +32,7 @@ export default function ArrowButton({ onPress, direction = 'right' }) {
             style={[styles.arrowButton, positionStyle]}
             onPress={onPress}
         >
-            <Icon name={direction === 'left' ? "arrow-back" : "arrow-forward"} size={30} color="#333333" />
+            <Icon name={direction === 'left' ? "arrow-back" : "arrow-forward"} size={30} color="#4f4f4f" />
         </TouchableOpacity>
     );
 }
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: 'transparent',
         borderWidth: 3,
-        borderColor: '#333333',
+        borderColor: '#4f4f4f',
         padding: 10,
         justifyContent: 'center',
         alignItems: 'center',

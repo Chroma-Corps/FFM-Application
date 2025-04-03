@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
 import Button from '../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { theme } from '../core/theme';
 import Header from '../components/Header';
 import Paragraph from '../components/Paragraph';
-import ArrowButton from '../components/ArrowButton';
 import ButtonSmall from '../components/ButtonSmall';
 import CurrencySelectionPopUp from '../components/CurrencySelectionPopUp';
 import Currencies from '../constants/currencies.json';
@@ -15,7 +14,7 @@ import Background from '../components/Background';
 const mainCurrencies = ['GBP', 'EUR', 'USD', 'TTD', 'JPY', 'CAD'];
 const colorData = Object.values(Colors);
 
-export default function SetupBankScreen({ navigation }) {
+export default function SetupPersonalCircleScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
 
     const [selectedBankTitle, setSelectedBankTitle] = useState(null);
@@ -256,7 +255,7 @@ export default function SetupBankScreen({ navigation }) {
 
                     <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 20 }}>
                         <Image
-                            source={require('../assets/wallet.png')}
+                            source={require('../assets/wallet_icon.png')}
                             style={styles.walletImage}
                         />
 
@@ -316,16 +315,22 @@ export default function SetupBankScreen({ navigation }) {
                         </View>
 
                         <View style={{ marginTop: 20 }}>
-                            <Paragraph>
+                            <Paragraph style={{ fontFamily: theme.fonts.bold.fontFamily }}>
                                 You can always edit this later
                             </Paragraph>
                         </View>
 
+                        <View style={{ alignSelf: 'center', width: 280, marginTop: 10 }}>
+                            <Button
+                                mode="contained"
+                                onPress={() => navigation.navigate('StartScreen')}
+                            >
+                                Activate
+                            </Button>
+                        </View>
+
                     </View>
                 </View>
-
-                <ArrowButton direction="left" onPress={() => navigation.navigate('SetupCircleScreen')} />
-                <ArrowButton direction="right" onPress={() => navigation.navigate('SetupBankScreen')} />
 
             </Background>
         </View >
