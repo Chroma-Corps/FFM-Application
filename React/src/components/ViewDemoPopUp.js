@@ -1,9 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Modal, StyleSheet, Text, TouchableOpacity, Image } from 'react-native';
 import Background from '../components/Background';
+import Slider from '../components/Slider';
 import { theme } from '../core/theme';
 
 const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
+
+    const [entries] = useState([
+        {
+            title: 'Slide 1',
+            color: '#6A4E23',
+            description: 'This is feature 1',
+            image: require('../assets/default_img.jpg'),
+        },
+        {
+            title: 'Slide 2',
+            color: '#4682B4',
+            description: 'This is feature 2',
+            image: require('../assets/default_img.jpg'),
+        },
+        {
+            title: 'Slide 3',
+            color: '#8B4513',
+            description: 'This is feature 3',
+            image: require('../assets/default_img.jpg'),
+        },
+    ]);
 
     const imageSource = selectedCircleType === 'Self'
         ? require('../assets/maya_icon.png')
@@ -18,7 +40,9 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
         >
             <Background justifyContent="center">
 
-                <Text style={styles.popupTitle}>Preview Demo</Text>
+                <Text style={styles.popupTitle}>
+                    {selectedCircleType === 'Self' ? "Personal View" : "Family View"}
+                </Text>
 
                 <View style={styles.modalContent}>
                     <View style={styles.imageCircleContainer}>
@@ -28,10 +52,13 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
                         </Text>
                     </View>
 
-
-                    <Text style={styles.text}>
-                        Selected Circle Type: {selectedCircleType}
-                    </Text>
+                    <View style={styles.sliderContainer}>
+                        <Slider
+                            data={entries}
+                            width={350}
+                            height={500}
+                        />
+                    </View>
 
                     <TouchableOpacity
                         style={styles.closeButton}
@@ -49,7 +76,7 @@ const styles = StyleSheet.create({
     modalContent: {
         width: '100%',
         height: '90%',
-        backgroundColor: 'white',
+        backgroundColor: '#FAF9F6',
         padding: 20,
         borderRadius: 10,
         alignItems: 'center',
@@ -58,11 +85,11 @@ const styles = StyleSheet.create({
     popupTitle: {
         fontFamily: theme.fonts.bold.fontFamily,
         color: 'white',
-        backgroundColor: theme.colors.secondary,
+        backgroundColor: theme.colors.primary,
         width: '70%',
         borderRadius: 15,
         position: 'absolute',
-        top: 40,
+        top: 35,
         fontSize: 32,
         textAlign: 'center',
         zIndex: 10,
@@ -70,7 +97,7 @@ const styles = StyleSheet.create({
 
     imageCircleContainer: {
         marginTop: 10,
-        marginBottom: 20,
+        marginBottom: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -80,14 +107,18 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 3,
-        borderColor: '#ddd',
+        borderColor: 'black',
     },
 
     imageText: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 12,
-        color: '#666',
+        color: 'black',
         textAlign: 'center',
+    },
+
+    sliderContainer: {
+        alignSelf: 'center',
     },
 
     text: {
@@ -95,6 +126,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         color: '#666',
     },
+
     closeButton: {
         marginTop: 20,
         backgroundColor: '#E57373',
