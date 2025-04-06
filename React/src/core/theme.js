@@ -7,6 +7,7 @@ export const theme = {
     ...DefaultTheme.colors,
     text: '#000000',
     grayedText: '#747474',
+    grayed: '#2F2F2F2F',
     textSecondary: '#fff',
     heading: '#333333',
     description: '#666666',

@@ -13,15 +13,16 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, ActivityIndicator, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, Platform, Image} from 'react-native';
 
-export default function AddTransactionScreen({ navigation }) {
-    // Fetched Data
+export default function EditTransactionScreen({ navigation, route }) {
+    // Transaction Data
+    const { transactionID } = route.params;
     const [banks, setBanks] = useState([]);
     const [goals, setGoals] = useState([]);
     const [budgets, setBudgets] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedGoal, setSelectedGoal] = useState(null);
     const [selectedBudget, setSelectedBudget] = useState(null);
-    const [selectedBankID, setSelectedBankID] = useState(1);
+    const [selectedBankID, setSelectedBankID] = useState(null);
 
     const [loading, setLoading] = useState(true);
 
@@ -128,24 +129,6 @@ export default function AddTransactionScreen({ navigation }) {
         toggleTimepicker();
     };
 
-    useEffect(() => {
-        const today = new Date();
-        const weekday = today.toLocaleDateString('en-US', { weekday: 'short' });
-        const month = today.toLocaleDateString('en-US', { month: 'short' });
-        const day = today.getDate();
-        const year = today.getFullYear();
-        const formattedDate = `${weekday}, ${month} ${day} ${year}`;
-
-        const formattedTime = today.toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        });
-
-        setTransactionDate(formattedDate);
-        setTransactionTime(formattedTime);
-      }, []);
-
     const isToday = () => {
         const today = new Date();
         const weekday = today.toLocaleDateString('en-US', { weekday: 'short' });
@@ -183,6 +166,34 @@ export default function AddTransactionScreen({ navigation }) {
             hour = hours.toString().padStart(2, '0');
         }
         return `${hour}:${minute}`;
+    };
+
+    const fetchTransaction = async () => {
+        try {
+            const response = await fetch(`http://192.168.0.9:8080/transaction/${transactionID}`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Transaction Details
+                setTransactionDate(data.message.transactionDate);
+                setTransactionTime(data.message.transactionTime);
+                setTransactionDesc(data.message.transactionDesc);
+                setTransactionType(data.message.transactionType);
+                setTransactionTitle(data.message.transactionTitle);
+                setTransactionAmount(data.message.transactionAmount);
+                setTransactionCategory(data.message.transactionCategory);
+                setSelectedGoal(data.message.transactionGoal)
+                setSelectedBudget(data.message.transactionBudget)
+                setSelectedBankID(data.message.transactionBank)
+            } else {
+                console.error(data.message);
+            }
+            console.log('Fetch Transaction Status:', data.status);
+        } catch (error) {
+            console.error('Error Fetching Transaction:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     // API Calls: Categories, Budgets, Goals & Banks
@@ -310,6 +321,7 @@ export default function AddTransactionScreen({ navigation }) {
 
     useFocusEffect(
         useCallback(() => {
+            fetchTransaction();
             fetchBanks();
             fetchGoals();
             fetchBudgets();
@@ -350,70 +362,78 @@ export default function AddTransactionScreen({ navigation }) {
         );
     };
 
-    const renderBudgets = ({ item }) => (
-        <TouchableOpacity
-            style={[
-                styles.radioButton,
-                selectedBudget === item.budgetID && styles.radioSelected,
-            ]}
-            onPress={() => setSelectedBudget(item.budgetID)}
-        >
-            <Text
-                style={
-                    selectedBudget === item.budgetID
-                        ? styles.radioTextSelected
-                        : styles.radioText
-                }
-            >
-                {item.budgetTitle.charAt(0).toUpperCase() + item.budgetTitle.slice(1)}
-            </Text>
-        </TouchableOpacity>
-    );
+    const renderBudgets = ({ item }) => {
+        const isSelected = selectedBudget === item.budgetID;
+            return (
+                <TouchableOpacity
+                    style={[
+                        styles.radioButton,
+                        isSelected && styles.radioSelected,
+                    ]}
+                    onPress={() => setSelectedBudget(item.budgetID)}
+                >
+                    <Text
+                        style={
+                            isSelected
+                                ? styles.radioTextSelected
+                                : styles.radioText
+                        }
+                    >
+                        {item.budgetTitle.charAt(0).toUpperCase() + item.budgetTitle.slice(1)}
+                    </Text>
+                </TouchableOpacity>
+            );
+    };
 
-    const renderGoals = ({ item }) => (
-        <TouchableOpacity
-            style={[
-                styles.radioButton,
-                selectedGoal === item.goalID && styles.radioSelected,
-            ]}
-            onPress={() => setSelectedGoal(item.goalID)}
-        >
-            <Text
-                style={
-                    selectedGoal === item.goalID
-                        ? styles.radioTextSelected
-                        : styles.radioText
-                }
+    const renderGoals = ({ item }) => {
+        const isSelected = selectedGoal === item.goalID
+        return (
+            <TouchableOpacity
+                style={[
+                    styles.radioButton,
+                    isSelected && styles.radioSelected,
+                ]}
+                onPress={() => setSelectedGoal(item.goalID)}
             >
-                {item.goalTitle.charAt(0).toUpperCase() + item.goalTitle.slice(1)}
-            </Text>
-        </TouchableOpacity>
-    );
+                <Text
+                    style={
+                        isSelected
+                            ? styles.radioTextSelected
+                            : styles.radioText
+                    }
+                >
+                    {item.goalTitle.charAt(0).toUpperCase() + item.goalTitle.slice(1)}
+                </Text>
+            </TouchableOpacity>
+        );
+    };
 
     const modifiedBudgets = [
         { budgetID: null, budgetTitle: 'No Budget' },
         ...budgets,
     ];
-    
+
     const modifiedGoals = [
         { goalID: null, goalTitle: 'No Goal' },
         ...goals,
     ];
 
-    // Add Transaction API Call
-    const addTransaction = async () => {
+    // Update Transaction API Call
+    const updateTransaction = async () => {
         try {
             const token = await AsyncStorage.getItem('access_token');
             const formattedTransactionDate = formatDateToISO(transactionDate);
             const formattedTransactionTime = formatTimeToISO(transactionTime);
 
             if (!token) {
-                console.error('Missing required data');
+                console.error('Missing Required Data');
                 return;
             }
+            console.log('Selected Goal ID:', selectedGoal)
+            console.log('Selected Budget ID:', selectedBudget)
 
-            const response = await fetch(`http://192.168.0.9:8080/add-transaction`, {
-                method: 'POST',
+            const response = await fetch(`http://192.168.0.9:8080/transaction/${transactionID}`, {
+                method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
@@ -423,7 +443,7 @@ export default function AddTransactionScreen({ navigation }) {
                     transactionDesc: transactionDesc,
                     transactionType: transactionType.trim().toUpperCase(),
                     transactionCategory: transactionCategory,
-                    transactionAmount: parseFloat(transactionAmount),
+                    transactionAmount: parseFloat(transactionAmount.replace(/[^0-9.-]+/g, '')),
                     transactionDate: formattedTransactionDate.trim(),
                     transactionTime: formattedTransactionTime.trim(),
                     budgetID: selectedBudget,
@@ -455,12 +475,12 @@ export default function AddTransactionScreen({ navigation }) {
                     <View style={styles.screenContainer}>
                         <View style={styles.headerContainer}>
                             <View style={styles.cardTitle}>
-                                <InAppHeader>New Transaction</InAppHeader>
+                                <InAppHeader>Edit Transaction</InAppHeader>
                             </View>
                         </View>
                         <View style={styles.radioContainer}>
                             {Object.values(TransactionType).map((type) => {
-                                const isSelected = transactionType === type;
+                                const isSelected = transactionType.toLowerCase() === type;
                                 const dynamicStyle = isSelected
                                 ? {
                                     backgroundColor: type === 'income' ? theme.colors.income : theme.colors.expense,
@@ -489,9 +509,9 @@ export default function AddTransactionScreen({ navigation }) {
 
                             {/* Amount */}
                             <View style={[styles.amountContainer,
-                                transactionType === 'income'
+                                transactionType === 'Income'
                                 ? { borderColor: theme.colors.income }
-                                : transactionType === 'expense'
+                                : transactionType === 'Expense'
                                 ? { borderColor: theme.colors.expense }
                                 : { borderColor: theme.colors.primary },
                             ]}>
@@ -631,7 +651,7 @@ export default function AddTransactionScreen({ navigation }) {
                                         contentContainerStyle={styles.scrollContainer}
                                     />
                                 ) : (
-                                    <Text style={styles.defaultText}>Loading Categories...</Text>
+                                    <Text style={styles.defaultText} >Loading Categories...</Text>
                                 )}
                             </View>
 
@@ -684,7 +704,7 @@ export default function AddTransactionScreen({ navigation }) {
                     </View>
                 </ScrollView>
                 <View style={styles.buttonContainer}>
-                    <Button mode="contained" onPress={addTransaction}>Add Transaction</Button>
+                    <Button mode="contained" onPress={updateTransaction}>Update Transaction</Button>
                 </View>
             </InAppBackground>
         </View>

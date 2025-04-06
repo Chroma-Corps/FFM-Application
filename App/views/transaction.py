@@ -128,7 +128,11 @@ def update_user_transaction(transactionID):
         transactionTime = data.get('transactionTime')
         voided = data.get('voided')
         budgetID = data.get('budgetID')
+        goalID = data.get('goalID')
         bankID = data.get('bankID')
+
+        print('API Goal ID:', goalID)
+        print('API Budget ID:', budgetID)
 
         updated_transaction = update_transaction (
             transactionID,
@@ -141,7 +145,8 @@ def update_user_transaction(transactionID):
             transactionTime,
             voided,
             budgetID,
-            bankID
+            bankID,
+            goalID
         )
 
         if updated_transaction:

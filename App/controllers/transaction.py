@@ -128,6 +128,9 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
     try:
         transaction = get_transaction(transactionID)
 
+        print('Controller Goal ID:', goalID)
+        print('Controller Budget ID:', budgetID)
+
         if transaction:
 
             # Retrieving The UserID For The Transaction
@@ -145,17 +148,20 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
             currTransactionAmount = transaction.transactionAmount
             currTransactionCategory = transaction.transactionCategory
 
-            goal_changed = goalID and goalID != currGoalID
-            budget_changed = budgetID and budgetID != currBudgetID
+            goal_changed = goalID is not None and goalID != currGoalID
+            budget_changed = budgetID is not None and budgetID != currBudgetID
             bank_changed = bankID and bankID != currBankID
             type_changed = transactionType and transactionType != currTransactionType
             amount_changed = transactionAmount is not None and transactionAmount != currTransactionAmount
 
             # Revert Old Data If Change
             if budget_changed or bank_changed or goal_changed or amount_changed or type_changed:
-                adjust_goal_balance(currGoalID, currTransactionType, -currTransactionAmount)
-                adjust_bank_balance(currBankID, currTransactionType, -currTransactionAmount)
-                adjust_exclusive_budget_balance(currBudgetID, currTransactionType, -currTransactionAmount)
+                if currGoalID:
+                    adjust_goal_balance(currGoalID, currTransactionType, -currTransactionAmount)
+                if currBankID:
+                    adjust_bank_balance(currBankID, currTransactionType, -currTransactionAmount)
+                if currBudgetID:
+                    adjust_exclusive_budget_balance(currBudgetID, currTransactionType, -currTransactionAmount)
                 adjust_inclusive_budgets(userID, currTransactionCategory, currTransactionType, -currTransactionAmount)
 
             if transactionTitle:
@@ -174,12 +180,16 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
                 transaction.transactionTime = convert_to_time(transactionTime)
             if voided is not None:
                 transaction.voided = voided
-            if budgetID:
+            if budgetID is not None:
                 transaction.budgetID = budgetID
+            else:
+                transaction.budgetID = None
             if bankID:
                 transaction.bankID = bankID
-            if goalID:
+            if goalID is not None:
                 transaction.goalID = goalID
+            else:
+                transaction.goalID = None
             db.session.commit()
 
             if (amount_changed or type_changed) and not budget_changed and not bank_changed and not goal_changed:
@@ -223,19 +233,20 @@ def void_transaction(userID, transactionID):
 
 # Adjusts Goal Balance Based On Transaction Type (Income/Expense)
 def adjust_goal_balance(goalID, transactionType, transactionAmount):
-    goal = get_goal(goalID)
-    if not goal:
-        raise ValueError("Goal Not Found")
+    if goalID:
+        goal = get_goal(goalID)
+        if not goal:
+            raise ValueError("Goal Not Found")
 
-    transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
+        transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
 
-    factor = 1 if transaction_type_str == TransactionType.INCOME.value.lower() else -1
-    goal.currentAmount += factor * transactionAmount
+        factor = 1 if transaction_type_str == TransactionType.INCOME.value.lower() else -1
+        goal.currentAmount += factor * transactionAmount
 
-    # Handle Insufficient Goal Balance
-    if goal.currentAmount < 0:
-        raise ValueError("Insufficient Goal Balance")
-    db.session.commit()
+        # Handle Insufficient Goal Balance
+        if goal.currentAmount < 0:
+            raise ValueError("Insufficient Goal Balance")
+        db.session.commit()
 
 # Adjusts Bank Balance Based On Transaction Type (Income/Expense)
 def adjust_bank_balance(bankID, transactionType, transactionAmount):
@@ -257,7 +268,7 @@ def adjust_bank_balance(bankID, transactionType, transactionAmount):
 # Adjusts Exclusive Budget Balance Based On Transaction Type (Income/Expense)
 def adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount):
     if budgetID:
-        budget = Budget.query.get(budgetID)
+        budget = get_budget(budgetID)
         if not budget:
             raise ValueError("Budget Not Found")
 
