@@ -15,6 +15,7 @@ import {
   BudgetsScreen,
   BudgetDetailsScreen,
   CreateBudgetScreen,
+  EditBudgetScreen,
   CreateBankScreen,
   AddTransactionScreen,
   TransactionsScreen,
@@ -69,6 +70,8 @@ export default function App() {
             <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
             <Stack.Screen name="CreateCircle" component={CreateCircleScreen} />
+
+            <Stack.Screen name="EditBudgetScreen" component={EditBudgetScreen} />
 
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
 

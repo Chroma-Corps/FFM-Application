@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader'
-import PlusFAB from '../components/PlusFAB';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
-import BudgetsScreen from './BudgetsScreen';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
@@ -15,44 +13,61 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     const [budgetTransactions, setBudgetTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchBudgetDetails = async () => {
-            try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`);
-                const data = await response.json();
-                if (response.ok) {
-                    setBudgetDetails(data.budget);
-                } else {
-                    console.error(data.message);
-                }
-                console.log('Fetch Budget Status:', data.status)
-            } catch (error) {
-                console.error('Error fetching budget details:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
+            // Define the async function to fetch all data
+            const fetchData = async () => {
+                // Set loading to true each time the screen focuses
+                setLoading(true);
+                try {
+                    // Use Promise.all to fetch details and transactions concurrently
+                    const [detailsResponse, transactionsResponse] = await Promise.all([
+                        fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`),
+                        fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`)
+                    ]);
 
-        const fetchBudgetTransactions = async () => {
-            try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`);
-                const data = await response.json();
-                if (response.ok) {
-                    setBudgetTransactions(data.transactions);
-                } else {
-                    console.error(data.message);
+                    // Process details
+                    const detailsData = await detailsResponse.json();
+                    if (detailsResponse.ok) {
+                        setBudgetDetails(detailsData.budget);
+                    } else {
+                        console.error("Failed to fetch budget details:", detailsData.message);
+                        setBudgetDetails(null); // Clear or set error state if needed
+                    }
+
+                    // Process transactions
+                    const transactionsData = await transactionsResponse.json();
+                    if (transactionsResponse.ok) {
+                        setBudgetTransactions(transactionsData.transactions);
+                    } else {
+                        console.error("Failed to fetch budget transactions:", transactionsData.message);
+                        setBudgetTransactions([]); // Clear or set error state if needed
+                    }
+
+                    console.log('Fetch Budget Status:', detailsData.status);
+                    console.log('Fetch Budget Transactions Status:', transactionsData.status);
+
+                } catch (error) {
+                    console.error('Error fetching budget data:', error);
+                    // Optionally set an error state here to show feedback to the user
+                    setBudgetDetails(null);
+                    setBudgetTransactions([]);
+                } finally {
+                    // Always set loading to false after fetching (or error)
+                    setLoading(false);
                 }
-                console.log('Fetch Budget Transactions Status:', data.status)
-            } catch (error) {
-                console.error('Error Fetching Budget Transactions:', error);
-            } 
-            finally {
-                setLoading(false);
-            }
-        };
-        fetchBudgetTransactions();
-        fetchBudgetDetails();
-    }, [budgetID]);
+            };
+
+            // Call the function to fetch data when the screen is focused
+            fetchData();
+
+            // Optional: Return a cleanup function if needed
+            // return () => {
+            //   console.log('BudgetDetailsScreen unfocused');
+            // };
+
+        }, [budgetID]) // Dependency array, refetch if budgetID changes
+    );
 
     if (loading) {
         return (
@@ -87,7 +102,13 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         <View style={styles.container}>
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
-                <EditButton />
+
+                <EditButton
+                    navigateTo="EditBudgetScreen"
+                    params={{ budgetID: budgetID }}
+                />
+
+
                 <View style={styles.headerContainer}>
 
                     <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
@@ -105,7 +126,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         />
 
                         <Text style={styles.categoryText}>
-                        {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
+                            {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
                         </Text>
 
                     </View>
@@ -131,8 +152,6 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         />
                     </View>
                 </View>
-
-                {/* <PlusFAB onPress={() => navigation.push('AddTransaction')}/> */}
             </InAppBackground>
         </View>
     );
