@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { View, StyleSheet, TouchableOpacity } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Text } from 'react-native-paper'
 import Background from '../components/Background'
 import Header from '../components/Header'
@@ -18,57 +19,70 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false)
 
   const onSignUpPressed = async () => {
-    // Commenting out the validation checks
-    // const nameError = nameValidator(name.value)
-    // const emailError = emailValidator(email.value)
-    // const passwordError = passwordValidator(password.value)
-    // if (emailError || passwordError || nameError) {
-    //   setName({ ...name, error: nameError })
-    //   setEmail({ ...email, error: emailError })
-    //   setPassword({ ...password, error: passwordError })
-    //   return
-    // }
+    const nameError = nameValidator(name.value);
+    const emailError = emailValidator(email.value);
+    const passwordError = passwordValidator(password.value);
 
-    setLoading(true)
+    setLoading(true);
+
+    if (emailError || passwordError || nameError) {
+      setName({ ...name, error: nameError });
+      setEmail({ ...email, error: emailError });
+      setPassword({ ...password, error: passwordError });
+      return;
+    }
 
     try {
-      // Skipping the HTTP request to register the user
-      // const response = await fetch(`https://ffm-application-main.onrender.com/register`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     name: name.value,
-      //     email: email.value,
-      //     password: password.value,
-      //   }),
-      // })
+      // 1. Register the user
+      const registerResponse = await fetch('https://ffm-application-main.onrender.com/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.value,
+          email: email.value,
+          password: password.value,
+        }),
+      });
 
-      // Directly set pass to true to skip registration flow
-      const pass = true;
-      // const data = await response.json()  // Not needed
+      const registerData = await registerResponse.json();
 
-      if (pass) {
-        console.log("User registration successful");
-        // Redirect immediately to the SelectCircleTypeScreen
-        // navigation.reset({
-        //   index: 0,
-        //   routes: [{ name: 'SelectCircleTypeScreen' }],
-        // })
+      if (registerData.status !== 'success') {
+        alert(registerData.message || 'Registration failed.');
+        return;
+      }
+
+      // 2. Log the user in
+      const loginResponse = await fetch('https://ffm-application-main.onrender.com/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value,
+        }),
+      });
+
+      const loginData = await loginResponse.json();
+
+      if (loginData.status === 'success') {
+        await AsyncStorage.setItem('access_token', loginData.access_token);
+        await AsyncStorage.setItem('user_name', name.value);
+        await AsyncStorage.setItem('user_email', email.value);
+
         navigation.navigate('SelectCircleTypeScreen');
       } else {
-        console.error('Registration Failed');
-        alert('Registration Failed, Please Try Again');
+        alert('Login failed after registration.');
       }
     } catch (error) {
-      console.error('Error Registering', error)
-      alert('An Error Occurred, Please Try Again Later')
+      console.error("Error during sign-up:", error);
+      alert('Something went wrong. Please try again later.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
+  };
 
   return (
     <Background>
@@ -111,8 +125,8 @@ export default function RegisterScreen({ navigation }) {
       >
         Sign Up
       </Button>
-      <Text style={styles.orText}>- Or SignUp With -</Text>
-      <Button mode="outlined" icon="google">Google</Button>
+      {/* <Text style={styles.orText}>- Or SignUp With -</Text>
+      <Button mode="outlined" icon="google">Google</Button> */}
       <View style={[styles.row, { marginTop: 50 }]}>
         <Text style={styles.loginLabel}>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('LoginScreen')}>
@@ -140,12 +154,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 12,
     fontFamily: theme.fonts.light.fontFamily,
-    color: theme.colors.text
+    color: theme.colors.description
   },
 
   loginLabel: {
     fontFamily: theme.fonts.regular.fontFamily,
     fontSize: 15,
-    color: theme.colors.text,
+    color: theme.colors.description,
   },
 })

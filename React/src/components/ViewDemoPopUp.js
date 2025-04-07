@@ -8,21 +8,21 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
 
     const [entries] = useState([
         {
-            title: 'Slide 1',
+            title: 'Track Personal Expenses',
             color: '#6A4E23',
-            description: 'This is feature 1',
+            description: 'Keep tabs on every dollar you spend with ease. Whether it’s groceries, bills, or your daily coffee run — effortlessly log your expenses and take charge of your spending.',
             image: require('../assets/default_img.jpg'),
         },
         {
-            title: 'Slide 2',
+            title: 'Set Your Budgets',
             color: '#4682B4',
-            description: 'This is feature 2',
+            description: 'Build smart, flexible budgets tailored to your lifestyle. Plan for bills, savings, and fun without the guesswork — and stay on top of your goals month after month.',
             image: require('../assets/default_img.jpg'),
         },
         {
-            title: 'Slide 3',
+            title: 'Track Financial Progress',
             color: '#8B4513',
-            description: 'This is feature 3',
+            description: 'Your personalized dashboard gives you a clear view of your financial health. Instantly see your balances, track how your budget is doing, and celebrate your financial wins, big or small.',
             image: require('../assets/default_img.jpg'),
         },
     ]);
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     modalContent: {
         width: '100%',
         height: '90%',
-        backgroundColor: '#FAF9F6',
+        backgroundColor: 'transparent',
         padding: 20,
         borderRadius: 10,
         alignItems: 'center',
@@ -107,13 +107,13 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 3,
-        borderColor: 'black',
+        borderColor: theme.colors.primary,
     },
 
     imageText: {
         fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 12,
-        color: 'black',
+        fontSize: 15,
+        color: theme.colors.description,
         textAlign: 'center',
     },
 

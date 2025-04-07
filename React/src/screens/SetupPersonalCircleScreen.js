@@ -6,21 +6,24 @@ import { theme } from '../core/theme';
 import Header from '../components/Header';
 import Paragraph from '../components/Paragraph';
 import ButtonSmall from '../components/ButtonSmall';
+import BackButton from '../components/BackButton';
 import CurrencySelectionPopUp from '../components/CurrencySelectionPopUp';
 import Currencies from '../constants/currencies.json';
-import Colors from '../constants/colors.json';
 import Background from '../components/Background';
+import { MaterialIcons } from '@expo/vector-icons'
 
 const mainCurrencies = ['GBP', 'EUR', 'USD', 'TTD', 'JPY', 'CAD'];
-const colorData = Object.values(Colors);
 
-export default function SetupPersonalCircleScreen({ navigation }) {
-    const [loading, setLoading] = useState(true);
+export default function SetupPersonalCircleScreen({ navigation, route }) {
 
-    const [selectedBankTitle, setSelectedBankTitle] = useState(null);
-    const [selectedBankAmount, setSelectedBankAmount] = useState(null);
+    const { selectedCircleType } = route.params;
+
+    const [loading, setLoading] = useState(false);
+
+    const [selectedBankTitle, setSelectedBankTitle] = useState('');
+    const [selectedBankAmount, setSelectedBankAmount] = useState('');
     const [isPrimary, setIsPrimary] = useState(true);
-    const [selectedCurrency, setSelectedCurrency] = useState('');
+    const [selectedCurrency, setSelectedCurrency] = useState(null);
     const [selectedTheme, setSelectedTheme] = useState('');
 
     const [currencyData, setCurrencyData] = useState([]);
@@ -38,100 +41,128 @@ export default function SetupPersonalCircleScreen({ navigation }) {
         setSelectedCurrency(currency);
     };
 
-    console.log('Is Primary:', isPrimary);
-
     const handleViewCurrenciesPopup = () => {
         setShowCurrencyPopup(true);
     }
 
-
-    const fetchActiveCircle = async () => {
-        const token = await AsyncStorage.getItem('access_token');
-
-        if (!token) {
-            console.error('No Token Found');
-            return null;
-        }
-
+    const setActiveCircle = async (circleID) => {
         try {
-            const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+            const token = await AsyncStorage.getItem('access_token');
 
-            const data = await response.json();
-            console.log('Raw Response:', data);
-
-            if (response.ok) {
-                const activeCircleID = data.activeCircle.circleID;
-                console.log('Active Circle ID:', activeCircleID);
-                return activeCircleID;
-            } else {
-                console.error('Error fetching active circle:', data.message);
-                return null;
-            }
-        } catch (error) {
-            console.error('Error fetching active circle:', error);
-            return null;
-        }
-    };
-
-    const fetchCircleUsers = async (circleID) => {
-        const token = await AsyncStorage.getItem('access_token');
-
-        if (!token) {
-            console.error('No Token Found');
-            return [];
-        }
-
-        try {
-            const response = await fetch(`https://ffm-application-main.onrender.com/circle/${circleID}/users`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                const userIds = data.users.map(user => user.id);
-                return userIds;
-            } else {
-                console.error('Error fetching circle users:', data.message);
-                return [];
-            }
-        } catch (error) {
-            console.error('Error fetching circle users:', error);
-            return [];
-        }
-    };
-
-    const handleAddBank = async () => {
-        const token = await AsyncStorage.getItem('access_token');
-
-        if (!token) {
-            console.error('No Token Found');
-            return;
-        }
-
-        if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency) {
-            Alert.alert('Error', 'Please Fill In All Fields');
-            return;
-        }
-
-        try {
-
-            const circleID = await fetchActiveCircle();
-            if (!circleID) {
-                Alert.alert('Error', 'No active circle found.');
+            if (!token) {
+                console.error('No Token Found');
                 return;
             }
 
-            const userIDs = await fetchCircleUsers(circleID);
+            const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    circleID
+                })
+            });
 
+            const responseData = await response.json();
+
+            if (response.ok) {
+                console.log('Active Circle Set Successfully:', responseData);
+                return true;
+            } else {
+                Alert.alert('Error', responseData.message || 'Failed To Set Active Circle');
+                return false;
+            }
+
+        } catch (error) {
+            console.error('Error setting active circle:', error);
+            Alert.alert('Error', 'Something went wrong while setting the active circle.');
+            return false;
+        }
+    };
+
+    const handleCreateCircle = async () => {
+        const token = await AsyncStorage.getItem('access_token');
+
+        if (!token) {
+            console.error('No Token Found');
+            return null;
+        }
+
+        const circleName = await AsyncStorage.getItem('user_name');
+        const circleColor = theme.colors.primary;
+        const circleImage = '../assets/default_profile_image.png';
+
+        if (!circleName || !circleColor || !circleImage || !selectedCircleType) {
+            Alert.alert('Error', 'Missing required information for circle creation.');
+            return null;
+        }
+
+        try {
+            const response = await fetch('https://ffm-application-main.onrender.com/create-circle', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    circleName: circleName.trim(),
+                    circleColor,
+                    circleImage,
+                    circleType: selectedCircleType,
+                    userIDs: []
+                })
+            });
+
+            const responseData = await response.json();
+
+            console.log('Create Circle Response:', responseData);
+
+            if (response.ok) {
+                const createdCircleID = responseData.circleID;
+                const setActiveSuccess = await setActiveCircle(createdCircleID);
+                if (setActiveSuccess) {
+                    console.log('Active Circle Set:', createdCircleID);
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                Alert.alert('Error', responseData.message || 'Failed To Create Circle');
+                return false;
+            }
+
+        } catch (error) {
+            console.error('Error creating circle:', error);
+            Alert.alert('Error', 'Something went wrong during circle creation. Please try again later.');
+            return false;
+        }
+    };
+
+    const handleAddBank = async ({ bankTitle = 'My Wallet', bankAmount = '0', bankCurrency = null, skip = false }) => {
+        const token = await AsyncStorage.getItem('access_token');
+
+        if (!token) {
+            console.error('No Token Found');
+            return false;
+        }
+
+        const finalBankTitle = (bankTitle || '').trim() || 'My Wallet';
+        const finalBankAmount = parseFloat(bankAmount || '0');
+        const finalBankCurrencyCode = bankCurrency?.code || 'TTD';
+
+        if (!skip && !finalBankTitle) {
+            Alert.alert('Error', 'Please provide a wallet title.');
+            return false;
+        }
+
+        if (!skip && !finalBankCurrencyCode) {
+            Alert.alert('Error', 'Please select a currency.');
+            return false;
+        }
+
+        try {
             const response = await fetch('https://ffm-application-main.onrender.com/create-bank', {
                 method: 'POST',
                 headers: {
@@ -139,34 +170,94 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    bankTitle: selectedBankTitle.trim(),
-                    bankCurrency: selectedCurrency.code,
-                    bankAmount: parseFloat(selectedBankAmount),
+                    bankTitle: finalBankTitle,
+                    bankCurrency: finalBankCurrencyCode,
+                    bankAmount: finalBankAmount,
                     isPrimary: isPrimary,
-                    userIDs: userIDs
+                    userIDs: []
                 })
             });
 
             const responseData = await response.json();
 
-            console.log('Response Data:', responseData);
+            console.log('Create Bank Response:', responseData);
 
             if (response.ok) {
-                Alert.alert('Success', 'Bank Added Successfully');
-                navigation.goBack();
+                Alert.alert('Success', 'Wallet Added Successfully');
+                return true;
             } else {
-                Alert.alert('Error', 'Failed To Add Bank');
-                navigation.goBack();
+                Alert.alert('Error', responseData.message || 'Failed To Add Wallet');
+                return false;
             }
 
         } catch (error) {
-            console.error('Error:', error);
-            Alert.alert('Error', 'Something went wrong. Please try again later.');
+            console.error('Error adding bank:', error);
+            Alert.alert('Error', 'Something went wrong while adding the wallet. Please try again later.');
+            return false;
+        }
+    };
+
+
+    const handleRegistrationComplete = async () => {
+        setLoading(true);
+        let circleCreated = false;
+        let bankAdded = false;
+
+        try {
+            circleCreated = await handleCreateCircle();
+
+            if (circleCreated) {
+                bankAdded = await handleAddBank({
+                    bankTitle: selectedBankTitle,
+                    bankAmount: selectedBankAmount,
+                    bankCurrency: selectedCurrency,
+                    skip: false
+                });
+            }
+
+            if (circleCreated && bankAdded) {
+                navigation.reset({ index: 0, routes: [{ name: 'Dashboard' }] });
+            } else {
+                Alert.alert('Setup Incomplete', 'Could not complete the setup process. Please check the details and try again.');
+            }
+
+        } catch (error) {
+            console.error('Registration Completion Error:', error);
+            Alert.alert('Error', 'Something went wrong during setup. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRegistrationCompleteWithDefaultBank = async () => {
+        setLoading(true);
+        let circleCreated = false;
+        let bankAdded = false;
+
+        try {
+            circleCreated = await handleCreateCircle();
+
+            if (circleCreated) {
+                bankAdded = await handleAddBank({ skip: true });
+            }
+
+            if (circleCreated && bankAdded) {
+                navigation.reset({ index: 0, routes: [{ name: 'Dashboard' }] });
+            } else {
+                Alert.alert('Setup Incomplete', 'Could not complete the setup process. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Registration Completion Error (No Bank):', error);
+            Alert.alert('Error', 'Something went wrong during setup. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
 
     useEffect(() => {
+        setLoading(true);
         const formattedCurrencies = Object.entries(Currencies).map(([code, currency], index) => {
             return {
                 id: index,
@@ -179,6 +270,12 @@ export default function SetupPersonalCircleScreen({ navigation }) {
         });
 
         setCurrencyData(formattedCurrencies);
+
+        const defaultCurrency = formattedCurrencies.find(c => c.code === 'TTD');
+        if (defaultCurrency) {
+            setSelectedCurrency(defaultCurrency);
+        }
+
         setLoading(false);
     }, []);
 
@@ -188,12 +285,13 @@ export default function SetupPersonalCircleScreen({ navigation }) {
     );
 
     const renderCurrencyItem = (currency) => {
+        const isSelected = selectedCurrency?.code === currency.code;
         return (
             <TouchableOpacity
-                key={currency}
+                key={currency.code}
                 style={[
                     styles.currencyBox,
-                    selectedCurrency?.code === currency.code
+                    isSelected
                         ? styles.selectedCurrencyBox
                         : styles.unselectedCurrencyBox,
                 ]}
@@ -202,7 +300,7 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency
+                        isSelected
                             ? styles.selectedCurrencyText
                             : styles.unselectedCurrencyText,
                     ]}
@@ -213,7 +311,7 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency
+                        isSelected
                             ? styles.selectedCurrencyText
                             : styles.unselectedCurrencyText,
                         { fontSize: 15, textAlign: 'center', marginBottom: 5 },
@@ -225,7 +323,7 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency
+                        isSelected
                             ? styles.selectedCurrencyText
                             : styles.unselectedCurrencyText,
                         { fontSize: 8, textAlign: 'center' },
@@ -250,14 +348,30 @@ export default function SetupPersonalCircleScreen({ navigation }) {
             )}
 
             <Background>
-
                 <View style={styles.createBankDetailsContainer}>
 
+                    <BackButton goBack={navigation.goBack} />
+
                     <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 20 }}>
-                        <Image
-                            source={require('../assets/wallet_icon.png')}
-                            style={styles.walletImage}
-                        />
+
+                        <View style={styles.walletContainer}>
+                            <Image
+                                source={require('../assets/wallet_icon.png')}
+                                style={styles.walletImage}
+                            />
+                        </View>
+
+
+                        <Button
+                            mode="text"
+                            onPress={handleRegistrationCompleteWithDefaultBank}
+                            loading={loading}
+                            style={styles.skipButton}
+                            labelStyle={styles.skipText}
+                            disabled={loading}
+                        >
+                            Skip
+                        </Button>
 
                         <Header style={{ fontSize: 40, textAlign: 'center', flexWrap: 'wrap', maxWidth: '100%' }}>
                             Create Your Wallet
@@ -273,7 +387,7 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                         selectedTheme ? { borderColor: selectedTheme.hex } : { borderColor: theme.colors.primary }
                     ]}>
                         <TextInput
-                            placeholderTextColor="#333333"
+                            placeholderTextColor="rgba(255, 255, 255, 0.38)"
                             placeholder="Wallet Title"
                             value={selectedBankTitle}
                             onChangeText={handleBankTitleChange}
@@ -283,7 +397,7 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                         <View style={styles.inputAmountContainer}>
                             <Text style={[styles.defaultText, { fontSize: 30 }]}>Starting at: </Text>
                             <TextInput
-                                placeholderTextColor="#333333"
+                                placeholderTextColor="rgba(255, 255, 255, 0.38)"
                                 placeholder={`${selectedCurrency?.symbol || '$'}0.00`}
                                 value={selectedBankAmount}
                                 onChangeText={handleBankAmountChange}
@@ -296,7 +410,7 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                     <View style={styles.bankCurrencyOptionsContainer}>
 
 
-                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency ( {selectedCurrency.code} )</Text>
+                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency ({selectedCurrency?.code || '...'} )</Text>
 
                         <View style={styles.currencyContainer}>
                             {mainCurrenciesList.map((currency) => (
@@ -323,9 +437,11 @@ export default function SetupPersonalCircleScreen({ navigation }) {
                         <View style={{ alignSelf: 'center', width: 280, marginTop: 10 }}>
                             <Button
                                 mode="contained"
-                                onPress={() => navigation.navigate('StartScreen')}
+                                onPress={handleRegistrationComplete}
+                                loading={loading}
+                                disabled={loading || !selectedCurrency}
                             >
-                                Activate
+                                Create Wallet
                             </Button>
                         </View>
 
@@ -349,13 +465,7 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         alignItems: 'center',
         overflow: 'hidden',
-    },
-
-    walletImage: {
-        width: 100,
-        height: 100,
-        margin: 0,
-        padding: 0,
+        paddingBottom: 20,
     },
 
     defaultText: {
@@ -363,7 +473,38 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
-        color: '#333333',
+        color: theme.colors.description,
+    },
+
+    walletContainer: {
+        backgroundColor: theme.colors.secondary,
+        padding: 10,
+        marginTop: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 80,
+        height: 80,
+    },
+
+    walletImage: {
+        width: 60,
+        height: 60,
+    },
+
+    skipButton: {
+        position: 'absolute',
+        top: 25,
+        right: 5,
+        width: 'auto',
+        backgroundColor: theme.colors.primary,
+        elevation: 0,
+    },
+
+    skipText: {
+        color: 'white',
+        fontSize: 14,
+        fontFamily: theme.fonts.bold.fontFamily,
     },
 
     headerContainer: {
@@ -375,26 +516,28 @@ const styles = StyleSheet.create({
     inputAmountContainer: {
         flexDirection: 'row',
         alignSelf: 'center',
-        gap: 15,
+        alignItems: 'baseline',
+        gap: 5,
     },
 
     input: {
         backgroundColor: 'transparent',
         borderBottomWidth: 2,
-        borderBottomColor: '#333333',
+        borderBottomColor: theme.colors.description,
         fontSize: 25,
         paddingVertical: 8,
         marginBottom: 20,
-        color: '#333333',
+        color: theme.colors.description,
         borderWidth: 0,
         textAlign: 'center',
     },
 
     shortInput: {
-        width: 120,
+        minWidth: 120,
         textAlign: 'center',
         borderBottomWidth: 1.5,
-        borderBottomColor: '#333333',
+        borderBottomColor: theme.colors.description,
+        paddingVertical: 4,
     },
 
     bankTypeOptionsContainer: {
@@ -422,7 +565,7 @@ const styles = StyleSheet.create({
         flex: 1,
         marginHorizontal: 5,
         backgroundColor: 'transparent',
-        borderColor: '#333333',
+        borderColor: theme.colors.description,
     },
 
     selectedButton: {
@@ -449,11 +592,12 @@ const styles = StyleSheet.create({
     currencyContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         maxWidth: '100%',
         flexShrink: 1,
         overflow: 'hidden',
         flexWrap: 'wrap',
+        marginTop: 5,
     },
 
     currencyBox: {
@@ -463,7 +607,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginVertical: 10,
+        marginHorizontal: 5,
         borderWidth: 2,
+        padding: 5,
     },
 
     currencyText: {
@@ -482,7 +628,7 @@ const styles = StyleSheet.create({
     },
 
     selectedCurrencyText: {
-        color: '#333333',
+        color: '#FFFFFF',
     },
 
     unselectedCurrencyText: {

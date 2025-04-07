@@ -33,10 +33,12 @@ export default function PreviewDemoScreen({ navigation }) {
             <Background justifyContent='flex-start'>
 
                 <View style={{ alignItems: 'center', width: '100%', marginTop: 40 }}>
-                    <Image
-                        source={require('../assets/money_icon.png')}
-                        style={styles.demoImage}
-                    />
+                    <View style={styles.demoImageContainer}>
+                        <Image
+                            source={require('../assets/money_icon.png')}
+                            style={styles.demoImage}
+                        />
+                    </View>
 
                     <Header fontSize={40}>From Every Penny To Every Posibility</Header>
                 </View>
@@ -91,7 +93,7 @@ export default function PreviewDemoScreen({ navigation }) {
                             onPress={() => setShowPreviewDemoPopup(true)}
                             style={{ marginVertical: 0, marginTop: 10, width: 200 }}
                         >
-                            Start Preview
+                            Start Demo
                         </Button>
                     </View>
                 )}
@@ -122,12 +124,22 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.surface,
     },
 
-    demoImage: {
-        width: 90,
+    demoImageContainer: {
+        backgroundColor: theme.colors.secondary,
+        borderRadius: 10,
+        padding: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 100,
         height: 90,
-        margin: 0,
-        padding: 0,
     },
+
+    demoImage: {
+        width: 150,
+        height: 100,
+        resizeMode: 'contain',
+    },
+
 
     container: {
         flexDirection: 'row',
@@ -147,6 +159,7 @@ const styles = StyleSheet.create({
     cardText: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
+        color: theme.colors.description,
         textAlign: 'center',
         marginTop: 10,
     },
@@ -167,6 +180,7 @@ const styles = StyleSheet.create({
     descriptionTitle: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 24,
+        color: theme.colors.description,
         textAlign: 'center',
         marginBottom: 10,
     },
@@ -175,7 +189,7 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
         textAlign: 'center',
-        color: '#666',
+        color: theme.colors.description,
     },
 
 })

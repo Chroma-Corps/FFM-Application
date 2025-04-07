@@ -7,7 +7,10 @@ import ArrowButton from '../components/ArrowButton'
 import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { theme } from '../core/theme'
 
-export default function SetupFamilyCircleScreen({ navigation }) {
+export default function SetupFamilyCircleScreen({ navigation, route }) {
+
+    const { selectedCircleType } = route.params
+
     return (
         <View style={styles.startScreenContainer}>
             <Background justifyContent='flex-start'>

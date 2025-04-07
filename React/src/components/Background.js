@@ -1,6 +1,6 @@
-import React from 'react'
-import { ImageBackground, StyleSheet, KeyboardAvoidingView } from 'react-native'
-import { theme } from '../core/theme'
+import React from 'react';
+import { ImageBackground, StyleSheet, KeyboardAvoidingView, View } from 'react-native'; // Added View
+import { theme } from '../core/theme';
 
 export default function Background({ children, justifyContent = 'center', ...props }) {
   return (
@@ -9,18 +9,25 @@ export default function Background({ children, justifyContent = 'center', ...pro
       resizeMode="repeat"
       style={styles.background}
     >
+      <View style={styles.overlay} />
+
       <KeyboardAvoidingView style={[styles.container, { justifyContent }]} behavior="padding">
         {children}
       </KeyboardAvoidingView>
     </ImageBackground>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   background: {
     flex: 1,
     width: '100%',
-    backgroundColor: theme.colors.surface,
+    backgroundColor: '#181818',
+  },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
 
   container: {
@@ -32,4 +39,4 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     alignItems: 'center',
   },
-})
+});

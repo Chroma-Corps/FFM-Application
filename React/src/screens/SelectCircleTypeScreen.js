@@ -1,4 +1,6 @@
 import { React, useState } from 'react'
+import { useRoute } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Background from '../components/Background'
 import Header from '../components/Header'
 import Paragraph from '../components/Paragraph'
@@ -7,14 +9,19 @@ import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { theme } from '../core/theme'
 
 export default function SelectCircleTypeScreen({ navigation }) {
-
     const [selectedCircleType, setSelectedCircleType] = useState(null);
 
     const handlePress = (id) => {
         setSelectedCircleType(id);
     };
 
-    console.log("Selected:", selectedCircleType);
+    const handleRegistrationContinue = async () => {
+        if (selectedCircleType === 'Self') {
+            navigation.navigate('SetupPersonalCircleScreen', { selectedCircleType });
+        } else {
+            navigation.navigate('SetupFamilyCircleScreen', { selectedCircleType });
+        }
+    };
 
     const Card = ({ id, source, text, isSelected }) => (
         <TouchableOpacity onPress={() => handlePress(id)}>
@@ -60,7 +67,7 @@ export default function SelectCircleTypeScreen({ navigation }) {
                     </View>
                 </View>
 
-                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 50 }}>
+                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
                     <View style={styles.descriptionContainer}>
                         {selectedCircleType === 'Self' && (
                             <View>
@@ -86,13 +93,9 @@ export default function SelectCircleTypeScreen({ navigation }) {
                         <View style={{ alignSelf: 'center', width: '50%', marginTop: 40 }}>
                             <Button
                                 mode="contained"
-                                onPress={() =>
-                                    selectedCircleType === 'Self'
-                                        ? navigation.navigate('SetupPersonalCircleScreen')
-                                        : navigation.navigate('SetupFamilyCircleScreen')
-                                }
+                                onPress={handleRegistrationContinue}
                             >
-                                Next
+                                Continue
                             </Button>
                         </View>
                     )}
@@ -122,12 +125,14 @@ const styles = StyleSheet.create({
         height: 150,
         borderRadius: 10,
         borderWidth: 3,
-        borderColor: 'black',
+        borderColor: 'white',
+        tintColor: 'white'
     },
 
     cardText: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
+        color: theme.colors.description,
         textAlign: 'center',
         marginTop: 10,
     },
@@ -148,6 +153,7 @@ const styles = StyleSheet.create({
 
     descriptionTitle: {
         fontFamily: theme.fonts.bold.fontFamily,
+        color: theme.colors.description,
         fontSize: 24,
         textAlign: 'center',
         marginBottom: 10,
@@ -157,6 +163,6 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
         textAlign: 'center',
-        color: '#666',
+        color: theme.colors.description,
     },
 })
