@@ -131,9 +131,6 @@ def update_user_transaction(transactionID):
         goalID = data.get('goalID')
         bankID = data.get('bankID')
 
-        print('API Goal ID:', goalID)
-        print('API Budget ID:', budgetID)
-
         updated_transaction = update_transaction (
             transactionID,
             transactionTitle,

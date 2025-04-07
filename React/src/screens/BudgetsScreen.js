@@ -30,7 +30,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.9:8080/budgets`, {
+      const response = await fetch(`http://192.168.0.10:8080/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

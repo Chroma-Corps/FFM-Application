@@ -128,9 +128,6 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
     try:
         transaction = get_transaction(transactionID)
 
-        print('Controller Goal ID:', goalID)
-        print('Controller Budget ID:', budgetID)
-
         if transaction:
 
             # Retrieving The UserID For The Transaction

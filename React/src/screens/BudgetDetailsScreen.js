@@ -18,7 +18,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     useEffect(() => {
         const fetchBudgetDetails = async () => {
             try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`);
+                const response = await fetch(`http://192.168.0.10:8080/budget/${budgetID}`);
                 const data = await response.json();
                 if (response.ok) {
                     setBudgetDetails(data.budget);
@@ -35,7 +35,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
         const fetchBudgetTransactions = async () => {
             try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`);
+                const response = await fetch(`http://192.168.0.10:8080/budget/${budgetID}/transactions`);
                 const data = await response.json();
                 if (response.ok) {
                     setBudgetTransactions(data.transactions);

@@ -34,7 +34,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
   
-      const response = await fetch('http://192.168.0.9:8080/active-circle', {
+      const response = await fetch('http://192.168.0.10:8080/active-circle', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -68,7 +68,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
   
-      const response = await fetch('http://192.168.0.9:8080/active-circle', {
+      const response = await fetch('http://192.168.0.10:8080/active-circle', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -103,7 +103,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.9:8080/banks', {
+      const response = await fetch('http://192.168.0.10:8080/banks', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -136,7 +136,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.9:8080/user', {
+      const response = await fetch('http://192.168.0.10:8080/user', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -166,7 +166,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.9:8080/circles', {
+      const response = await fetch('http://192.168.0.10:8080/circles', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

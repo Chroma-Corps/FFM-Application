@@ -31,7 +31,7 @@ export default function RegisterScreen({ navigation }) {
     setLoading(true)
 
     try {
-      const response = await fetch(`https://ffm-application-main.onrender.com/register`, {
+      const response = await fetch(`http://192.168.0.10:8080/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
