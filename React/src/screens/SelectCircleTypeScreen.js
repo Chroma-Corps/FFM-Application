@@ -67,7 +67,7 @@ export default function SelectCircleTypeScreen({ navigation }) {
                     </View>
                 </View>
 
-                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 20 }}>
+                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 60 }}>
                     <View style={styles.descriptionContainer}>
                         {selectedCircleType === 'Self' && (
                             <View>
@@ -100,6 +100,7 @@ export default function SelectCircleTypeScreen({ navigation }) {
                         </View>
                     )}
                 </View>
+
             </Background >
         </View >
     )

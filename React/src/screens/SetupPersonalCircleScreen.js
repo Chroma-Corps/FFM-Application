@@ -19,6 +19,9 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
     const { selectedCircleType } = route.params;
 
     const [loading, setLoading] = useState(false);
+    const [isCreateWalletLoading, setIsCreateWalletLoading] = useState(false);
+    const [isSkipButtonLoading, setIsSkipButtonLoading] = useState(false);
+
 
     const [selectedBankTitle, setSelectedBankTitle] = useState('');
     const [selectedBankAmount, setSelectedBankAmount] = useState('');
@@ -83,68 +86,82 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
     };
 
     const handleCreateCircle = async () => {
-        const token = await AsyncStorage.getItem('access_token');
-
-        if (!token) {
-            console.error('No Token Found');
-            return null;
-        }
-
-        const circleName = await AsyncStorage.getItem('user_name');
-        const circleColor = theme.colors.primary;
-        const circleImage = '../assets/default_profile_image.png';
-
-        if (!circleName || !circleColor || !circleImage || !selectedCircleType) {
-            Alert.alert('Error', 'Missing required information for circle creation.');
-            return null;
-        }
-
         try {
+            const token = await AsyncStorage.getItem('access_token');
+            if (!token) {
+                console.error('[Create Circle] No access token found');
+                Alert.alert('Authentication Error', 'You are not logged in. Please log in and try again.');
+                return false;
+            }
+
+            const circleName = (await AsyncStorage.getItem('user_name'))?.trim();
+            const circleColor = theme.colors.primary;
+            const circleImage = "https://i.postimg.cc/Znv9kYwG/default-profile-image.png";
+
+            if (!circleName || !circleColor || !circleImage || !selectedCircleType) {
+                Alert.alert('Missing Info', 'All circle details are required to continue.');
+                return false;
+            }
+
             const response = await fetch('https://ffm-application-main.onrender.com/create-circle', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    circleName: circleName.trim(),
+                    circleName,
                     circleColor,
                     circleImage,
-                    circleType: selectedCircleType,
-                    userIDs: []
-                })
+                    circleType: selectedCircleType.toUpperCase(),
+                    userIDs: [],
+                }),
             });
 
-            const responseData = await response.json();
+            console.log('[Create Circle] Response Status:', response.status);
 
-            console.log('Create Circle Response:', responseData);
-
-            if (response.ok) {
-                const createdCircleID = responseData.circleID;
-                const setActiveSuccess = await setActiveCircle(createdCircleID);
-                if (setActiveSuccess) {
-                    console.log('Active Circle Set:', createdCircleID);
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                Alert.alert('Error', responseData.message || 'Failed To Create Circle');
+            if (response.status === 401) {
+                console.error('[Create Circle] Token expired or unauthorized');
+                Alert.alert('Session Expired', 'Your session has expired. Please log in again.');
                 return false;
             }
 
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('[Create Circle] Failed:', data);
+                Alert.alert('Error', data.message || 'Unable to create circle. Please try again.');
+                return false;
+            }
+
+            const createdCircleID = data.circleID;
+            const activeCircle = await setActiveCircle(createdCircleID);
+
+            if (activeCircle) {
+                console.log('[Create Circle] Circle created and set active:', createdCircleID);
+                return true;
+            } else {
+                console.warn('[Create Circle] Circle created but failed to set as active');
+                return false;
+            }
         } catch (error) {
-            console.error('Error creating circle:', error);
-            Alert.alert('Error', 'Something went wrong during circle creation. Please try again later.');
+            console.error('[Create Circle] Exception:', error);
+            Alert.alert('Error', 'Something went wrong while creating your circle. Please try again.');
             return false;
         }
     };
 
-    const handleAddBank = async ({ bankTitle = 'My Wallet', bankAmount = '0', bankCurrency = null, skip = false }) => {
+    const handleAddBank = async ({
+        bankTitle = 'My Wallet',
+        bankAmount = '0',
+        bankCurrency = null,
+        skip = false
+    }) => {
         const token = await AsyncStorage.getItem('access_token');
 
         if (!token) {
-            console.error('No Token Found');
+            console.error('[Add Bank] No access token found.');
+            Alert.alert('Session Error', 'You must be logged in to add a wallet.');
             return false;
         }
 
@@ -153,12 +170,14 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
         const finalBankCurrencyCode = bankCurrency?.code || 'TTD';
 
         if (!skip && !finalBankTitle) {
-            Alert.alert('Error', 'Please provide a wallet title.');
+            console.warn('[Add Bank] Missing wallet title.');
+            Alert.alert('Missing Info', 'Please provide a wallet title.');
             return false;
         }
 
         if (!skip && !finalBankCurrencyCode) {
-            Alert.alert('Error', 'Please select a currency.');
+            console.warn('[Add Bank] No currency selected.');
+            Alert.alert('Missing Info', 'Please select a currency.');
             return false;
         }
 
@@ -178,32 +197,42 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
                 })
             });
 
+            if (response.status === 401) {
+                console.error('[Add Bank] Unauthorized. Token may be expired.');
+                Alert.alert('Session Expired', 'Your session has expired. Please log in again.');
+                return false;
+            }
+
             const responseData = await response.json();
 
-            console.log('Create Bank Response:', responseData);
-
             if (response.ok) {
-                Alert.alert('Success', 'Wallet Added Successfully');
+                console.log('[Add Bank] Success:', responseData);
+                Alert.alert('Success', 'Wallet added successfully.');
                 return true;
             } else {
-                Alert.alert('Error', responseData.message || 'Failed To Add Wallet');
+                console.error('[Add Bank] Failed:', responseData);
+                Alert.alert('Error', responseData.message || 'Failed to add wallet.');
                 return false;
             }
 
         } catch (error) {
-            console.error('Error adding bank:', error);
-            Alert.alert('Error', 'Something went wrong while adding the wallet. Please try again later.');
+            console.error('[Add Bank] Exception:', error);
+            Alert.alert('Error', 'An error occurred while adding the wallet. Please try again later.');
             return false;
         }
     };
 
-
     const handleRegistrationComplete = async () => {
-        setLoading(true);
+        setIsCreateWalletLoading(true);
         let circleCreated = false;
         let bankAdded = false;
 
         try {
+            if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency) {
+                Alert.alert('Missing Information', 'Please fill in all the fields before proceeding.');
+                return;
+            }
+
             circleCreated = await handleCreateCircle();
 
             if (circleCreated) {
@@ -216,21 +245,23 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
             }
 
             if (circleCreated && bankAdded) {
-                navigation.reset({ index: 0, routes: [{ name: 'Dashboard' }] });
+                console.log('[Registration] Setup complete. Navigating to Dashboard.');
+                navigation.navigate('Dashboard');
             } else {
-                Alert.alert('Setup Incomplete', 'Could not complete the setup process. Please check the details and try again.');
+                console.error('[Registration] Setup failed');
+                Alert.alert('Registration Failed', 'Something went wrong during the registration process. Please try again.');
             }
 
         } catch (error) {
-            console.error('Registration Completion Error:', error);
-            Alert.alert('Error', 'Something went wrong during setup. Please try again.');
+            console.error('[Registration] Error:', error);
+            Alert.alert('Registration Failed', 'Something went wrong during the registration process. Please try again.');
         } finally {
-            setLoading(false);
+            setIsCreateWalletLoading(false);
         }
     };
 
     const handleRegistrationCompleteWithDefaultBank = async () => {
-        setLoading(true);
+        setIsSkipButtonLoading(true);
         let circleCreated = false;
         let bankAdded = false;
 
@@ -242,19 +273,20 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
             }
 
             if (circleCreated && bankAdded) {
-                navigation.reset({ index: 0, routes: [{ name: 'Dashboard' }] });
+                console.log('[Registration Skip] Setup complete with default wallet.');
+                navigation.navigate('Dashboard');
             } else {
-                Alert.alert('Setup Incomplete', 'Could not complete the setup process. Please try again.');
+                console.error('[Registration Skip] Setup failed');
+                Alert.alert('Registration Failed', 'Something went wrong during the registration process. Please try again.');
             }
 
         } catch (error) {
-            console.error('Registration Completion Error (No Bank):', error);
-            Alert.alert('Error', 'Something went wrong during setup. Please try again.');
+            console.error('[Registration Skip] Error:', error);
+            Alert.alert('Registration Failed', 'Something went wrong during the registration process. Please try again.');
         } finally {
-            setLoading(false);
+            setIsSkipButtonLoading(false);
         }
     };
-
 
     useEffect(() => {
         setLoading(true);
@@ -365,7 +397,7 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
                         <Button
                             mode="text"
                             onPress={handleRegistrationCompleteWithDefaultBank}
-                            loading={loading}
+                            loading={isSkipButtonLoading}
                             style={styles.skipButton}
                             labelStyle={styles.skipText}
                             disabled={loading}
@@ -438,7 +470,7 @@ export default function SetupPersonalCircleScreen({ navigation, route }) {
                             <Button
                                 mode="contained"
                                 onPress={handleRegistrationComplete}
-                                loading={loading}
+                                loading={isCreateWalletLoading}
                                 disabled={loading || !selectedCurrency}
                             >
                                 Create Wallet
