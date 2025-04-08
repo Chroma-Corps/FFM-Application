@@ -358,9 +358,11 @@ export default function Dashboard({ navigation }) {
        {circleType === 'Group' && (
         <View>
           <Text style={styles.sectionTitle}>Most Recent Activity</Text>
-          <TouchableOpacity style={styles.viewCircleContainer}>
-            <Text style={styles.viewCircleText}>View Circle</Text>
-          </TouchableOpacity>
+          <TouchableOpacity 
+              style={styles.viewCircleContainer}
+              onPress={() => navigation.navigate('CircleDetailsScreen', { circle: currentCircle })}>
+              <Text style={styles.viewCircleText}>View Circle</Text>
+        </TouchableOpacity>
         </View>
       )}
         </View>
