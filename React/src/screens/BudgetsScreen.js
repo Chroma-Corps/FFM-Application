@@ -1,24 +1,50 @@
 // rfce
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Keyboard } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
 import { Image } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import InAppHeader from '../components/InAppHeader';
 import { theme } from '../core/theme';
+import { MaterialIcons } from '@expo/vector-icons'
 import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
 import ProgressBar from '../components/ProgressBar';
 import RadialMenu from '../components/RadialMenu';
 
-const filters = ['All', 'Savings', 'Expense'];
-
 export default function BudgetsScreen({ navigation }) {
+  const filters = ['All', 'Savings', 'Expense'];
   const [data, setData] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [filteredBudgets, setFilteredBudgets] = useState([]);
+
+  const handleSearchPress = () => { 
+    setIsSearchMode(!isSearchMode);
+  };
+
+  const handleFilterPress = (filter) => { 
+    setSelectedFilter(filter);
+  };
+
+  const handleSearchChange = (text) => {
+    setSearchQuery(text);
+  };
+
+  const handleKeyboardDone = () => {
+    // setIsSearchMode(false);
+    Keyboard.dismiss();
+  };
+
+  const handleResetPress = () => {
+    setSearchQuery("");
+    setIsSearchMode(false);
+    setSelectedFilter(selectedFilter);
+  }
 
   const fetchData = async () => {
     try {
@@ -30,7 +56,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.10:8080/budgets`, {
+      const response = await fetch(`http://192.168.0.4:8080/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -53,19 +79,46 @@ export default function BudgetsScreen({ navigation }) {
     }
   };
 
-  const filteredBudgets = selectedFilter === 'All'
-    ? data
-    : data.filter((budget) => budget.budgetType === selectedFilter);
-
-  const handleFilterPress = (filter) => {
-    setSelectedFilter(filter);
-  };
-
   useFocusEffect(
     useCallback(() => {
       fetchData();
     }, [])
   );
+
+  useEffect(() => {
+    if (data.length > 0) {
+      filterBudgets();
+    }
+  }, [searchQuery, selectedFilter, data]);
+
+  // Filter Budgets Based On 1) Title, OR 2) Category
+  const filterBudgets = () => {
+    if (data.length === 0) return;
+    let filtered = selectedFilter === 'All' ? data : data.filter((budget) => budget.budgetType === selectedFilter);
+    const cleanedSearchQuery = searchQuery.trim();
+  
+    if (cleanedSearchQuery) {
+      filtered = filtered.filter((budget) => {
+        const budgetTitle = budget.budgetTitle || '';
+        const budgetCategory = budget.budgetCategory || '';
+
+        let categoryMatch = false;
+        if (Array.isArray(budgetCategory)) {
+          categoryMatch = budgetCategory.some(category =>
+            category.toLowerCase().includes(cleanedSearchQuery.toLowerCase())
+          );
+        } else {
+          categoryMatch = budgetCategory.toLowerCase().includes(cleanedSearchQuery.toLowerCase());
+        }
+        const matchesSearch =
+          budgetTitle.toLowerCase().includes(cleanedSearchQuery.toLowerCase()) ||
+          categoryMatch;
+        console.log('Matches Search:', matchesSearch);
+        return matchesSearch
+      });
+    }
+    setFilteredBudgets([...filtered].reverse());
+  };
 
   const renderData = (item) => {
     const budgetColorTheme = item.color || '#9ACBD0';
@@ -136,15 +189,14 @@ export default function BudgetsScreen({ navigation }) {
                 <ProgressBar
                   startDate={item.startDate}
                   endDate={item.endDate}
-                  budgetColorTheme={budgetColorTheme}
+                  colorTheme={budgetColorTheme}
+                  amount={item.budgetAmount} 
+                  remainingAmount={item.remainingBudgetAmount}
                 />
-
-                <Text style={styles.insightsText}>
-                  ~ Insights Go Here ~
-                </Text>
               </View>
             </View>
           </View>
+          <Text style={styles.insightsText}>{item.budgetType} - {item.transactionScope}</Text>
         </Card>
       </TouchableOpacity>
     );
@@ -154,8 +206,31 @@ export default function BudgetsScreen({ navigation }) {
     <View style={styles.budgetsScreen}>
       <InAppBackground>
         <View style={styles.headerContainer}>
-          <InAppHeader>Budgets</InAppHeader>
-          <NotificationBell />
+          {isSearchMode ? (
+            // Search Bar Shown When In Search Mode
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search Budgets"
+              placeholderTextColor={theme.colors.grayedText}
+              autoFocus
+              returnKeyType='done'
+              onSubmitEditing={handleKeyboardDone}
+              onChangeText={handleSearchChange}
+              value={searchQuery}
+            />
+          ) : (
+            // Normal Header Shown When Not In Search Mode
+            <InAppHeader>Budgets</InAppHeader>
+          )}
+          <View style={styles.iconsSection}>
+            <TouchableOpacity onPress={handleSearchPress}>
+              <MaterialIcons name={"search"} size={26} color={"white"}/>
+            </TouchableOpacity>
+            <TouchableOpacity>
+              <MaterialIcons name={"edit"} size={26} color={"white"}/>
+            </TouchableOpacity>
+          </View>
+          {/* <NotificationBell /> */}
         </View>
 
         <Text style={styles.descriptionText}>
@@ -169,8 +244,12 @@ export default function BudgetsScreen({ navigation }) {
               label={filter}
               isSelected={selectedFilter === filter}
               onPress={() => handleFilterPress(filter)}
+              style={styles.descriptionText} 
             />
           ))}
+          <TouchableOpacity onPress={handleResetPress} style={{ alignSelf: 'center', marginBottom: 10 }}>
+            <MaterialIcons name={"refresh"} size={30} color={"white"}/>
+          </TouchableOpacity>
         </View>
 
         {loading ? (
@@ -212,6 +291,26 @@ const styles = StyleSheet.create({
     padding: 20
   },
 
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.bold.fontFamily,
+    backgroundColor: "#2F2F2F",
+    alignItems: 'center',
+    alignContent: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    height: 40,
+    marginVertical: 10,
+    marginHorizontal: 10,
+  },
+
+  iconsSection: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+
   descriptionText: {
     color: '#fff',
     fontSize: 16,
@@ -223,8 +322,8 @@ const styles = StyleSheet.create({
 
   filterContainer: {
     flexDirection: 'row',
-    marginBottom: 10,
     paddingHorizontal: 10,
+    alignItems: 'center',
   },
 
   card: {
@@ -292,7 +391,7 @@ const styles = StyleSheet.create({
   },
 
   insightsText: {
-    textAlign: 'left',
+    textAlign: 'center',
     flexWrap: 'wrap',
     color: "#fff",
     fontSize: 12,

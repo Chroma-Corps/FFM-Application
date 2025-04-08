@@ -30,7 +30,7 @@ export default function GoalsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.10:8080/goals`, {
+      const response = await fetch(`http://192.168.0.4:8080/goals`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -92,7 +92,9 @@ export default function GoalsScreen({ navigation }) {
                 <ProgressBar
                   startDate={item.startDate}
                   endDate={item.endDate}
-                  goalColorTheme={goalColorTheme}
+                  colorTheme={goalColorTheme}
+                  amount={item.targetAmount} 
+                  remainingAmount={item.currentAmount}
                 />
 
                 <Text style={styles.insightsText}>

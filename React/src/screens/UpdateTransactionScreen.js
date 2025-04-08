@@ -170,7 +170,7 @@ export default function EditTransactionScreen({ navigation, route }) {
 
     const fetchTransaction = async () => {
         try {
-            const response = await fetch(`http://192.168.0.10:8080/transaction/${transactionID}`);
+            const response = await fetch(`http://192.168.0.4:8080/transaction/${transactionID}`);
             const data = await response.json();
             
             if (response.ok) {
@@ -198,7 +198,7 @@ export default function EditTransactionScreen({ navigation, route }) {
 
     // API Calls: Categories, Budgets, Goals & Banks
     useEffect(() => {
-        fetch('http://192.168.0.10:8080/ffm/categories')
+        fetch('http://192.168.0.4:8080/ffm/categories')
             .then(response => response.json())
             .then(data => {
 
@@ -234,7 +234,7 @@ export default function EditTransactionScreen({ navigation, route }) {
                 return;
             }
 
-            const response = await fetch(`http://192.168.0.10:8080/budgets`, {
+            const response = await fetch(`http://192.168.0.4:8080/budgets`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -265,7 +265,7 @@ export default function EditTransactionScreen({ navigation, route }) {
                 return;
             }
 
-            const response = await fetch(`http://192.168.0.10:8080/goals`, {
+            const response = await fetch(`http://192.168.0.4:8080/goals`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -296,7 +296,7 @@ export default function EditTransactionScreen({ navigation, route }) {
                 return;
             }
 
-            const response = await fetch('http://192.168.0.10:8080/banks', {
+            const response = await fetch('http://192.168.0.4:8080/banks', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -432,7 +432,7 @@ export default function EditTransactionScreen({ navigation, route }) {
             console.log('Selected Goal ID:', selectedGoal)
             console.log('Selected Budget ID:', selectedBudget)
 
-            const response = await fetch(`http://192.168.0.10:8080/transaction/${transactionID}`, {
+            const response = await fetch(`http://192.168.0.4:8080/transaction/${transactionID}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,

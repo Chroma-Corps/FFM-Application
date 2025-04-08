@@ -102,7 +102,7 @@ export default function CreateBudgetsScreen({ navigation }) {
       };
 
     useEffect(() => {
-        fetch('http://192.168.0.10:8080/ffm/categories')
+        fetch('http://192.168.0.4:8080/ffm/categories')
             .then(response => response.json())
             .then(data => {
 
@@ -328,7 +328,7 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
 
         try {
-            const response = await fetch(`http://192.168.0.10:8080/create-budget`, {
+            const response = await fetch(`http://192.168.0.4:8080/create-budget`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -371,7 +371,7 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('http://192.168.0.10:8080/banks', {
+          const response = await fetch('http://192.168.0.4:8080/banks', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,

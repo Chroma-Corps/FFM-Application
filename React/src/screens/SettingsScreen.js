@@ -18,7 +18,7 @@ export default function SettingsScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('http://192.168.0.10:8080/logout', {
+          const response = await fetch('http://192.168.0.4:8080/logout', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${token}`,

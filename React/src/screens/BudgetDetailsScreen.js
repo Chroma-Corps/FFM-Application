@@ -18,7 +18,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     useEffect(() => {
         const fetchBudgetDetails = async () => {
             try {
-                const response = await fetch(`http://192.168.0.10:8080/budget/${budgetID}`);
+                const response = await fetch(`http://192.168.0.4:8080/budget/${budgetID}`);
                 const data = await response.json();
                 if (response.ok) {
                     setBudgetDetails(data.budget);
@@ -35,7 +35,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
         const fetchBudgetTransactions = async () => {
             try {
-                const response = await fetch(`http://192.168.0.10:8080/budget/${budgetID}/transactions`);
+                const response = await fetch(`http://192.168.0.4:8080/budget/${budgetID}/transactions`);
                 const data = await response.json();
                 if (response.ok) {
                     setBudgetTransactions(data.transactions);
@@ -101,7 +101,9 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         <ProgressBar
                             startDate={budgetDetails.startDate}
                             endDate={budgetDetails.endDate}
-                            budgetColorTheme={budgetDetails.color || '#9ACBD0'}
+                            colorTheme={budgetDetails.color || '#9ACBD0'}
+                            amount={budgetDetails.budgetAmount} 
+                            remainingAmount={budgetDetails.remainingBudgetAmount}
                         />
 
                         <Text style={styles.categoryText}>

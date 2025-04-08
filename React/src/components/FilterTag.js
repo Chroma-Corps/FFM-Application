@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { theme } from '../core/theme';
 
-const FilterTag = ({ label, shape = "rectangular", onPress, isSelected }) => {
+const FilterTag = ({ label, shape = "rectangular", onPress, isSelected, style }) => {
 
     const getTagStyle = () => {
         if (label === "Savings" && isSelected) {
@@ -20,7 +20,8 @@ const FilterTag = ({ label, shape = "rectangular", onPress, isSelected }) => {
                 styles.tag,
                 isSelected && styles.selected,
                 shape === 'round' && styles.round,
-                getTagStyle()
+                getTagStyle(),
+                style
             ]}
             onPress={onPress}
         >
