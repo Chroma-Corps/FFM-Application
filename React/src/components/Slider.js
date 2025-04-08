@@ -5,7 +5,7 @@ import { theme } from '../core/theme';
 
 const Slider = ({ data, width, height }) => {
 
-    const footerHeight = height * 0.25;
+    const footerHeight = height * 0.20;
     const imageHeight = height - footerHeight;
 
     return (
@@ -26,7 +26,9 @@ const Slider = ({ data, width, height }) => {
                             resizeMode="cover"
                         />
                         <View style={[styles.footer, { height: footerHeight }]}>
-                            <Text style={styles.text}>{item.title}</Text>
+                            <View style={styles.textContainer}>
+                                <Text style={styles.text}>{item.title}</Text>
+                            </View>
 
                             {item.description ? (
                                 <Text style={styles.description}>{item.description}</Text>
@@ -61,6 +63,19 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         backgroundColor: theme.colors.primary,
+        position: 'relative',
+    },
+
+    textContainer: {
+        backgroundColor: '#2C2C2C',
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        top: -25,
+        zIndex: 1,
     },
 
     text: {
@@ -69,13 +84,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#FFFFFF',
         textAlign: 'center',
-        marginBottom: 4,
     },
+
     description: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 14,
         color: '#FFFFFF',
         textAlign: 'center',
+        marginTop: 8,
     },
 });
 

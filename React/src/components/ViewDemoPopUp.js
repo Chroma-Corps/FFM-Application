@@ -6,26 +6,44 @@ import { theme } from '../core/theme';
 
 const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
 
-    const [entries] = useState([
+    const [personalFeatures] = useState([
         {
-            title: 'Track Personal Expenses',
+            title: 'Analyze Spending & Income',
             color: '#6A4E23',
-            description: 'Keep tabs on every dollar you spend with ease. Whether it’s groceries, bills, or your daily coffee run — effortlessly log your expenses and take charge of your spending.',
-            image: require('../assets/default_img.jpg'),
+            description: 'Gain full control of your finances with insights into income, expenses, and spending trends effortlessly track where your money goes!',
+            image: require('../assets/bank_details_screen.jpeg'),
         },
         {
-            title: 'Set Your Budgets',
+            title: 'Set Personal Budgets',
             color: '#4682B4',
-            description: 'Build smart, flexible budgets tailored to your lifestyle. Plan for bills, savings, and fun without the guesswork — and stay on top of your goals month after month.',
+            description: 'Create custom budgets to manage bills, savings, and fun while tracking progress toward your goals with ease.',
             image: require('../assets/default_img.jpg'),
         },
         {
-            title: 'Track Financial Progress',
+            title: 'Set Shorterm Goals',
             color: '#8B4513',
-            description: 'Your personalized dashboard gives you a clear view of your financial health. Instantly see your balances, track how your budget is doing, and celebrate your financial wins, big or small.',
+            description: 'Set and track your short-term financial goals, no matter how small, and stay motivated as you achieve each milestone.',
             image: require('../assets/default_img.jpg'),
         },
     ]);
+
+
+    const [familyFeatures] = useState([
+        {
+            title: 'Set Collaborative Budgets',
+            color: '#6A4E23',
+            description: '. . . ',
+            image: require('../assets/default_img.jpg'),
+        },
+        {
+            title: 'Track Circle Acticivity',
+            color: '#4682B4',
+            description: '. . .',
+            image: require('../assets/default_img.jpg'),
+        },
+    ]);
+
+
 
     const imageSource = selectedCircleType === 'Self'
         ? require('../assets/maya_icon.png')
@@ -54,7 +72,7 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
 
                     <View style={styles.sliderContainer}>
                         <Slider
-                            data={entries}
+                            data={selectedCircleType === 'Self' ? personalFeatures : familyFeatures}
                             width={350}
                             height={500}
                         />
