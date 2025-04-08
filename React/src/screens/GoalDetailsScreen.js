@@ -64,6 +64,19 @@ export default function GoalDetailsScreen({ route, navigation }) {
         fetchGoalTransactions();
     }, [goalID]);
 
+    const totalTransactionAmount = goalTransactions.reduce((sum, txn) => {
+        let raw = txn.transactionAmount;
+      
+        if (typeof raw === "string") {
+          // Remove $ signs, commas, and trim whitespace
+          raw = raw.replace(/[^0-9.-]+/g, '').trim();
+        }
+      
+        const amount = parseFloat(raw);
+        return isNaN(amount) ? sum : sum + amount;
+      }, 0);
+    
+
     const formatDate = (dateString) => {
         if (!dateString) return "--";
     
@@ -82,6 +95,7 @@ export default function GoalDetailsScreen({ route, navigation }) {
         if (!goalDetails || !goalDetails.startDate || !goalDetails.endDate) return "--";
         return `${formatDate(goalDetails.startDate)} - ${formatDate(goalDetails.endDate)}`;
     };
+    
 
     if (loading) {
         return (
@@ -100,8 +114,9 @@ export default function GoalDetailsScreen({ route, navigation }) {
                 <Text style={styles.goalTitle}>{goalDetails?.goalTitle}</Text>
                 <View style={styles.goalAmountContainer}>
                     <Text style={styles.currentAmount}>
-                        {goalDetails?.bankCurrency} {goalDetails?.currentAmount || 0} 
+                        {(goalDetails?.bankCurrency || "$") + totalTransactionAmount.toFixed(2)}
                     </Text>
+
                     <Text style={styles.targetAmount}>
                         / {goalDetails?.bankCurrency} {goalDetails?.targetAmount}
                     </Text>
@@ -113,9 +128,10 @@ export default function GoalDetailsScreen({ route, navigation }) {
                 </View>
 
                 <View style={styles.graphContainer}>
+                
                     {goalDetails && goalDetails.currentAmount !== undefined && goalDetails.targetAmount !== undefined ? (
                         <DonutChart 
-                            currentAmount={goalDetails.currentAmount} 
+                            currentAmount={totalTransactionAmount} 
                             targetAmount={goalDetails.targetAmount} 
                             radius={150}
                             strokeWidth={40}
@@ -129,7 +145,7 @@ export default function GoalDetailsScreen({ route, navigation }) {
 
                 {/* Transactions Section */}
                 <View style={styles.transactionsContainer}>
-                    <Text style={styles.transactionsHeader}>Goal Transactions</Text>
+                    <Text style={styles.transactionsHeader}>Goal Transactions </Text>
                     {goalTransactions.length === 0 ? (
                         <Text style={styles.noTransactionsText}>No transactions recorded for this goal.</Text>
                     ) : (

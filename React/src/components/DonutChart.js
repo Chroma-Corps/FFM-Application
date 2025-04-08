@@ -17,7 +17,9 @@ export default function DonutChart({
     delay,
  }) 
  {
-    const progress = targetAmount > 0 ? Math.min((currentAmount / targetAmount) * 100, 100) : 100; // Cap at 100%
+    const progress = (targetAmount.replace(/[^0-9.-]+/g, '').trim()) > 0 
+    ? Math.min((currentAmount / (targetAmount.replace(/[^0-9.-]+/g, '').trim())) * 100, 100)
+    : 100; // Cap at 100%
     const animatedValue = React.useRef(new Animated.Value(0)).current;
     const halfCircle = radius + strokeWidth;
     const circumference = 2 * Math.PI * radius;
@@ -33,11 +35,12 @@ export default function DonutChart({
     };
 
     React.useEffect(() =>{
-        animation(progress);
+        animatedValue.setValue(0); // Reset
+        animation(progress)
                 
         animatedValue.addListener(v => {
             if (circleRef?.current) {
-                const strokeDashoffset = circumference - (progress / 100) * circumference;
+                const strokeDashoffset = circumference - (v.value / 100) * circumference;
                 circleRef.current.setNativeProps({
                     strokeDashoffset,
                 });
@@ -45,7 +48,7 @@ export default function DonutChart({
 
             if (inputRef?.current) {
                 inputRef.current.setNativeProps({
-                    text: `${Math.round(progress)}`,
+                    text: `${Math.round(v.value)}%`,
                 })
             }
         });
