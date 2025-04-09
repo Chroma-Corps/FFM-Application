@@ -24,44 +24,103 @@ const formatDate = (date) => {
     return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
 };
 
+const parseAndFormatDateString = (dateString) => {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        console.error("Could not parse date string:", dateString);
+        return '';
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
 const calculateEndDate = (startDate, duration, selectedPeriod) => {
     const periodsInDays = {
-        daily: 1,
-        weekly: 7,
-        monthly: 30,
-        yearly: 365
+        Daily: 1,
+        Weekly: 7,
+        Monthly: 30,
+        Yearly: 365
     };
 
     if (!startDate || !duration || !selectedPeriod) {
-        console.error("Missing required parameters.");
+        console.error("Missing required parameters for calculateEndDate.");
         return null;
     }
 
     const start = new Date(startDate);
 
     if (isNaN(start.getTime())) {
-        console.error("Invalid start date.");
+        console.error("Invalid start date for calculateEndDate.");
         return null;
     }
 
-    const periodInDays = periodsInDays[selectedPeriod.toLowerCase()];
+    const periodKey = selectedPeriod.charAt(0).toUpperCase() + selectedPeriod.slice(1).toLowerCase();
+    const periodInDays = periodsInDays[periodKey];
     if (typeof periodInDays === 'undefined') {
-        console.error("Invalid selected period.");
+        console.error("Invalid selected period for calculateEndDate:", selectedPeriod);
         return null;
     }
 
-    if (isNaN(duration)) {
-        console.error("Invalid duration");
+    const numDuration = parseInt(duration, 10);
+    if (isNaN(numDuration) || numDuration <= 0) {
+        console.error("Invalid duration for calculateEndDate:", duration);
         return null;
     }
 
-    const daysToAdd = duration * periodInDays;
+    const daysToAdd = numDuration * periodInDays;
 
-    start.setDate(start.getDate() + daysToAdd);
+    start.setDate(start.getDate() + daysToAdd - 1); // Subtract 1 because period includes start date
 
-    const formattedEndDate = start.toISOString().split('T')[0];  // Format to YYYY-MM-DD
+    const formattedEndDate = start.toISOString().split('T')[0];
     return formattedEndDate;
 };
+
+const calculateDurationAndPeriodFromDates = (startStr, endStr) => {
+    if (!startStr || !endStr) return null;
+
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || endDate < startDate) {
+        return null;
+    }
+
+    const diffInMs = endDate.getTime() - startDate.getTime();
+    const diffInDays = Math.round(diffInMs / (1000 * 60 * 60 * 24)) + 1; // Inclusive days
+
+    if (diffInDays <= 0) return null;
+
+    if (diffInDays >= 365 && diffInDays % 365 === 0) {
+        const years = diffInDays / 365;
+        if (years > 0) {
+            return { duration: years, period: 'Yearly' };
+        }
+    }
+
+    if (diffInDays >= 30 && diffInDays % 30 === 0) {
+        const months = diffInDays / 30;
+        if (months > 0) {
+            return { duration: months, period: 'Monthly' };
+        }
+    }
+
+    if (diffInDays >= 7 && diffInDays % 7 === 0) {
+        const weeks = diffInDays / 7;
+        if (weeks > 0) {
+            return { duration: weeks, period: 'Weekly' };
+        }
+    }
+
+    return { duration: diffInDays, period: 'Daily' };
+};
+
 
 
 export default function EditBudgetScreen({ navigation, route }) {
@@ -162,14 +221,34 @@ export default function EditBudgetScreen({ navigation, route }) {
                 const rawAmount = fetchedBudget.budgetAmount ? String(fetchedBudget.budgetAmount) : '';
                 const cleanedAmount = rawAmount.replace(/[^0-9.]/g, '');
 
+                const rawFetchedStartDate = fetchedBudget.startDate || '';
+                const rawFetchedEndDate = fetchedBudget.endDate || '';
+
+                const fetchedStartDate = parseAndFormatDateString(rawFetchedStartDate);
+                const fetchedEndDate = parseAndFormatDateString(rawFetchedEndDate);
+
                 setBudgetTitle(fetchedBudget.budgetTitle || '');
                 setBudgetAmount(cleanedAmount);
                 setBudgetType(fetchedBudget.budgetType ? fetchedBudget.budgetType.charAt(0).toUpperCase() + fetchedBudget.budgetType.slice(1).toLowerCase() : '');
                 setBudgetCategories(fetchedBudget.budgetCategory || []);
-                setStartDate(fetchedBudget.startDate || '');
-                setEndDate(fetchedBudget.endDate || '');
+                setStartDate(fetchedStartDate);
+                setEndDate(fetchedEndDate);
                 setSelectedBankID(fetchedBudget.bankID || null);
                 setBudgetScope(fetchedBudget.transactionScope ? fetchedBudget.transactionScope.charAt(0).toUpperCase() + fetchedBudget.transactionScope.slice(1).toLowerCase() : 'Inclusive');
+
+                if (fetchedStartDate && fetchedEndDate) {
+                    const derivedPeriod = calculateDurationAndPeriodFromDates(fetchedStartDate, fetchedEndDate);
+                    if (derivedPeriod) {
+                        setDuration(String(derivedPeriod.duration));
+                        setSelectedPeriod(derivedPeriod.period);
+                    } else {
+                        setDuration('');
+                        setSelectedPeriod(null);
+                    }
+                } else {
+                    setDuration('');
+                    setSelectedPeriod(null);
+                }
 
             } catch (fetchError) {
                 console.error("Error fetching initial data:", fetchError);
@@ -185,9 +264,12 @@ export default function EditBudgetScreen({ navigation, route }) {
 
     useEffect(() => {
         if (startDate && duration && selectedPeriod) {
-            const newEndDate = calculateEndDate(startDate, duration, selectedPeriod);
-            if (newEndDate) {
-                setEndDate(newEndDate);
+            const numDuration = parseInt(duration, 10);
+            if (!isNaN(numDuration) && numDuration > 0) {
+                const newEndDate = calculateEndDate(startDate, numDuration, selectedPeriod);
+                if (newEndDate && newEndDate !== endDate) {
+                    setEndDate(newEndDate);
+                }
             }
         }
     }, [startDate, duration, selectedPeriod]);
@@ -274,7 +356,6 @@ export default function EditBudgetScreen({ navigation, route }) {
             return;
         }
 
-
         if (!budgetTitle.trim() || !budgetAmount || !budgetType || !startDate || !endDate || !budgetScope) {
             Alert.alert('Validation Error', 'Please fill in all required fields (Title, Amount, Type, Dates, Scope).');
             return;
@@ -317,7 +398,7 @@ export default function EditBudgetScreen({ navigation, route }) {
 
             const responseData = await response.json();
 
-            if (response.ok) {
+            if (response.ok && responseData.status === 'success') {
                 Alert.alert('Success', responseData.message || 'Budget Updated Successfully');
                 navigation.navigate('BudgetDetails', { budgetID });
 
@@ -352,7 +433,6 @@ export default function EditBudgetScreen({ navigation, route }) {
                 <View style={styles.centeredMessageContainer}>
                     <Text style={styles.errorText}>Error Loading Data</Text>
                     <Text style={styles.errorDetailsText}>{error}</Text>
-                    {/* Optionally add a retry button here */}
                 </View>
             </InAppBackground>
         );
@@ -361,7 +441,7 @@ export default function EditBudgetScreen({ navigation, route }) {
     return (
         <View style={styles.editBudgetScreen}>
             <InAppBackground>
-                <BackButton goBack={navigation.goBack} />
+                <BackButton goBack={() => navigation.navigate('BudgetDetails', { budgetID })} />
 
                 {showPeriodPopup && (
                     <PeriodSelectionPopup
@@ -383,14 +463,12 @@ export default function EditBudgetScreen({ navigation, route }) {
                     <View style={styles.screenContainer}>
                         <View style={styles.headerContainer}>
                             <View style={styles.cardTitle}>
-                                {/* --- UI Change --- */}
                                 <InAppHeader>Edit Budget</InAppHeader>
                             </View>
                         </View>
 
                         <View style={styles.card}>
                             <View style={styles.cardTopHalfContainer}>
-                                {/* Title */}
                                 <TextInput
                                     placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                     placeholder="Enter Title"
@@ -411,7 +489,7 @@ export default function EditBudgetScreen({ navigation, route }) {
                                     <Text style={styles.slashText}>/</Text>
                                     <TextInput
                                         placeholderTextColor="rgba(255, 255, 255, 0.25)"
-                                        placeholder="0"
+                                        placeholder={duration || '0'}
                                         value={duration}
                                         onChangeText={(text) => setDuration(text.replace(/[^0-9]/g, ''))}
                                         style={[styles.input, styles.shortInput, styles.defaultText]}
@@ -425,7 +503,6 @@ export default function EditBudgetScreen({ navigation, route }) {
                                     </TouchableOpacity>
                                 </View>
 
-                                {/* Start Date */}
                                 <Text style={styles.defaultText}>Starting:</Text>
                                 <ButtonSmall
                                     label={formatDateForDisplay(startDate)}
@@ -434,14 +511,12 @@ export default function EditBudgetScreen({ navigation, route }) {
                                     style={styles.dateButton}
                                 />
 
-                                {/* Date Range Display */}
                                 <Text style={[styles.defaultText, { marginTop: 35 }]}>Budget Period</Text>
                                 <Text style={[styles.defaultText, { fontSize: 16, color: theme.colors.primary }]}>
                                     {displayBudgetPeriod()}
                                 </Text>
                             </View>
 
-                            {/* Budget Type Filter */}
                             <View style={styles.filterTagsContainer}>
                                 <FilterTag
                                     label="Savings"
@@ -455,7 +530,6 @@ export default function EditBudgetScreen({ navigation, route }) {
                                 />
                             </View>
 
-                            {/* Budget Scope Filter */}
                             <View style={styles.filterTagsContainer}>
                                 <FilterTag
                                     label="Inclusive"
@@ -472,7 +546,6 @@ export default function EditBudgetScreen({ navigation, route }) {
 
                         <View style={[styles.cardBottomHalfContainer, budgetScope !== 'Inclusive' && styles.disabledSection]}>
                             <View style={styles.budgetPropertiesContainer}>
-                                {/* Bank Selection */}
                                 <Text style={styles.defaultText}>Select Bank:</Text>
                                 {banks.length === 0 && !isLoading ? (
                                     <Text style={styles.infoText}>No Bank Accounts Found</Text>
@@ -506,7 +579,6 @@ export default function EditBudgetScreen({ navigation, route }) {
                     </View>
                 </ScrollView>
 
-                {/* Update Button Area */}
                 <View style={styles.buttonContainer}>
                     <Button
                         mode="contained"
@@ -514,7 +586,6 @@ export default function EditBudgetScreen({ navigation, route }) {
                         style={styles.buttonStyle}
                         disabled={isSubmitting}
                     >
-
                         {isSubmitting ? 'Updating...' : 'Update Budget'}
                     </Button>
                 </View>

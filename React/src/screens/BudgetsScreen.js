@@ -109,7 +109,7 @@ export default function BudgetsScreen({ navigation }) {
 
     return (
       <TouchableOpacity
-        onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
+        onPress={() => navigation.navigate('BudgetDetails', { budgetID: item.budgetID })}
       >
         <Card style={[styles.card, { borderColor: budgetColorTheme }]}>
           <View style={styles.cardContentContainer}>

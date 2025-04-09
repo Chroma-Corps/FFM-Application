@@ -15,33 +15,31 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
     useFocusEffect(
         useCallback(() => {
-            // Define the async function to fetch all data
+
             const fetchData = async () => {
-                // Set loading to true each time the screen focuses
+
                 setLoading(true);
                 try {
-                    // Use Promise.all to fetch details and transactions concurrently
+                    // Using Promise.all in order to fetch details and transactions concurrently
                     const [detailsResponse, transactionsResponse] = await Promise.all([
                         fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`),
                         fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`)
                     ]);
 
-                    // Process details
                     const detailsData = await detailsResponse.json();
                     if (detailsResponse.ok) {
                         setBudgetDetails(detailsData.budget);
                     } else {
                         console.error("Failed to fetch budget details:", detailsData.message);
-                        setBudgetDetails(null); // Clear or set error state if needed
+                        setBudgetDetails(null);
                     }
 
-                    // Process transactions
                     const transactionsData = await transactionsResponse.json();
                     if (transactionsResponse.ok) {
                         setBudgetTransactions(transactionsData.transactions);
                     } else {
                         console.error("Failed to fetch budget transactions:", transactionsData.message);
-                        setBudgetTransactions([]); // Clear or set error state if needed
+                        setBudgetTransactions([]);
                     }
 
                     console.log('Fetch Budget Status:', detailsData.status);
@@ -49,24 +47,18 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
                 } catch (error) {
                     console.error('Error fetching budget data:', error);
-                    // Optionally set an error state here to show feedback to the user
+
                     setBudgetDetails(null);
                     setBudgetTransactions([]);
                 } finally {
-                    // Always set loading to false after fetching (or error)
+
                     setLoading(false);
                 }
             };
 
-            // Call the function to fetch data when the screen is focused
             fetchData();
 
-            // Optional: Return a cleanup function if needed
-            // return () => {
-            //   console.log('BudgetDetailsScreen unfocused');
-            // };
-
-        }, [budgetID]) // Dependency array, refetch if budgetID changes
+        }, [budgetID])
     );
 
     if (loading) {
@@ -101,7 +93,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             <InAppBackground>
-                <BackButton goBack={navigation.goBack} />
+                <BackButton goBack={() => navigation.goBack()} />
 
                 <EditButton
                     navigateTo="EditBudgetScreen"
@@ -133,7 +125,6 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                 </View>
 
                 <View style={styles.graphContainer}>
-                    {/* <CircleGraph transactions={budgetDetails.transactions} /> */}
                     <View style={styles.graphKey}>
                         <Text style={styles.descriptionText}>Graph Key Goes Here</Text>
                     </View>
@@ -215,7 +206,6 @@ const styles = StyleSheet.create({
     },
 
     graphContainer: {
-        // flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,
