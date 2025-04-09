@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput, Keyboard } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
-import { Image } from 'react-native';
+import { Image, Alert } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import InAppHeader from '../components/InAppHeader';
 import { theme } from '../core/theme';
@@ -13,6 +13,7 @@ import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
 import ProgressBar from '../components/ProgressBar';
 import RadialMenu from '../components/RadialMenu';
+import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function BudgetsScreen({ navigation }) {
   const filters = ['All', 'Savings', 'Expense'];
@@ -21,11 +22,16 @@ export default function BudgetsScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [filteredBudgets, setFilteredBudgets] = useState([]);
 
   const handleSearchPress = () => { 
     setIsSearchMode(!isSearchMode);
   };
+
+  const handleEditPress = () => {
+    setIsEditMode(!isEditMode);
+  }
 
   const handleFilterPress = (filter) => { 
     setSelectedFilter(filter);
@@ -43,8 +49,65 @@ export default function BudgetsScreen({ navigation }) {
   const handleResetPress = () => {
     setSearchQuery("");
     setIsSearchMode(false);
+    setIsEditMode(false);
     setSelectedFilter(selectedFilter);
   }
+
+  const handleReorder = async ({ data }) => {
+      setFilteredBudgets(data);
+  };
+
+  const handleDeleteBudget = (budgetID) => {
+    Alert.alert(
+      "Are You Sure?",
+      "This Action Cannot Be Undone",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete", 
+          onPress: () => deleteBudget(budgetID),
+          style: "destructive"
+        }
+      ]
+    );
+  };
+
+  const deleteBudget = async (budgetID) => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem("access_token");
+
+      if (!token) {
+        console.error('No Token Found');
+        return;
+      }
+
+      const response = await fetch(`http://192.168.0.4:8080/budget/${budgetID}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(data.message)
+        setData(prevBudgets => prevBudgets.filter(budget => budget.budgetID !== budgetID));
+      } else {
+        console.error(data.message);
+      }
+      console.log('Delete Budget Status:', data.status)
+    } catch (error) {
+      console.error('Error Fetching Budgets:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -120,6 +183,36 @@ export default function BudgetsScreen({ navigation }) {
     setFilteredBudgets([...filtered].reverse());
   };
 
+  const renderReorderedBudgets = (({ item, drag }) => {
+    const budgetColorTheme = item.color || '#9ACBD0';
+    return (
+      <Card style={[styles.card, { borderColor: budgetColorTheme }]}>
+        <View style={styles.cardContentContainer}>
+          <View style={[styles.colorStrip, { backgroundColor: budgetColorTheme }]} />
+          <View style={styles.cardContentEditMode}>
+            <View>
+              <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
+              <Text style={styles.insightsTextEditMode}>
+                {item.budgetType} - {item.transactionScope}
+              </Text>
+            </View>
+            <View style={styles.editModeIcons}>
+              <TouchableOpacity onPress={null}>
+                <MaterialIcons name={"edit"} size={25} color={"white"} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleDeleteBudget(item.budgetID)}>
+                <MaterialIcons name={"delete"} size={25} color={"white"} />
+              </TouchableOpacity>
+              <TouchableOpacity onLongPress={drag}>
+                <MaterialIcons name={"reorder"} size={25} color={"white"} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Card>
+    );
+  });
+
   const renderData = (item) => {
     const budgetColorTheme = item.color || '#9ACBD0';
 
@@ -164,40 +257,40 @@ export default function BudgetsScreen({ navigation }) {
       <TouchableOpacity
         onPress={() => navigation.push('BudgetDetails', { budgetID: item.budgetID })}
       >
-        <Card style={[styles.card, { borderColor: budgetColorTheme }]}>
-          <View style={styles.cardContentContainer}>
-            <View style={[styles.colorStrip, { backgroundColor: budgetColorTheme }]} />
+          <Card style={[styles.card, { borderColor: budgetColorTheme }]}>
+            <View style={styles.cardContentContainer}>
+              <View style={[styles.colorStrip, { backgroundColor: budgetColorTheme }]} />
 
-            <View style={styles.cardContent}>
-              <View style={styles.cardHeaderContainer}>
-                <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
-                <View>
-                  {item.budgetCategory ? (
-                    renderCategories(item.budgetCategory)
-                  ) : (
-                    <Text>None</Text>
-                  )}
+              <View style={styles.cardContent}>
+                <View style={styles.cardHeaderContainer}>
+                  <Text style={styles.cardTitle}>{item.budgetTitle}</Text>
+                  <View>
+                    {item.budgetCategory ? (
+                      renderCategories(item.budgetCategory)
+                    ) : (
+                      <Text>None</Text>
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.cardDetailsContainer}>
+                  <Text style={styles.cardText}>
+                    <Text style={styles.remainingBudgetAmountText}>{item.remainingBudgetAmount} </Text>
+                    left of {item.budgetAmount}
+                  </Text>
+
+                  <ProgressBar
+                    startDate={item.startDate}
+                    endDate={item.endDate}
+                    colorTheme={budgetColorTheme}
+                    amount={item.budgetAmount} 
+                    remainingAmount={item.remainingBudgetAmount}
+                  />
                 </View>
               </View>
-
-              <View style={styles.cardDetailsContainer}>
-                <Text style={styles.cardText}>
-                  <Text style={styles.remainingBudgetAmountText}>{item.remainingBudgetAmount} </Text>
-                  left of {item.budgetAmount}
-                </Text>
-
-                <ProgressBar
-                  startDate={item.startDate}
-                  endDate={item.endDate}
-                  colorTheme={budgetColorTheme}
-                  amount={item.budgetAmount} 
-                  remainingAmount={item.remainingBudgetAmount}
-                />
-              </View>
             </View>
-          </View>
-          <Text style={styles.insightsText}>{item.budgetType} - {item.transactionScope}</Text>
-        </Card>
+            <Text style={styles.insightsText}>{item.budgetType} - {item.transactionScope}</Text>
+          </Card>
       </TouchableOpacity>
     );
   };
@@ -226,7 +319,7 @@ export default function BudgetsScreen({ navigation }) {
             <TouchableOpacity onPress={handleSearchPress}>
               <MaterialIcons name={"search"} size={26} color={"white"}/>
             </TouchableOpacity>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleEditPress}>
               <MaterialIcons name={"edit"} size={26} color={"white"}/>
             </TouchableOpacity>
           </View>
@@ -254,14 +347,21 @@ export default function BudgetsScreen({ navigation }) {
 
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
-        ) : filteredBudgets.length === 0 ? (
-          <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
-        ) : (
-          <FlatList
-            data={filteredBudgets}
-            renderItem={({ item }) => renderData(item)}
-            keyExtractor={item => `${item.budgetID}`}
-          />
+          ) : filteredBudgets.length === 0 ? (
+            <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
+          ) : isEditMode ? (
+              <DraggableFlatList
+                data={filteredBudgets}
+                keyExtractor={(item) => `${item.budgetID}`}
+                onDragEnd={handleReorder}
+                renderItem={renderReorderedBudgets}
+              />
+          ) : (
+            <FlatList
+              data={filteredBudgets}
+              renderItem={({ item }) => renderData(item)}
+              keyExtractor={(item) => `${item.budgetID}`}
+            />
         )}
         <RadialMenu navigation={navigation} />
       </InAppBackground>
@@ -345,6 +445,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  cardContentEditMode: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+
   colorStrip: {
     width: 10,
     height: '100%',
@@ -397,4 +503,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: theme.fonts.medium.fontFamily,
   },
+
+  insightsTextEditMode: {
+    flexWrap: 'wrap',
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: theme.fonts.medium.fontFamily,
+  },
+
+  editModeIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  }
 });
