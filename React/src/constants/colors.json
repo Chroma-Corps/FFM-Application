@@ -1,0 +1,74 @@
+{
+    "teal": {
+        "name": "Teal",
+        "hex": "#48A6A7",
+        "rgb": "rgb(72, 166, 167)",
+        "description": "A vibrant teal with a cool, refreshing feel"
+    },
+    "soft_teal": {
+        "name": "Soft Teal",
+        "hex": "#9ACBD0",
+        "rgb": "rgb(154, 203, 208)",
+        "description": "A calm and soft teal, offering a refreshing yet subdued feel"
+    },
+    "coffee": {
+        "name": "Coffee",
+        "hex": "#6F4F37",
+        "rgb": "rgb(111, 79, 55)",
+        "description": "A rich, warm coffee brown"
+    },
+    "soft_blue": {
+        "name": "Soft Blue",
+        "hex": "#A8D0E6",
+        "rgb": "rgb(168, 208, 230)",
+        "description": "A soft, pastel blue that is easy on the eyes"
+    },
+    "dusty_rose": {
+        "name": "Dusty Rose",
+        "hex": "#D8A7B1",
+        "rgb": "rgb(216, 167, 177)",
+        "description": "A muted rose tone with a hint of gray"
+    },
+    "earthy_green": {
+        "name": "Earthy Green",
+        "hex": "#4B7F52",
+        "rgb": "rgb(75, 127, 82)",
+        "description": "A grounded, natural green"
+    },
+    "lavender_mist": {
+        "name": "Lavender Mist",
+        "hex": "#E6DAF7",
+        "rgb": "rgb(230, 218, 247)",
+        "description": "A delicate, light lavender with a misty feel"
+    },
+    "muted_peach": {
+        "name": "Muted Peach",
+        "hex": "#F4C4A1",
+        "rgb": "rgb(244, 196, 161)",
+        "description": "A soft, warm peach tone"
+    },
+    "misty_grey": {
+        "name": "Misty Grey",
+        "hex": "#B0B0B0",
+        "rgb": "rgb(176, 176, 176)",
+        "description": "A calm, neutral grey"
+    },
+    "serene_blue": {
+        "name": "Serene Blue",
+        "hex": "#A4C8E3",
+        "rgb": "rgb(164, 200, 227)",
+        "description": "A peaceful, serene light blue"
+    },
+    "warm_sand": {
+        "name": "Warm Sand",
+        "hex": "#D4B69D",
+        "rgb": "rgb(212, 182, 157)",
+        "description": "A sandy beige with a warm undertone"
+    },
+    "soft_mint": {
+        "name": "Soft Mint",
+        "hex": "#AEE6D3",
+        "rgb": "rgb(174, 230, 211)",
+        "description": "A refreshing, soft mint green"
+    }
+}

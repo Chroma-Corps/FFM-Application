@@ -15,6 +15,7 @@ import {
   BudgetsScreen,
   BudgetDetailsScreen,
   CreateBudgetScreen,
+  CreateBankScreen,
   AddTransactionScreen,
   TransactionsScreen,
   UpdateTransactionScreen,
@@ -64,6 +65,7 @@ export default function App() {
             <Stack.Screen name="Goals" component={GoalsScreen} />
             <Stack.Screen name="Transactions" component={TransactionsScreen} />
 
+            <Stack.Screen name="CreateBank" component={CreateBankScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
             <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
@@ -71,6 +73,7 @@ export default function App() {
 
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
             <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
+
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
             <Stack.Screen name="Settings" component={SettingsScreen} />

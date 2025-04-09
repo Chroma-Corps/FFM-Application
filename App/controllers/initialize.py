@@ -30,7 +30,6 @@ def initialize():
     )
 
     set_active_circle(bob.id, bobberson_circle.circleID)
-    set_active_circle(jalene.id, bobberson_circle.circleID)
     set_active_circle(alice.id, bobberson_circle.circleID)
 
     # Bank - Bobberson
@@ -41,7 +40,6 @@ def initialize():
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[alice.id, jalene.id],
-        circleID=bobberson_circle.circleID
     )
 
     # Goal
@@ -181,7 +179,7 @@ def initialize():
     )
 
     add_transaction (
-        userID=jalene.id,
+        userID=alice.id,
         transactionTitle="Vacay Progress",
         transactionDesc="Saved a sum of money to contribute towards vacation plans",
         transactionType=TransactionType.INCOME,
@@ -206,6 +204,8 @@ def initialize():
         userIDs=[rynnia.id, tamia.id]
     )
 
+    set_active_circle(jalene.id, chroma_circle.circleID)
+
     # Bank - Chroma Corps
     create_bank (
         userID=jalene.id,
@@ -214,7 +214,6 @@ def initialize():
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[rynnia.id, tamia.id],
-        circleID=chroma_circle.circleID
     )
 
     set_active_circle(rynnia.id, chroma_circle.circleID)
@@ -247,6 +246,8 @@ def initialize():
         circleImage="https://picsum.photos/id/65/300/300.jpg"
     )
 
+    set_active_circle(jalene.id, jalene_self.circleID)
+
     # Bank - Jalene
     create_bank (
         userID=jalene.id,
@@ -255,5 +256,6 @@ def initialize():
         bankAmount=100.00,
         isPrimary=True,
         userIDs=[],
-        circleID=jalene_self.circleID
     )
+
+    set_active_circle(jalene.id, bobberson_circle.circleID)
