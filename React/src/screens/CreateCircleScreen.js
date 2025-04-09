@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
+import {
+  ScrollView, View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image, Modal
+} from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
@@ -7,14 +9,17 @@ import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import ColorPicker from 'react-native-wheel-color-picker';
 
 export default function CreateCircleScreen({ navigation }) {
   const [circleName, setCircleName] = useState('');
   const [circleType, setCircleType] = useState('Self');
   const [circleColor, setCircleColor] = useState('#9ACBD0');
   const [circleImage, setCircleImage] = useState(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [tempColor, setTempColor] = useState(circleColor);
 
-  const colors = ['#9ACBD0', '#F28D8D', '#FFD700', '#48A6A7', '#B980F0'];
+  const presetColors = ['#9ACBD0', '#F28D8D', '#FFD700', '#48A6A7', '#B980F0'];
 
   const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -30,7 +35,6 @@ export default function CreateCircleScreen({ navigation }) {
 
   const createCircle = async () => {
     const token = await AsyncStorage.getItem('access_token');
-
     if (!token) return Alert.alert('Error', 'No access token found');
 
     if (!circleName || !circleType || !circleColor || !circleImage) {
@@ -73,7 +77,10 @@ export default function CreateCircleScreen({ navigation }) {
 
         <ScrollView contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}>
           <View style={styles.headerContainer}>
-            <InAppHeader>New Circle</InAppHeader>
+            <View style={{alignSelf: 'center'}}>
+              <InAppHeader >New Circle</InAppHeader>
+            </View>
+            
 
             <TextInput
               placeholder="Circle Name"
@@ -106,15 +113,32 @@ export default function CreateCircleScreen({ navigation }) {
               ))}
             </View>
 
-            <Text style={styles.label}>Choose Color:</Text>
+            <Text style={styles.label}>Choose Colour:</Text>
             <View style={styles.colorPalette}>
-              {colors.map((color) => (
+              {presetColors.map((color) => (
                 <TouchableOpacity
                   key={color}
-                  style={[styles.colorCircle, { backgroundColor: color }, circleColor === color && styles.selectedCircle]}
+                  style={[
+                    styles.colorCircle,
+                    { backgroundColor: color },
+                    circleColor === color && styles.selectedCircle,
+                  ]}
                   onPress={() => setCircleColor(color)}
                 />
               ))}
+              <TouchableOpacity onPress={() => {
+                setTempColor(circleColor);
+                setShowColorPicker(true);
+              }}>
+                <View style={[styles.colorCircle, styles.plusCircle]}>
+                  <Text style={styles.plusText}>+</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.label}>Current Colour:</Text>
+            <View style={[styles.colorPreview, { backgroundColor: circleColor }]}>
+              <Text style={styles.hexPreview}>{circleColor}</Text>
             </View>
 
             <Text style={styles.label}>Select Circle Image:</Text>
@@ -133,18 +157,61 @@ export default function CreateCircleScreen({ navigation }) {
             Create Circle
           </Button>
         </View>
+
+        {/* Modal for Custom Color Picker */}
+        <Modal visible={showColorPicker} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.label}>Pick a Custom Colour</Text>
+              <ColorPicker
+                color={tempColor}
+                swatches={false}
+                onColorChange={setTempColor}
+                onColorChangeComplete={(c) => setTempColor(c)}
+                thumbSize={30}
+                sliderSize={20}
+                noSnap
+                row={false}
+                style={{ width: 200, height: 200 }}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Hex code"
+                placeholderTextColor="#aaa"
+                value={tempColor}
+                onChangeText={(text) => setTempColor(text)}
+              />
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
+                <Button
+                  mode="outlined"
+                  onPress={() => setShowColorPicker(false)}
+                  style={{ width: '45%' }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={() => {
+                    setCircleColor(tempColor);
+                    setShowColorPicker(false);
+                  }}
+                  style={{ width: '45%' }}
+                >
+                  Select
+                </Button>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </InAppBackground>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  createCircleScreen: {
-    flex: 1,
-    justifyContent: 'flex-start',
-  },
-  headerContainer: {
-    paddingHorizontal: 20,
+  createCircleScreen: { flex: 1 },
+  headerContainer: { 
+    paddingHorizontal: 20, 
     gap: 15,
   },
   input: {
@@ -159,6 +226,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.textSecondary,
     fontFamily: theme.fonts.bold.fontFamily,
+    marginTop: 10,
   },
   typeSelector: {
     flexDirection: 'row',
@@ -186,6 +254,18 @@ const styles = StyleSheet.create({
   selectedCircle: {
     borderColor: theme.colors.secondary,
   },
+  plusCircle: {
+    backgroundColor: '#2a2a2a',
+    borderColor: '#888',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  plusText: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
   imagePicker: {
     marginTop: 10,
     alignSelf: 'center',
@@ -207,5 +287,28 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     padding: 10,
+  },
+  colorPreview: {
+    height: 50,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  hexPreview: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: '#000000aa',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: '#2a2a2a',
+    padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
   },
 });
