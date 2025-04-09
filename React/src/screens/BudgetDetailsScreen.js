@@ -46,9 +46,15 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
     const setDefaultChart = (message) => {
         const defaultColor = theme.colors.disabled || '#CCCCCC';
+        const isNoTransactionMessage = message.includes('No Spending') || message.includes('No Budget Data') || message.includes('No transactions');
+
         setChartData({
             series: [{ value: 1, color: defaultColor }],
-            keyData: [{ name: message, color: defaultColor, image: categoryImages.default }]
+            keyData: [{
+                name: isNoTransactionMessage ? "No Associated Transactions" : message,
+                color: defaultColor,
+                image: isNoTransactionMessage ? null : categoryImages.default
+            }]
         });
     };
 
@@ -97,70 +103,92 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     }, [budgetID, categoryColorMap]);
 
     useEffect(() => {
-        if (budgetTransactions.length > 0 && budgetDetails?.budgetCategory?.length > 0) {
-            const categorySpending = budgetDetails.budgetCategory.reduce((acc, category) => {
-                acc[category.toLowerCase()] = 0;
-                return acc;
-            }, {});
+        if (!budgetDetails || !budgetDetails.transactionScope || !budgetTransactions) {
+            setDefaultChart('Loading Budget Data...');
+            return;
+        }
 
-            budgetTransactions.forEach(tx => {
-                const { amount } = parseTransactionAmount(tx.transactionAmount);
-                if (Array.isArray(tx.transactionCategory)) {
-                    tx.transactionCategory.forEach(txCat => {
-                        const key = txCat.toLowerCase();
-                        if (categorySpending.hasOwnProperty(key)) {
-                            categorySpending[key] += amount;
-                        }
+        let categorySpending = {};
+        const seriesWithObjects = [];
+        const keyData = [];
+        let hasSpending = false;
+        const scope = budgetDetails.transactionScope.toUpperCase();
+
+        if (scope === 'INCLUSIVE') {
+            if (budgetDetails.budgetCategory && budgetDetails.budgetCategory.length > 0) {
+                budgetDetails.budgetCategory.forEach(category => {
+                    categorySpending[category.toLowerCase()] = 0;
+                });
+
+                budgetTransactions.forEach(transaction => {
+                    const { amount } = parseTransactionAmount(transaction.transactionAmount);
+                    if (Array.isArray(transaction.transactionCategory)) {
+                        transaction.transactionCategory.forEach(category => {
+                            const key = category.toLowerCase();
+                            if (categorySpending.hasOwnProperty(key)) {
+                                categorySpending[key] += amount;
+                                if (amount > 0) hasSpending = true;
+                            }
+                        });
+                    }
+                });
+
+                budgetDetails.budgetCategory.forEach(categoryName => {
+                    const key = categoryName.toLowerCase();
+                    const spending = categorySpending[key];
+                    if (spending > 0) {
+                        const color = getCategoryColor(key);
+                        seriesWithObjects.push({ value: spending, color });
+                        const imageKey = categoryImages[key] ? key : 'default';
+                        keyData.push({
+                            name: categoryName,
+                            color,
+                            image: categoryImages[imageKey]
+                        });
+                    }
+                });
+            }
+
+        } else if (scope === 'EXCLUSIVE') {
+            budgetTransactions.forEach(transaction => {
+                const { amount } = parseTransactionAmount(transaction.transactionAmount);
+                if (amount > 0) {
+                    hasSpending = true;
+                    let categories = transaction.transactionCategory;
+                    if (!Array.isArray(categories) || categories.length === 0) {
+                        categories = ['Uncategorized'];
+                    }
+
+                    categories.forEach(category => {
+                        const key = category.toLowerCase();
+                        categorySpending[key] = (categorySpending[key] || 0) + amount;
                     });
                 }
             });
 
-            const seriesWithObjects = [];
-            const keyData = [];
-            let hasSpending = false;
-
-            budgetDetails.budgetCategory.forEach(categoryName => {
-                const key = categoryName.toLowerCase();
-                const spending = categorySpending[key];
+            Object.entries(categorySpending).forEach(([categoryKey, spending]) => {
                 if (spending > 0) {
-                    hasSpending = true;
-                    const color = getCategoryColor(key);
+                    const color = getCategoryColor(categoryKey);
                     seriesWithObjects.push({ value: spending, color });
-
-                    const imageKey = categoryImages[key] ? key : 'default';
+                    const displayName = categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
+                    const imageKey = categoryImages[categoryKey] ? categoryKey : 'default';
                     keyData.push({
-                        name: categoryName,
+                        name: displayName,
                         color,
                         image: categoryImages[imageKey]
                     });
                 }
             });
+        }
 
-            if (seriesWithObjects.length === 0) {
-                let nonBudgetedSpending = 0;
-                budgetTransactions.forEach(tx => {
-                    const { amount } = parseTransactionAmount(tx.transactionAmount);
-                    const inBudgetCategory = Array.isArray(tx.transactionCategory) &&
-                        tx.transactionCategory.some(txCat =>
-                            budgetDetails.budgetCategory.includes(txCat)
-                        );
-                    if (!inBudgetCategory) {
-                        nonBudgetedSpending += amount;
-                    }
-                });
-
-                hasSpending = nonBudgetedSpending > 0;
-            }
-
-            if (seriesWithObjects.length === 0) {
-                setDefaultChart(hasSpending ? 'Spending Outside Budget Categories' : 'No Spending Recorded Yet');
-            } else {
-                setChartData({ series: seriesWithObjects, keyData });
-            }
+        if (seriesWithObjects.length === 0) {
+            setDefaultChart(hasSpending ? 'Spending Outside Scope' : 'No Spending Recorded Yet');
         } else {
-            setDefaultChart('No Budget Data Available');
+            keyData.sort((a, b) => a.name.localeCompare(b.name));
+            setChartData({ series: seriesWithObjects, keyData });
         }
     }, [budgetTransactions, budgetDetails, getCategoryColor]);
+
 
     if (loading) {
         return (
@@ -265,12 +293,10 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                                 endDate={budgetDetails.endDate}
                                 budgetColorTheme={theme.colors.secondary}
                             />
-                            <Text style={[
-                                styles.categoryText,
-                                {
-                                    backgroundColor:
-                                        budgetDetails.budgetType === 'EXPENSE' ? '#81C784' : '#E57373'
-                                }
+                            <Text style={[styles.categoryText,
+                            {
+                                backgroundColor: (budgetDetails.budgetType || '').toUpperCase() === 'EXPENSE' ? '#E57373' : '#81C784'
+                            }
                             ]}>
                                 {budgetDetails.budgetType ?? 'Type N/A'} Budget
                             </Text>
@@ -279,7 +305,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     </View>
 
                     <View style={styles.chartSectionContainer}>
-                        <Text style={[styles.descriptionText, styles.sectionTitle]}>Spending by Category</Text>
+                        <Text style={[styles.descriptionText, styles.sectionTitle]}>Budget Activity</Text>
                         <View style={styles.chartAndKeyWrapper}>
                             <View style={styles.chartContainer}>
                                 <DonutChart
@@ -307,7 +333,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         </Text>
                         <View style={styles.transactionsList}>
                             {budgetTransactions.length > 0 ? (
-                                budgetTransactions.map(item => renderTransaction({ item }))
+                                budgetTransactions.map(item => renderTransaction({ item, key: item.id }))
                             ) : (
                                 <Text style={[styles.descriptionText, { textAlign: 'center', marginTop: 20 }]}>
                                     No transactions recorded for this budget yet.
@@ -374,11 +400,11 @@ const styles = StyleSheet.create({
     },
     amountText: {
         fontSize: 15,
-        color: theme.colors.textSecondary,
+        color: theme.colors.secondary,
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'left',
         paddingTop: 8,
-        marginBottom: 10,
+        marginBottom: 5,
     },
     amountTextBold: {
         fontFamily: theme.fonts.bold.fontFamily,
