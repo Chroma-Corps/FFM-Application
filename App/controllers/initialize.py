@@ -54,7 +54,7 @@ def initialize():
     )
 
     create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=bobberson_bank.bankID,
         budgetTitle="Violet Budget",
         budgetAmount=1000.00,
@@ -68,7 +68,7 @@ def initialize():
     )
 
     create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=bobberson_bank.bankID,
         budgetTitle="Indigo Budget",
         budgetAmount=1000.00,
@@ -82,7 +82,7 @@ def initialize():
     )
 
     create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=None,
         budgetTitle="Blue Budget",
         budgetAmount=1000.00,
@@ -96,7 +96,7 @@ def initialize():
     )
 
     create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=bobberson_bank.bankID,
         budgetTitle="Green Budget",
         budgetAmount=1000.00,
@@ -110,7 +110,7 @@ def initialize():
     )
 
     create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=None,
         budgetTitle="Yellow Budget",
         budgetAmount=1000.00,
@@ -124,7 +124,7 @@ def initialize():
     )
 
     exclusive_budget = create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=None,
         budgetTitle="Orange Budget",
         budgetAmount=1000.00,
@@ -138,7 +138,7 @@ def initialize():
     )
 
     create_budget (
-        userID=jalene.id,
+        userID=bob.id,
         bankID=bobberson_bank.bankID,
         budgetTitle="Red Budget",
         budgetAmount=1000.00,

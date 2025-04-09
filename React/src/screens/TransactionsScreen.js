@@ -75,7 +75,7 @@ export default function TransactionsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.9:8080/transactions`, {
+      const response = await fetch(`http://192.168.0.4:8080/transactions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -8,7 +8,7 @@ import { Image, Alert } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import InAppHeader from '../components/InAppHeader';
 import { theme } from '../core/theme';
-import { MaterialIcons } from '@expo/vector-icons'
+import { MaterialIcons } from '@expo/vector-icons';
 import NotificationBell from '../components/NotificationButton';
 import FilterTag from '../components/FilterTag';
 import ProgressBar from '../components/ProgressBar';
@@ -110,6 +110,7 @@ export default function BudgetsScreen({ navigation }) {
   };
 
   const fetchData = async () => {
+    setData([]);
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem("access_token");
@@ -131,6 +132,7 @@ export default function BudgetsScreen({ navigation }) {
 
       if (response.ok) {
         setData(data.budgets);
+        // console.log(data.budgets);
       } else {
         console.error(data.message);
       }
@@ -149,14 +151,12 @@ export default function BudgetsScreen({ navigation }) {
   );
 
   useEffect(() => {
-    if (data.length > 0) {
       filterBudgets();
-    }
   }, [searchQuery, selectedFilter, data]);
 
   // Filter Budgets Based On 1) Title, OR 2) Category
   const filterBudgets = () => {
-    if (data.length === 0) return;
+    if (!data) return;
     let filtered = selectedFilter === 'All' ? data : data.filter((budget) => budget.budgetType === selectedFilter);
     const cleanedSearchQuery = searchQuery.trim();
   
@@ -176,7 +176,6 @@ export default function BudgetsScreen({ navigation }) {
         const matchesSearch =
           budgetTitle.toLowerCase().includes(cleanedSearchQuery.toLowerCase()) ||
           categoryMatch;
-        console.log('Matches Search:', matchesSearch);
         return matchesSearch
       });
     }
@@ -347,15 +346,23 @@ export default function BudgetsScreen({ navigation }) {
 
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          ) : filteredBudgets.length === 0 ? (
-            <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
+          ) : data.length === 0 ? (
+            <View>
+              <Image
+                style={styles.image}
+                source={require('../assets/empty.png')}
+              />
+              <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
+            </View>
           ) : isEditMode ? (
+            <View style={{ flex: 1 }}>
               <DraggableFlatList
                 data={filteredBudgets}
                 keyExtractor={(item) => `${item.budgetID}`}
                 onDragEnd={handleReorder}
                 renderItem={renderReorderedBudgets}
               />
+            </View>
           ) : (
             <FlatList
               data={filteredBudgets}
@@ -380,7 +387,13 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     lineHeight: 21,
     textAlign: 'center',
-    paddingTop: 100
+  },
+
+  image: {
+    alignSelf: 'center',
+    width: 300,
+    height: 300,
+    resizeMode: 'contain',
   },
 
   headerContainer: {

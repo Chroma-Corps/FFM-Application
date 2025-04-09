@@ -14,6 +14,7 @@ import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
 import { MaterialIcons } from '@expo/vector-icons'
+import ColorTray from '../components/ColorTray'
 
 const formatDate = (date) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -81,6 +82,10 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [categories, setCategories] = useState('');
     const [duration, setDuration] = useState(''); // To help with calclation of end date
     const budgetDurationRef = useRef(null);
+    const [selectedColor, setSelectedColor] = useState('#4A90E2');
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+      };
 
     //Pop-up Triggers
     const [selectedPeriod, setSelectedPeriod] = useState('');
@@ -343,6 +348,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                     transactionScope: budgetScope.toUpperCase(),
                     startDate: startDate,
                     endDate: endDate,
+                    color: selectedColor,
                 })
             });
 
@@ -583,7 +589,12 @@ export default function CreateBudgetsScreen({ navigation }) {
                         )}
                     </View>
                 </ScrollView>
+
                 <View style={styles.buttonContainer}>
+                    <ColorTray 
+                        selectedColor={selectedColor} 
+                        onColorSelect={handleColorSelect}
+                    />
                     <Button mode="contained" onPress={handlePress} style={styles.buttonStyle}>
                         {getButtonText()}
                     </Button>

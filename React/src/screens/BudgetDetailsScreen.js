@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader'
-import PlusFAB from '../components/PlusFAB';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
-import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
-import BudgetsScreen from './BudgetsScreen';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
@@ -22,6 +19,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                 const data = await response.json();
                 if (response.ok) {
                     setBudgetDetails(data.budget);
+                    // console.log(data.budget);
                 } else {
                     console.error(data.message);
                 }
@@ -82,14 +80,14 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         );
     };
 
-
     return (
         <View style={styles.container}>
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
-                <EditButton />
-                <View style={styles.headerContainer}>
-
+                <TouchableOpacity onPress={null} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
+                    <MaterialIcons name={"edit"} size={30} color={"white"}/>
+                </TouchableOpacity>
+                <View style={[styles.headerContainer, {borderColor: budgetDetails.color}]}>
                     <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
 
                     <Text style={styles.amountText}>
@@ -154,10 +152,10 @@ const styles = StyleSheet.create({
     },
 
     headerContainer: {
-        borderColor: theme.colors.primary,
         padding: 15,
         marginTop: 30,
         borderBottomWidth: 5,
+        alignItems: 'center'
     },
 
     titleText: {
