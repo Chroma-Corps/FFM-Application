@@ -59,8 +59,11 @@ class Transaction(db.Model):
             'transactionType': self.transactionType.value,
             'transactionCategory': self.transactionCategory,
             'transactionAmount': amount,
-            'transactionDate': self.transactionDate.strftime("%a, %d %b %Y"),
+            'transactionDate': self.transactionDate.strftime("%a, %b %d %Y"),
             'transactionTime': self.transactionTime.strftime("%H:%M"),
+            'transactionBank': self.bankID,
+            'transactionBudget': self.budgetID,
+            'transactionGoal': self.goalID
         }
 
     def __str__(self):

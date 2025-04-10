@@ -1,7 +1,8 @@
 from App.database import db
+from App.controllers.goal import get_goal
 from App.controllers.bank import get_bank
 from App.controllers.budget import get_budget
-from App.controllers.goal import get_goal
+from App.controllers.user import get_user_json
 from App.services.category import CategoryService
 from App.controllers.userBudget import get_user_budgets_json
 from App.services.datetime import convert_to_date, convert_to_time
@@ -9,12 +10,14 @@ from App.models import Transaction, TransactionType, Budget, TransactionScope
 from App.controllers.userTransaction import create_user_transaction, is_transaction_owner, get_user_transaction_by_transaction_id
 
 # Add A New Transaction
-def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, circleID, userID, goalID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
+def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, goalID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
     try:
         userIDs = userIDs or []
-        transaction_data, error = transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, circleID, goalID)
+        transaction_data, error = transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID)
         if error:
             return None, error
+
+        user = get_user_json(userID)
 
         new_transaction = Transaction(
             transactionTitle=transaction_data['transactionTitle'],
@@ -26,7 +29,7 @@ def add_transaction(transactionTitle, transactionDesc, transactionType, transact
             transactionTime=transaction_data['transactionTime'],
             budgetID=transaction_data['budgetID'],
             bankID=transaction_data['bankID'],
-            circleID=transaction_data['circleID'],
+            circleID=user['activeCircle'],
             goalID=transaction_data['goalID']
         )
         db.session.add(new_transaction)
@@ -142,17 +145,20 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
             currTransactionAmount = transaction.transactionAmount
             currTransactionCategory = transaction.transactionCategory
 
-            goal_changed = goalID and goalID != currGoalID
-            budget_changed = budgetID and budgetID != currBudgetID
+            goal_changed = goalID is not None and goalID != currGoalID
+            budget_changed = budgetID is not None and budgetID != currBudgetID
             bank_changed = bankID and bankID != currBankID
             type_changed = transactionType and transactionType != currTransactionType
             amount_changed = transactionAmount is not None and transactionAmount != currTransactionAmount
 
             # Revert Old Data If Change
             if budget_changed or bank_changed or goal_changed or amount_changed or type_changed:
-                adjust_goal_balance(currGoalID, currTransactionType, -currTransactionAmount)
-                adjust_bank_balance(currBankID, currTransactionType, -currTransactionAmount)
-                adjust_exclusive_budget_balance(currBudgetID, currTransactionType, -currTransactionAmount)
+                if currGoalID:
+                    adjust_goal_balance(currGoalID, currTransactionType, -currTransactionAmount)
+                if currBankID:
+                    adjust_bank_balance(currBankID, currTransactionType, -currTransactionAmount)
+                if currBudgetID:
+                    adjust_exclusive_budget_balance(currBudgetID, currTransactionType, -currTransactionAmount)
                 adjust_inclusive_budgets(userID, currTransactionCategory, currTransactionType, -currTransactionAmount)
 
             if transactionTitle:
@@ -171,12 +177,16 @@ def update_transaction(transactionID, transactionTitle=None, transactionDesc=Non
                 transaction.transactionTime = convert_to_time(transactionTime)
             if voided is not None:
                 transaction.voided = voided
-            if budgetID:
+            if budgetID is not None:
                 transaction.budgetID = budgetID
+            else:
+                transaction.budgetID = None
             if bankID:
                 transaction.bankID = bankID
-            if goalID:
+            if goalID is not None:
                 transaction.goalID = goalID
+            else:
+                transaction.goalID = None
             db.session.commit()
 
             if (amount_changed or type_changed) and not budget_changed and not bank_changed and not goal_changed:
@@ -220,19 +230,20 @@ def void_transaction(userID, transactionID):
 
 # Adjusts Goal Balance Based On Transaction Type (Income/Expense)
 def adjust_goal_balance(goalID, transactionType, transactionAmount):
-    goal = get_goal(goalID)
-    if not goal:
-        raise ValueError("Goal Not Found")
+    if goalID:
+        goal = get_goal(goalID)
+        if not goal:
+            raise ValueError("Goal Not Found")
 
-    transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
+        transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
 
-    factor = 1 if transaction_type_str == TransactionType.INCOME.value.lower() else -1
-    goal.currentAmount += factor * transactionAmount
+        factor = 1 if transaction_type_str == TransactionType.INCOME.value.lower() else -1
+        goal.currentAmount += factor * transactionAmount
 
-    # Handle Insufficient Goal Balance
-    if goal.currentAmount < 0:
-        raise ValueError("Insufficient Goal Balance")
-    db.session.commit()
+        # Handle Insufficient Goal Balance
+        if goal.currentAmount < 0:
+            raise ValueError("Insufficient Goal Balance")
+        db.session.commit()
 
 # Adjusts Bank Balance Based On Transaction Type (Income/Expense)
 def adjust_bank_balance(bankID, transactionType, transactionAmount):
@@ -254,7 +265,7 @@ def adjust_bank_balance(bankID, transactionType, transactionAmount):
 # Adjusts Exclusive Budget Balance Based On Transaction Type (Income/Expense)
 def adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount):
     if budgetID:
-        budget = Budget.query.get(budgetID)
+        budget = get_budget(budgetID)
         if not budget:
             raise ValueError("Budget Not Found")
 
@@ -296,10 +307,11 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
         db.session.rollback()
         raise ValueError(f"Error adjusting inclusive budgets: {str(e)}")
 
-def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, circleID, goalID):
+def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID):
     try:
         adjust_bank_balance(bankID, transactionType, transactionAmount)
-        adjust_goal_balance(goalID, transactionType, transactionAmount)
+        if goalID is not None:
+            adjust_goal_balance(goalID, transactionType, transactionAmount)
         adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount)
         if budgetID is not None:
             adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount)
@@ -316,7 +328,6 @@ def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, tran
             'transactionTime': transactionTime,
             'budgetID': budgetID,  # Can be None
             'bankID': bankID,
-            'circleID': circleID,
             'goalID': goalID
         }
         return transaction_data, None

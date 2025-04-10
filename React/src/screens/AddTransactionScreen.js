@@ -1,53 +1,42 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View,
-         ActivityIndicator,
-         Text, 
-         TextField,
-         StyleSheet, 
-         TextInput, 
-         TouchableOpacity,
-         Pressable,
-         Platform,
-         Image } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import { Card } from 'react-native-paper';
-import InAppBackground from '../components/InAppBackground';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import DropDownPicker from 'react-native-dropdown-picker';
+// Imports
+import { theme } from '../core/theme';
 import Button from '../components/Button';
-import TransactionType from '../constants/TransactionTypes';
 import BackButton from '../components/BackButton'
-import { theme } from '../core/theme'
-import { ScrollView, KeyboardAvoidingView, FlatList } from 'react-native';
-import * as DocumentPicker from 'expo-document-picker';
-import BankAccountCard from '../components/BankAccountCard';
+import { MaterialIcons } from '@expo/vector-icons';
+import { ScrollView, FlatList } from 'react-native';
+import InAppHeader from '../components/InAppHeader';
 import { useFocusEffect } from '@react-navigation/native';
-
-//Testing date/timer feature
+import TransactionType from '../constants/TransactionTypes';
+import InAppBackground from '../components/InAppBackground';
+import React, { useState, useEffect, useCallback } from 'react';
 import DateTimePicker from "@react-native-community/datetimepicker";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, ActivityIndicator, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, Platform, Image} from 'react-native';
 
 export default function AddTransactionScreen({ navigation }) {
-    const [transactionTitle, setTransactionTitle] = useState('');
-    const [transactionDesc, setTransactionDesc] = useState('');
-    const [transactionType, setTransactionType] = useState('expense');
-    const [transactionCategory, setTransactionCategory] = useState('');
-    const [transactionAmount, setTransactionAmount] = useState('');
+    // Fetched Data
+    const [banks, setBanks] = useState([]);
+    const [goals, setGoals] = useState([]);
+    const [budgets, setBudgets] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [selectedGoal, setSelectedGoal] = useState(null);
+    const [selectedBudget, setSelectedBudget] = useState(null);
+    const [selectedBankID, setSelectedBankID] = useState(1);
+
+    const [loading, setLoading] = useState(true);
+
+    // Transaction Details
     const [transactionDate, setTransactionDate] = useState('');
     const [transactionTime, setTransactionTime] = useState('');
-    const [open, setOpen] = useState(false);
-    const [selectedBudget, setSelectedBudget] = useState(null);
-    const [budgets, setBudgets] = useState(null);
-    const [banks, setBanks] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedBankID, setSelectedBankID] = useState(null);
-    // const selectBank = (id) => setSelectedBank(id);
+    const [transactionDesc, setTransactionDesc] = useState('');
+    const [transactionType, setTransactionType] = useState('');
+    const [transactionTitle, setTransactionTitle] = useState('');
+    const [transactionAmount, setTransactionAmount] = useState('');
+    const [transactionCategory, setTransactionCategory] = useState('');
 
-
-    //Date/Time Spinner
+    // Date-Time Spinner
     const [date, setDate] = useState(new Date());
     const [showPicker, setShowPicker] = useState(false);
-
     const [time, setTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
     const categoryImages = {
@@ -57,9 +46,147 @@ export default function AddTransactionScreen({ navigation }) {
         income: require('../assets/icons/income.png'),
         shopping: require('../assets/icons/shopping.png'),
         transit: require('../assets/icons/transit.png')
-      };
+    };
 
-      useEffect(() => {
+    // Helper Functions
+    const toggleDatepicker = () => {
+        setShowPicker(!showPicker);
+    };
+
+    const handleCategorySelect = (item) => {
+        const isAlreadySelected = transactionCategory.includes(item.name);
+
+        if (isAlreadySelected) {
+            setTransactionCategory(prevCategories =>
+                prevCategories.filter(category => category !== item.name)
+            );
+        } else {
+            const capitalizedCategory = item.name.charAt(0).toUpperCase() + item.name.slice(1);
+            setTransactionCategory(prevCategories => [
+                ...prevCategories,
+                capitalizedCategory
+            ]);
+        }
+    };
+
+    const onDateChange = ({ type }, selectedDate) => {
+        if (type === "set") {
+            const currentDate = selectedDate;
+            setDate(currentDate);
+    
+            const weekday = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
+            const month = currentDate.toLocaleDateString('en-US', { month: 'short' });
+            const day = currentDate.getDate();
+            const year = currentDate.getFullYear();
+
+            const formattedDate = `${weekday}, ${month} ${day} ${year}`;
+    
+            if (Platform.OS === "android") {
+                toggleDatepicker();
+            }
+    
+            setTransactionDate(formattedDate);
+        } else {
+            toggleDatepicker();
+        }
+    };
+
+    const confirmIOSDate = () => {
+        setTransactionDate(date.toISOString().split("T")[0]); // Format YYYY-MM-DD
+        toggleDatepicker();
+    };
+
+    const toggleTimepicker = () => {
+        setShowTimePicker(!showTimePicker);
+    };
+
+    const onTimeChange = ({ type }, selectedTime) => {
+        if (type === "set") {
+            const currentTime = selectedTime;
+            setTime(currentTime);
+
+            const formattedTime = currentTime.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            });
+
+            if (Platform.OS === "android") {
+                toggleTimepicker();
+                setTransactionTime(formattedTime);
+            }
+        } else {
+            toggleTimepicker();
+        }
+    };
+
+    const confirmIOSTime = () => {
+        setTransactionTime(
+            String(time.getHours()).padStart(2, '0') + ":" +
+            String(time.getMinutes()).padStart(2, '0')
+        );
+        toggleTimepicker();
+    };
+
+    useEffect(() => {
+        const today = new Date();
+        const weekday = today.toLocaleDateString('en-US', { weekday: 'short' });
+        const month = today.toLocaleDateString('en-US', { month: 'short' });
+        const day = today.getDate();
+        const year = today.getFullYear();
+        const formattedDate = `${weekday}, ${month} ${day} ${year}`;
+
+        const formattedTime = today.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+
+        setTransactionDate(formattedDate);
+        setTransactionTime(formattedTime);
+      }, []);
+
+    const isToday = () => {
+        const today = new Date();
+        const weekday = today.toLocaleDateString('en-US', { weekday: 'short' });
+        const month = today.toLocaleDateString('en-US', { month: 'short' });
+        const day = today.getDate();
+        const year = today.getFullYear();
+        const formattedToday = `${weekday}, ${month} ${day} ${year}`;
+        return formattedToday === transactionDate;
+    };
+
+    const formatDateToISO = (dateString) => {
+        const cleanedDateString = dateString.replace(/^.*?,\s*/, '').trim();
+        const [month, day, year] = cleanedDateString.split(' ');
+
+        const monthMap = {
+            Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+            Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
+        };
+
+        const dayFormatted = day.padStart(2, '0');
+        const formattedDate = `${year}-${monthMap[month]}-${dayFormatted}`;
+        return formattedDate;
+    };
+
+    const formatTimeToISO = (timeString) => {
+        let [hour, minuteWithSuffix] = timeString.split(':');
+        const [minute, suffix] = minuteWithSuffix.split(' ');
+
+        if (suffix) {
+            const isPM = suffix.toUpperCase() === 'PM';
+            let hours = parseInt(hour, 10);
+
+            if (isPM && hours < 12) hours += 12;
+            if (!isPM && hours === 12) hours = 0;
+            hour = hours.toString().padStart(2, '0');
+        }
+        return `${hour}:${minute}`;
+    };
+
+    // API Calls: Categories, Budgets, Goals & Banks
+    useEffect(() => {
         fetch('https://ffm-application-main.onrender.com/ffm/categories')
             .then(response => response.json())
             .then(data => {
@@ -85,122 +212,112 @@ export default function AddTransactionScreen({ navigation }) {
                 setCategories(categoryArray);
             })
             .catch(error => console.error('Error Fetching categories:', error));
-        }, []);
+    }, []);
 
-    const toggleDatepicker = () => {
-        setShowPicker(!showPicker);
-    };
-
-    const handleCategorySelect = (item) => {
-        const isAlreadySelected = transactionCategory.includes(item.name);
-    
-        if (isAlreadySelected) {
-            setTransactionCategory(prevCategories => 
-                prevCategories.filter(category => category !== item.name)
-            );
-        } else {
-            const capitalizedCategory = item.name.charAt(0).toUpperCase() + item.name.slice(1);
-            setTransactionCategory(prevCategories => [
-                ...prevCategories, 
-                capitalizedCategory
-            ]);
-        }
-    };
-
-    const onChange = ({ type }, selectedDate) => {
-        if (type == "set") {
-            const currentDate = selectedDate;
-            setDate(currentDate);
-    
-            if (Platform.OS === "android") {
-                toggleDatepicker();
-                setTransactionDate(currentDate.toISOString().split("T")[0]); // Format YYYY-MM-DD
-            }
-        } else {
-            toggleDatepicker();
-        }
-    };
-    
-    const confirmIOSDate = () => {
-        setTransactionDate(date.toISOString().split("T")[0]); // Format YYYY-MM-DD
-        toggleDatepicker();
-    };
-    
-    const toggleTimepicker = () => {
-        setShowTimePicker(!showTimePicker);
-    };
-
-    const onTimeChange = ({ type }, selectedTime) => {
-        if (type === "set") {
-            const currentTime = selectedTime;
-            setTime(currentTime);
-    
-            if (Platform.OS === "android") {
-                toggleTimepicker();
-                setTransactionTime(
-                    String(currentTime.getHours()).padStart(2, '0') + ":" + 
-                    String(currentTime.getMinutes()).padStart(2, '0')
-                );
-            }
-        } else {
-            toggleTimepicker();
-        }
-    };
-    
-    const confirmIOSTime = () => {
-        setTransactionTime(
-            String(time.getHours()).padStart(2, '0') + ":" + 
-            String(time.getMinutes()).padStart(2, '0')
-        );
-        toggleTimepicker();
-    };
-
-    //Currency Formatting 
-    // const formatCurrency = (value) => {
-    //     let cleanedValue = value.replace(/[^0-9.]/g, "");
-      
-    //     const parts = cleanedValue.split(".");
-    //     if (parts.length > 2) {
-    //       cleanedValue = parts[0] + "." + parts.slice(1).join("");
-    //     }
-
-    //     let numericValue = parseFloat(cleanedValue);
-    //     if (isNaN(numericValue)) return "";
-      
-    //     return `$${numericValue}`; // Always show two decimal places
-    //   };
-
-      //File Attachment
-      const [selectedFile, setSelectedFile] = useState(null);
-
-      const pickDocument = async () => {
+    const fetchBudgets = async () => {
         try {
-          const result = await DocumentPicker.getDocumentAsync({
-            type: [
-              "image/*",
-              "application/pdf",
-              "application/msword",
-              "text/plain"
-            ],
-            copyToCacheDirectory: false,
-          });
-      
-          if (result.type === "success") {
-            Alert.alert(
-              "Confirm Selection",
-              `Do you want to upload "${result.name}"?`,
-              [
-                { text: "Cancel", style: "cancel" },
-                { text: "Yes", onPress: () => setSelectedFile(result) }
-              ]
-            );
-          }
-        } catch (error) {
-          console.error("Error picking document:", error);
-        }
-      };
+            const token = await AsyncStorage.getItem('access_token');
 
-    const renderBankCard = ({ item }) => (
+            if (!token) {
+                console.error('No Token Found');
+                return;
+            }
+
+            const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                const exclusiveBudgets = data.budgets.filter(budget => budget.transactionScope === 'Exclusive');
+                setBudgets(exclusiveBudgets);
+            } else {
+                console.error('Failed To Fetch Budgets:', data.message);
+            }
+            console.log('Fetch Exclusive Budgets Status:', data.status)
+        } catch (error) {
+            console.error('Error Fetching Budgets:', error);
+        }
+    };
+
+    const fetchGoals = async () => {
+        try {
+            const token = await AsyncStorage.getItem('access_token');
+
+            if (!token) {
+                console.error('No Token Found');
+                return;
+            }
+
+            const response = await fetch(`https://ffm-application-main.onrender.com/goals`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setGoals(data.goals);
+            } else {
+                console.error('Failed To Fetch Goals:', data.message);
+            }
+            console.log('Fetch Goals Status:', data.status)
+        } catch (error) {
+            console.error('Error Fetching Goals:', error);
+        }
+    };
+
+    const fetchBanks = async () => {
+        try {
+            setLoading(true);
+            const token = await AsyncStorage.getItem("access_token");
+
+            if (!token) {
+                console.error('No Token Found');
+                return;
+            }
+
+            const response = await fetch('https://ffm-application-main.onrender.com/banks', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setBanks(data.banks);
+            } else {
+                console.error('Failed To Fetch Banks:', data.message);
+            }
+            console.log("Fetch Banks Status:", data.status);
+        } catch (error) {
+            console.error("Error Fetching Banks:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchBanks();
+            fetchGoals();
+            fetchBudgets();
+        }, [])
+    );
+
+    // Render Functions: Banks, Categories, Budgets & Goals
+    const renderBanks = ({ item }) => (
         <TouchableOpacity
             style={[
                 styles.bankCard,
@@ -212,7 +329,7 @@ export default function AddTransactionScreen({ navigation }) {
         >
             <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
             <Text style={styles.bankCardAmount}>
-                <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount} /</Text> {item.bankAmount}
+                <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount}</Text>
             </Text>
         </TouchableOpacity>
     );
@@ -221,118 +338,74 @@ export default function AddTransactionScreen({ navigation }) {
         const isSelected = transactionCategory.includes(item.name);
         return (
             <TouchableOpacity
-          style={[
-            styles.radioButton,
-            isSelected && styles.radioSelected,
-          ]}
-          onPress={() => handleCategorySelect(item)}
-        >
-        <View style={styles.inputRow}>
-            <Image source={item.image} style={{ width: 20, height: 20 }} />
-            <Text style={ transactionCategory === item.name ? styles.radioTextSelected : styles.radioText}>{item.name}</Text>
-        </View>
-        </TouchableOpacity>
+                style={[
+                    { margin: 10, alignItems: 'center', padding: 5 },
+                    isSelected && { backgroundColor: theme.colors.primaryDimmed, borderRadius: 10 }
+                ]}
+                onPress={() => handleCategorySelect(item)}
+            >
+                <Image source={item.image} style={{ width: 30, height: 30 }} />
+                <Text style={transactionCategory === item.name ? styles.radioTextSelected : styles.radioText}>{item.name}</Text>
+            </TouchableOpacity>
         );
     };
 
-      const renderBudgets = ({ item }) => (
-                <TouchableOpacity
-                style={[
+    const renderBudgets = ({ item }) => (
+        <TouchableOpacity
+            style={[
                 styles.radioButton,
-                selectedBudget === item.budgetID && styles.radioSelected,  // Highlight selected budget
-                ]}
-                onPress={() => setSelectedBudget(item.budgetID)} // Update selected budget
-            >
-                <Text
+                selectedBudget === item.budgetID && styles.radioSelected,
+            ]}
+            onPress={() => setSelectedBudget(item.budgetID)}
+        >
+            <Text
                 style={
                     selectedBudget === item.budgetID
-                    ? styles.radioTextSelected
-                    : styles.radioText
+                        ? styles.radioTextSelected
+                        : styles.radioText
                 }
-                >
-                {item.budgetTitle.charAt(0).toUpperCase() + item.budgetTitle.slice(1)}  {/* Format the budget title */}
-                </Text>
-            </TouchableOpacity>
-      );
+            >
+                {item.budgetTitle.charAt(0).toUpperCase() + item.budgetTitle.slice(1)}
+            </Text>
+        </TouchableOpacity>
+    );
 
-    useEffect(() => {
-        const fetchBudgets = async () => {
-            try {
-                const token = await AsyncStorage.getItem('access_token');
-
-                if (!token) {
-                    console.error('No Token Found');
-                    return;
+    const renderGoals = ({ item }) => (
+        <TouchableOpacity
+            style={[
+                styles.radioButton,
+                selectedGoal === item.goalID && styles.radioSelected,
+            ]}
+            onPress={() => setSelectedGoal(item.goalID)}
+        >
+            <Text
+                style={
+                    selectedGoal === item.goalID
+                        ? styles.radioTextSelected
+                        : styles.radioText
                 }
+            >
+                {item.goalTitle.charAt(0).toUpperCase() + item.goalTitle.slice(1)}
+            </Text>
+        </TouchableOpacity>
+    );
 
-                const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
-                    method: 'GET',
-                    headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                    },
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    const exclusiveBudgets = data.budgets.filter(budget => budget.transactionScope === 'Exclusive');
-                    setBudgets(exclusiveBudgets);
-                } else {
-                    console.error('Failed to fetch budgets:', data.message);
-                }
-                console.log('Fetch Exclusive Budgets Status:', data.status)
-            } catch (error) {
-                console.error('Error fetching budgets:', error);
-            }
-        };
-
-        fetchBudgets();
-    }, []);
-
-    const fetchBanks = async () => { // Awaiting Banks JSON To Return BankID
-        try {
-          setLoading(true);
-          const token = await AsyncStorage.getItem("access_token");
+    const modifiedBudgets = [
+        { budgetID: null, budgetTitle: 'No Budget' },
+        ...budgets,
+    ];
     
-          if (!token) {
-            console.error('No Token Found');
-            return;
-          }
-    
-          const response = await fetch('https://ffm-application-main.onrender.com/banks', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-    
-          const data = await response.json();
+    const modifiedGoals = [
+        { goalID: null, goalTitle: 'No Goal' },
+        ...goals,
+    ];
 
-          if (response.ok) {
-            setBanks(data.banks);
-          } else {
-            console.error('Failed To Fetch Banks:', data.message);
-          }
-          console.log("Fetch Banks Status:", data.status);
-        } catch (error) {
-          console.error("Error Fetching Banks:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-    
-      useFocusEffect(
-        useCallback(() => {
-          fetchBanks();
-        }, [])
-      );
-
-    // Add Transaction
+    // Add Transaction API Call
     const addTransaction = async () => {
         try {
             const token = await AsyncStorage.getItem('access_token');
+            const formattedTransactionDate = formatDateToISO(transactionDate);
+            const formattedTransactionTime = formatTimeToISO(transactionTime);
 
             if (!token) {
                 console.error('Missing required data');
@@ -340,21 +413,22 @@ export default function AddTransactionScreen({ navigation }) {
             }
 
             const response = await fetch(`https://ffm-application-main.onrender.com/add-transaction`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify({
                     transactionTitle: transactionTitle,
                     transactionDesc: transactionDesc,
                     transactionType: transactionType.trim().toUpperCase(),
                     transactionCategory: transactionCategory,
                     transactionAmount: parseFloat(transactionAmount),
-                    transactionDate: transactionDate.trim(),
-                    transactionTime: transactionTime.trim(),
+                    transactionDate: formattedTransactionDate.trim(),
+                    transactionTime: formattedTransactionTime.trim(),
                     budgetID: selectedBudget,
                     bankID: selectedBankID,
+                    goalID: selectedGoal,
                 }),
             });
 
@@ -364,7 +438,7 @@ export default function AddTransactionScreen({ navigation }) {
                 alert(data.message)
                 navigation.goBack();
             } else {
-            alert(data.message)
+                alert(data.message)
             }
         } catch (error) {
             console.error(error.message);
@@ -372,450 +446,452 @@ export default function AddTransactionScreen({ navigation }) {
         }
     };
 
+    // UI
     return (
-    <View style={styles.screen}>
-        <InAppBackground>
-        <BackButton goBack={navigation.goBack} />
-            
-            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
-                <View style={styles.screenContainer}>
-                    <View style={styles.headerContainer}>
-                        <View style={styles.cardTitle}>
-                            <InAppHeader>New Transaction</InAppHeader>
+        <View style={styles.screen}>
+            <InAppBackground>
+                <BackButton goBack={navigation.goBack} />
+                <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
+                    <View style={styles.screenContainer}>
+                        <View style={styles.headerContainer}>
+                            <View style={styles.cardTitle}>
+                                <InAppHeader>New Transaction</InAppHeader>
+                            </View>
+                        </View>
+                        <View style={styles.radioContainer}>
+                            {Object.values(TransactionType).map((type) => {
+                                const isSelected = transactionType === type;
+                                const dynamicStyle = isSelected
+                                ? {
+                                    backgroundColor: type === 'income' ? theme.colors.income : theme.colors.expense,
+                                    }
+                                : {};
+
+                                return (
+                                <TouchableOpacity
+                                    key={type}
+                                    style={[
+                                    styles.transactionType,
+                                    isSelected && styles.transactionTypeSelected,
+                                    dynamicStyle,
+                                    ]}
+                                    onPress={() => setTransactionType(type)}
+                                >
+                                    <Text style={isSelected ? styles.transactionTypeTextSelected : styles.transactionTypeText}>
+                                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                                    </Text>
+                                </TouchableOpacity>
+                                );
+                            })}
+                            </View>
+
+                        <View style={styles.card}>
+
+                            {/* Amount */}
+                            <View style={[styles.amountContainer,
+                                transactionType === 'income'
+                                ? { borderColor: theme.colors.income }
+                                : transactionType === 'expense'
+                                ? { borderColor: theme.colors.expense }
+                                : { borderColor: theme.colors.primary },
+                            ]}>
+                            <View style={styles.inputRow}>
+                                <TextInput
+                                    placeholder="0.00"
+                                    value={transactionAmount}
+                                    onChangeText={setTransactionAmount}
+                                    onBlur={() => setTransactionAmount(transactionAmount)}
+                                    style={styles.inputAmount}
+                                    keyboardType="numeric"
+                                    returnKeyType="done"
+                                    placeholderTextColor="white"
+                                />
+                                </View>
+                            </View>
+
+                            {/* Date & Time */}
+                            {showPicker && (
+                                <DateTimePicker
+                                    mode="date"
+                                    display="default"
+                                    value={date}
+                                    is24Hour={true}
+                                    onChange={onDateChange}
+                                    style={styles.datePicker}
+                                />
+                            )}
+
+                            {showPicker && Platform.OS === "ios" &&
+                                (
+                                    <View
+                                        style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
+                                        <TouchableOpacity style={[
+                                            styles.button,
+                                            styles.pickerButton,
+                                            { backgroundColor: theme.colors.primary },
+                                        ]}
+                                            onPress={toggleDatepicker}
+                                        >
+                                            <Text style={{ color: "white" }}>Cancel</Text>
+                                        </TouchableOpacity>
+
+                                        <TouchableOpacity style={[
+                                            styles.button,
+                                            styles.pickerButton,
+                                            { backgroundColor: theme.colors.primary },
+                                        ]}
+                                            onPress={confirmIOSDate}
+                                        >
+                                            <Text style={{ color: "white" }}>Confirm</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                                <View style={styles.dateTimeContainer}>
+                                    {!showPicker && (
+                                        <TouchableOpacity onPress={toggleDatepicker} style={styles.dateContainer}>
+                                            <MaterialIcons name="calendar-today" size={24} color="white" style={styles.dateIcon} />
+                                            <Text style={styles.dateText}>
+                                                {isToday() ? "Today" : transactionDate}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+
+                                    {showTimePicker && (
+                                        <DateTimePicker
+                                            mode="time"
+                                            display="spinner"
+                                            value={time}
+                                            onChange={onTimeChange}
+                                            style={styles.datePicker}
+                                        />
+                                    )}
+
+                                    {showTimePicker && Platform.OS === "ios" && (
+                                        <View style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
+                                            <TouchableOpacity
+                                                style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
+                                                onPress={toggleTimepicker}
+                                            >
+                                            <Text style={{ color: "white" }}>Cancel</Text>
+                                            </TouchableOpacity>
+
+                                            <TouchableOpacity
+                                                style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
+                                                onPress={confirmIOSTime}
+                                            >
+                                            <Text style={{ color: "white" }}>Confirm</Text>
+                                            </TouchableOpacity>
+                                        </View>
+                                    )}
+
+                                    {!showTimePicker && (
+                                        <Pressable onPress={toggleTimepicker}>
+                                            <TouchableOpacity onPress={toggleTimepicker} style={styles.timeContainer}>
+                                                <MaterialIcons name="access-time" size={24} color="white" style={styles.dateIcon} />
+                                                <Text style={styles.dateText}>
+                                                    {transactionTime}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        </Pressable>
+                                    )}
+                                </View>
+
+                            {/* Title & Notes */}
+                            <View>
+                                <TextInput
+                                    placeholder="Title"
+                                    value={transactionTitle}
+                                    onChangeText={setTransactionTitle}
+                                    style={styles.input}
+                                    placeholderTextColor={theme.colors.grayedText}
+                                />
+                                <TextInput
+                                    placeholder="Notes"
+                                    value={transactionDesc}
+                                    onChangeText={setTransactionDesc}
+                                    style={styles.description}
+                                    placeholderTextColor={theme.colors.grayedText}
+                                    multiline
+                                    numberOfLines={4}
+                                    textAlignVertical="top"
+                                />
+
+                            </View>
+
+                            {/* Categories */}
+                            <Text style={styles.sectionTitle}>Categories</Text>
+                            <View style={styles.radioContainer}>
+                                {categories.length > 0 ? (
+                                    <FlatList
+                                        data={categories}
+                                        renderItem={renderCategories}
+                                        keyExtractor={(item) => item.id.toString()}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={styles.scrollContainer}
+                                    />
+                                ) : (
+                                    <Text style={styles.defaultText}>Loading Categories...</Text>
+                                )}
+                            </View>
+
+                            {/* Wallets */}
+                            <View>
+                                <Text style={styles.sectionTitle}>Wallets</Text>
+                                {loading ? (
+                                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                                ) : banks.length === 0 ? (
+                                    <Text style={styles.defaultText}>You Have No Wallets</Text>
+                                ) : (
+
+                                <FlatList
+                                    data={banks}
+                                    renderItem={renderBanks}
+                                    keyExtractor={(item) => item?.bankID}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={styles.scrollContainer}
+                                />
+                                )}
+                            </View>
+
+                            {/* Budgets */}
+                            <Text style={styles.sectionTitle}>Exclusive Budgets</Text>
+                            <View>
+                                <FlatList
+                                    data={modifiedBudgets}
+                                    renderItem={renderBudgets}
+                                    keyExtractor={(item) => item?.budgetID}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={styles.radioContainer}
+                                />
+                            </View>
+
+                            {/* Goals */}
+                            <Text style={styles.sectionTitle}>Goals</Text>
+                            <View>
+                                <FlatList
+                                    data={modifiedGoals}
+                                    renderItem={renderGoals}
+                                    keyExtractor={(item) => item?.goalID}
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={styles.radioContainer}
+                                />
+                            </View>
                         </View>
                     </View>
-            
-            <View style={styles.card}>
-                <View style={styles.inputRow}>
-                    <TextInput
-                        placeholder="$0.00"
-                        value={transactionAmount}
-                        onChangeText={setTransactionAmount} // No formatting while typing
-                        onBlur={() => setTransactionAmount(transactionAmount)} // Format when input loses focus
-                        style={styles.inputAmount}
-                        keyboardType="numeric"
-                        returnKeyType="done"
-                        placeholderTextColor="white"
-                    />
-                    <View style={styles.radioContainer}>
-                    {Object.values(TransactionType).map((type) => (
-                        <TouchableOpacity
-                            key={type}
-                            style={[
-                                styles.radioButton,
-                                transactionType === type && styles.radioSelected,
-                            ]}
-                            onPress={() => setTransactionType(type)}
-                        >
-                            <Text style={transactionType === type ? styles.radioTextSelected : styles.radioText}>
-                                {type.charAt(0).toUpperCase() + type.slice(1)}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
+                </ScrollView>
+                <View style={styles.buttonContainer}>
+                    <Button mode="contained" onPress={addTransaction}>Add Transaction</Button>
                 </View>
-                </View>
-                <View>
-                <TextInput
-                        placeholder="Title"
-                        value={transactionTitle}
-                        onChangeText={setTransactionTitle}
-                        style={styles.input}
-                    />
-                    <TextInput
-                        placeholder="Description"
-                        value={transactionDesc}
-                        onChangeText={setTransactionDesc}
-                        style={styles.input}
-                    />
-                </View>
-                <View style={styles.radioContainer}>
-                {categories.length > 0 ? (
-                    <FlatList
-                        data={categories}
-                        renderItem={renderCategories}
-                        keyExtractor={(item) => item.id.toString()}
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.scrollContainer}
-                    />
-                ) : (
-                    <Text>Loading Categories...</Text>
-                )}
-                </View>
-
-                <View>
-                <Text style={styles.sectionTitle}>Banks</Text>
-                    {loading ? (
-                    <ActivityIndicator size="large" color={theme.colors.primary} />
-                    ) : banks.length === 0 ? (
-                    <Text style={styles.defaultText}>You Have No Banks</Text>
-                    ) : (
-
-                        <FlatList
-                            data={banks}
-                            renderItem={renderBankCard}
-                            keyExtractor={(item) => item?.bankID}
-                            horizontal
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.scrollContainer}
-                        />
-                    )}
-                </View>
-                {showPicker && (
-                    <DateTimePicker
-                        mode="date"
-                        display="spinner"
-                        value={date}
-                        onChange={onChange}
-                        style={styles.datePicker}
-                    />
-                )}
-                
-                {showPicker && Platform.OS === "ios" && 
-                (
-                    <View 
-                        style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
-                        <TouchableOpacity style={[
-                            styles.button,
-                            styles.pickerButton,
-                            { backgroundColor: theme.colors.primary },
-                        ]}
-                        onPress={toggleDatepicker}
-                        >
-                            <Text style={{color: "white"}}>Cancel</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity style={[
-                            styles.button,
-                            styles.pickerButton,
-                            { backgroundColor: theme.colors.primary },
-                        ]}
-                        onPress={confirmIOSDate}
-                        >
-                            <Text style={{color: "white"}}>Confirm</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {!showPicker && (
-                    <Pressable
-                        onPress={toggleDatepicker}
-                    >
-                        <TextInput
-                            placeholder="Date"
-                            value={transactionDate}
-                            onChangeText={onChange}
-                            style={styles.input}
-                            editable={false}
-                            onPressIn={toggleDatepicker}
-                        />
-                    </Pressable>
-                )}
-                
-
-                {showTimePicker && (
-                    <DateTimePicker
-                        mode="time"
-                        display="spinner"
-                        value={time}
-                        onChange={onTimeChange}
-                        style={styles.datePicker}
-                    />
-                )}
-
-                {showTimePicker && Platform.OS === "ios" && (
-                    <View style={{ alignItems: "center", padding: 10, flexDirection: "row", justifyContent: "space-around" }}>
-                        <TouchableOpacity
-                            style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
-                            onPress={toggleTimepicker}
-                        >
-                            <Text style={{color: "white"}}>Cancel</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity
-                            style={[styles.button, styles.pickerButton, { backgroundColor: theme.colors.primary }]}
-                            onPress={confirmIOSTime}
-                        >
-                            <Text style={{color: "white"}}>Confirm</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-
-                {!showTimePicker && (
-                    <Pressable onPress={toggleTimepicker}>
-                        <TextInput
-                            placeholder="Time"
-                            value={transactionTime}
-                            onChangeText={setTransactionTime}
-                            style={styles.input}
-                            editable={false}
-                            onPressIn={toggleTimepicker}
-                        />
-                    </Pressable>
-                )}
-
-                <View style={styles.container}>
-                <FlatList
-                    data={budgets}
-                    renderItem={renderBudgets}
-                    keyExtractor={(item) => item?.budgetID}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.radioContainer}
-                    />
-                </View>
-
-                <View>
-                    <Text style={styles.sectionTitle}>Attach Document (Optional)</Text>
-
-                    {/* onPress={pickDocument} */}
-                    <TouchableOpacity style={styles.attachmentButton}>
-                        <Text style={styles.attachmentButtonText}>Choose File</Text>
-                    </TouchableOpacity>
-
-                    {selectedFile && (
-                        <View style={styles.filePreview}>
-                            <Icon name="file-document-outline" size={20} color="gray" />
-                            <Text style={styles.fileName}>{selectedFile.name}</Text>
-                            <TouchableOpacity onPress={() => setSelectedFile(null)}>
-                                <Icon name="close-circle" size={18} color="red" />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
-            </View>
-            </View>
-            </ScrollView>
-            <View style={styles.buttonContainer}>
-                <Button mode="contained" onPress={addTransaction}>
-                    Add Transaction
-            </Button>
-            </View>
-        </InAppBackground>
-    </View>
+            </InAppBackground>
+        </View>
     );
 }
 
-    const styles = StyleSheet.create({
-        screen: {
-            flex: 1,
-        },
+// Styles
+const styles = StyleSheet.create({
+    screen: {
+        flex: 1,
+    },
 
-        card: {
-            margin: 10,
-            padding: 10,
-        },
+    card: {
+        margin: 10,
+        padding: 10,
+    },
 
-        headerContainer: {
-            flex: 1,
-            flexDirection: 'coloumn',
-        },
+    headerContainer: {
+        flex: 1,
+        flexDirection: 'coloumn',
+        margin: 15
+    },
 
-        cardTitle: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingLeft: 0,
-        },
+    cardTitle: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingLeft: 0,
+    },
 
-        input: {
-            borderWidth: 2,
-            borderColor: theme.colors.primary,
-            backgroundColor: '#f9f9f9',
-            padding: 5,
-            borderRadius: 8,
-            fontSize: 14,
-            color: '#333',
-            marginBottom: 15,
-            fontFamily: theme.fonts.medium.fontFamily,
-        },
+    input: {
+        borderBottomWidth: 2,
+        borderColor: theme.colors.primary,
+        padding: 5,
+        borderRadius: 8,
+        fontSize: 25,
+        marginBottom: 15,
+        color: theme.colors.textSecondary,
+        fontFamily: theme.fonts.medium.fontFamily,
+    },
 
-        inputRow: {
-            flexDirection: "row",
-            alignSelf: "center",
-            gap: 10,
-          },
+    description: {
+        borderWidth: 1,
+        borderColor: theme.colors.primary,
+        padding: 5,
+        borderRadius: 8,
+        fontSize: 20,
+        marginBottom: 15,
+        color: theme.colors.textSecondary,
+        fontFamily: theme.fonts.medium.fontFamily,
+        height: 150,
+        textAlignVertical: 'top',
+    },
 
-        button: { marginBottom: 0, },
+    amountContainer: {
+        borderRadius: 100,
+        margin: 15,
+        borderWidth: 2,
+    },
 
-        radioContainer: { 
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-        },
+    inputRow: {
+        flexDirection: "row",
+        alignSelf: "center",
+        gap: 10,
+    },
 
-        radioButton: {
-            padding: 10,
-            marginHorizontal: 5,
-            marginVertical: 10,
-            borderWidth: 1,
-            borderColor: theme.colors.surface,
-            borderRadius: 10,
-            backgroundColor: "#181818",
-        },
+    button: { marginBottom: 0, },
 
-        radioSelected: { backgroundColor: theme.colors.primary },
-        radioText: { color: theme.colors.surface, fontFamily: theme.fonts.medium.fontFamily},
-        radioTextSelected: { color: theme.colors.textSecondary, fontFamily: theme.fonts.bold.fontFamily },
-          pickerContainer: {
-            width: '100%',
-          },
-          placeholderStyle: {
-            fontFamily: theme.fonts.medium.fontFamily,
-          },
-          textStyle: {
-            fontFamily: theme.fonts.medium.fontFamily,
-          },
-          listItemLabelStyle: {
-            fontFamily: theme.fonts.medium.fontFamily,
-          },
-          dropDownContainerStyle: {
-            backgroundColor: '#f9f9f9',
-            borderColor: theme.colors.secondary,
-            borderWidth: 2,
-          },
+    radioContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+    },
 
-          datePicker: {
-            height: 120,
-            margin: 5,
-            backgroundColor: '#ffffff',
-          },
-          pickerButton: {
-            backgroundColor: theme.colors.primary,
-            paddingVertical: 8,
-            paddingHorizontal: 20,
-            borderRadius: 5,
-          },
+    transactionType: {
+        paddingLeft: 50,
+        paddingRight: 50,
+        paddingTop: 10,
+        paddingBottom: 10,
+        marginHorizontal: 5,
+        marginVertical: 10,
+        borderWidth: 2,
+        borderColor: theme.colors.primaryDimmed,
+        borderRadius: 15,
+    },
 
-          categoryContainer: {
-            flexDirection: "row",
-            marginVertical: 10,
-          },
-          
-          categoryButton: {
-            paddingVertical: 10,
-            paddingHorizontal: 15,
-            borderRadius: 20,
-            borderWidth: 1,
-            borderColor: theme.colors.primary,
-            marginHorizontal: 5,
-            backgroundColor: "#f9f9f9",
-          },
-          
-          categorySelected: {
-            backgroundColor: theme.colors.primary,
-          },
-          
-          categoryText: {
-            fontSize: 14,
-            color: theme.colors.text,
-          },
-          
-          categoryTextSelected: {
-            color: "white",
-          },
-          
-          sectionTitle: {
-            fontSize: 18,
-            fontFamily: theme.fonts.bold.fontFamily,
-            marginBottom: 5,
-            color: "#ffffff",
-          },
-          attachmentButton: {
-            backgroundColor: theme.colors.background,
-            padding: 10,
-            borderRadius: 8,
-            alignItems: "center",
-            marginVertical: 10,
-            borderWidth: 2,
-            borderColor: theme.colors.secondary,
-          },
-          
-          attachmentButtonText: {
-            color: theme.colors.textSecondary,
-            fontFamily: theme.fonts.bold.fontFamily,
-          },
-          
-          filePreview: {
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "#e8f5e9",
-            padding: 10,
-            borderRadius: 5,
-            marginTop: 10,
-          },
-          
-          fileName: {
-            fontSize: 14,
-            marginLeft: 8,
-            color: theme.colors.text,
-            flex: 1,
-          },
-          
-          fileAttached: {
-            fontSize: 12,
-            color: "green",
-            marginTop: 5,
-            fontWeight: "bold",
-          },
-          bankContainer: {
-            flexDirection: "row",
-            marginVertical: 10,
-          },
-          inputAmount: {
-            width: "50%",
-            borderBottomWidth: 2,
-            borderColor: theme.colors.primary,
-            padding: 10,
-            fontSize: 20,
-            color: "white",
-            fontFamily: theme.fonts.bold.fontFamily,
-            textAlign: "left",
-            margin: 15,
-          },
-          bankCard: {
-            backgroundColor: '#333',
-            padding: 10,
-            borderRadius: 8,
-            marginHorizontal: 10,
-            marginVertical: 10,
-            width: 150,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-    
-        selectedCard: {
-            borderColor: theme.colors.secondary,
-            borderWidth: 3,
-        },
-    
-        bankCardTitle: {
-            color: '#fff',
-            fontSize: 18,
-            fontFamily: theme.fonts.bold.fontFamily,
-            textAlign: 'center',
-        },
-    
-        bankCardAmount: {
-            color: theme.colors.textSecondary,
-            fontSize: 10,
-            fontFamily: theme.fonts.medium.fontFamily,
-            marginBottom: 5,
-            textAlign: 'center',
-          },
-    
-        remainingBankCardAmount: {
-            color: theme.colors.textSecondary,
-            fontSize: 15,
-            fontFamily: theme.fonts.bold.fontFamily,
-            marginBottom: 5,
-            textAlign: 'center',
-          },
-    
-        bankCardRemaining: {
-            color: '#fff',
-            fontSize: 14,
-            fontFamily: theme.fonts.medium.fontFamily,
-            textAlign: 'center',
-        },
-    });
+    transactionTypeText: { fontSize: 15, color: theme.colors.surface, fontFamily: theme.fonts.medium.fontFamily },
+    transactionTypeTextSelected: { color: theme.colors.textSecondary, fontFamily: theme.fonts.bold.fontFamily },
+
+    radioButton: {
+        padding: 10,
+        marginHorizontal: 5,
+        marginVertical: 10,
+        borderWidth: 1,
+        borderColor: theme.colors.primaryDimmed,
+        borderRadius: 10,
+        backgroundColor: "#181818",
+    },
+
+    radioSelected: { backgroundColor: theme.colors.primary },
+    radioText: { color: theme.colors.surface, fontFamily: theme.fonts.medium.fontFamily },
+    radioTextSelected: { color: theme.colors.textSecondary, fontFamily: theme.fonts.bold.fontFamily },
+
+    datePicker: {
+        height: 120,
+        margin: 5,
+        backgroundColor: '#ffffff',
+    },
+
+    pickerButton: {
+        backgroundColor: theme.colors.primary,
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+
+    dateText: {
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: theme.colors.textSecondary,
+        fontSize: 20,
+    },
+
+    dateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+        backgroundColor: theme.colors.primaryDimmed,
+        borderRadius: 10,
+        padding: 7
+    },
+
+    timeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.colors.primaryDimmed,
+        borderRadius: 10,
+        padding: 7
+    },
+
+    dateTimeContainer: {
+        justifyContent:'space-evenly',
+        flexDirection: 'row',
+        marginTop: 10
+    },
+
+    dateIcon: {
+        marginRight: 10,
+    },
+
+    sectionTitle: {
+        fontSize: 18,
+        fontFamily: theme.fonts.bold.fontFamily,
+        marginBottom: 5,
+        color: "#ffffff",
+    },
+
+    defaultText: {
+        fontFamily: theme.fonts.bold.fontFamily,
+        color: theme.colors.textSecondary
+    },
+
+    inputAmount: {
+        fontSize: 30,
+        color: "white",
+        fontFamily: theme.fonts.bold.fontFamily,
+        textAlign: "center",
+        margin: 15,
+    },
+
+    bankCard: {
+        borderWidth: 2,
+        borderColor: theme.colors.primaryDimmed,
+        padding: 10,
+        borderRadius: 8,
+        marginHorizontal: 10,
+        marginVertical: 10,
+        width: 200,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    selectedCard: {
+        backgroundColor: theme.colors.primaryDimmed,
+        borderWidth: 2,
+        borderColor: theme.colors.primary
+    },
+
+    bankCardTitle: {
+        color: '#fff',
+        fontSize: 18,
+        fontFamily: theme.fonts.bold.fontFamily,
+        textAlign: 'center',
+    },
+
+    bankCardAmount: {
+        color: theme.colors.textSecondary,
+        fontSize: 10,
+        fontFamily: theme.fonts.medium.fontFamily,
+        marginBottom: 5,
+        textAlign: 'center',
+    },
+
+    remainingBankCardAmount: {
+        color: theme.colors.textSecondary,
+        fontSize: 15,
+        fontFamily: theme.fonts.bold.fontFamily,
+        marginBottom: 5,
+        textAlign: 'center',
+    },
+});

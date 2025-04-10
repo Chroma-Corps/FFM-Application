@@ -29,6 +29,9 @@ def initialize():
         userIDs=[alice.id, jalene.id]
     )
 
+    set_active_circle(bob.id, bobberson_circle.circleID)
+    set_active_circle(alice.id, bobberson_circle.circleID)
+
     # Bank - Bobberson
     bobberson_bank = create_bank (
         userID=bob.id,
@@ -37,7 +40,6 @@ def initialize():
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[alice.id, jalene.id],
-        circleID=bobberson_circle.circleID
     )
 
     # Goal
@@ -49,35 +51,105 @@ def initialize():
         startDate="2025-01-01",
         endDate="2025-01-31",
         userIDs=[alice.id, jalene.id],
-        circleID=bobberson_circle.circleID
+        color="#F5A623"
     )
 
     create_budget (
         userID=bob.id,
         bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
-        budgetTitle="Inclusive Budget",
+        budgetTitle="Violet Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
-        budgetCategory=['SHOPPING', 'TRANSIT', 'ENTERTAINMENT'],
+        budgetCategory=['TRANSIT'],
         transactionScope=TransactionScope.INCLUSIVE,
         startDate="2025-01-01",
         endDate="2025-01-31",
-        userIDs=[alice.id]
+        userIDs=[alice.id, bob.id],
+        color="#9B4AD8"
     )
 
-    exclusive_budget = create_budget (
+    create_budget (
+        userID=bob.id,
+        bankID=bobberson_bank.bankID,
+        budgetTitle="Indigo Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['SHOPPING'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#4A6CD8"
+    )
+
+    create_budget (
         userID=bob.id,
         bankID=None,
-        circleID=bobberson_circle.circleID,
-        budgetTitle="Exclusive Budget",
+        budgetTitle="Blue Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
         budgetCategory=[],
         transactionScope=TransactionScope.EXCLUSIVE,
         startDate="2025-01-01",
         endDate="2025-01-31",
-        userIDs=[alice.id]
+        userIDs=[alice.id, bob.id],
+        color="#4A90E2"
+    )
+
+    create_budget (
+        userID=bob.id,
+        bankID=bobberson_bank.bankID,
+        budgetTitle="Green Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['ENTERTAINMENT'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#4AD88A"
+    )
+
+    create_budget (
+        userID=bob.id,
+        bankID=None,
+        budgetTitle="Yellow Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.SAVINGS,
+        budgetCategory=['INCOME'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#D8C24A"
+    )
+
+    exclusive_budget = create_budget (
+        userID=bob.id,
+        bankID=None,
+        budgetTitle="Orange Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=[],
+        transactionScope=TransactionScope.EXCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#D88F4A"
+    )
+
+    create_budget (
+        userID=bob.id,
+        bankID=bobberson_bank.bankID,
+        budgetTitle="Red Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['SHOPPING', 'TRANSIT', 'ENTERTAINMENT'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#D85A5A"
     )
 
     add_transaction (
@@ -92,7 +164,6 @@ def initialize():
         budgetID=exclusive_budget.budgetID,
         bankID=bobberson_bank.bankID,
         goalID=None,
-        circleID=bobberson_circle.circleID,
     )
 
     add_transaction (
@@ -106,11 +177,10 @@ def initialize():
         transactionTime="09:30",
         bankID=bobberson_bank.bankID,
         goalID=None,
-        circleID=bobberson_circle.circleID,
     )
 
     add_transaction (
-        userID=jalene.id,
+        userID=alice.id,
         transactionTitle="Vacay Progress",
         transactionDesc="Saved a sum of money to contribute towards vacation plans",
         transactionType=TransactionType.INCOME,
@@ -119,13 +189,8 @@ def initialize():
         transactionDate="2025-03-10",
         transactionTime="09:30",
         bankID=bobberson_bank.bankID,
-        circleID=bobberson_circle.circleID,
         goalID=bobberson_goal.goalID
     )
-
-    set_active_circle(bob.id, bobberson_circle.circleID)
-    set_active_circle(jalene.id, bobberson_circle.circleID)
-    set_active_circle(alice.id, bobberson_circle.circleID)
 
     # Users - Chroma Corps
     rynnia = create_user('Rynnia Ryan','rynnia@mail.com', 'rynniapass')
@@ -140,6 +205,8 @@ def initialize():
         userIDs=[rynnia.id, tamia.id]
     )
 
+    set_active_circle(jalene.id, chroma_circle.circleID)
+
     # Bank - Chroma Corps
     create_bank (
         userID=jalene.id,
@@ -148,7 +215,6 @@ def initialize():
         bankAmount=5000.00,
         isPrimary=True,
         userIDs=[rynnia.id, tamia.id],
-        circleID=chroma_circle.circleID
     )
 
     set_active_circle(rynnia.id, chroma_circle.circleID)
@@ -181,6 +247,8 @@ def initialize():
         circleImage="https://picsum.photos/id/65/300/300.jpg"
     )
 
+    set_active_circle(jalene.id, jalene_self.circleID)
+
     # Bank - Jalene
     create_bank (
         userID=jalene.id,
@@ -189,5 +257,6 @@ def initialize():
         bankAmount=100.00,
         isPrimary=True,
         userIDs=[],
-        circleID=jalene_self.circleID
     )
+
+    set_active_circle(jalene.id, bobberson_circle.circleID)

@@ -17,8 +17,8 @@ def get_all_users():
     return jsonify({"status": "success", "users": users}), 200
 
 # 2. Create New User
-@user_views.route('/register', methods=['POST'])
-def register_action():
+@user_views.route('/create-user', methods=['POST'])
+def create_user():
     try:
         data = request.get_json()
         name = data.get('name')

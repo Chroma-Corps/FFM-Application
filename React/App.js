@@ -7,15 +7,24 @@ import PlusFAB from './src/components/PlusFAB'
 import { useFonts } from 'expo-font'
 import {
   StartScreen,
+  PreviewDemoScreen,
+  MainAuthScreen,
   LoginScreen,
-  RegisterScreen,
   ResetPasswordScreen,
+  RegisterScreen,
+  SelectCircleTypeScreen,
+  SetupPersonalCircleScreen,
+  SetupFamilyCircleScreen,
   Dashboard,
+  BankDetailsScreen,
   BudgetsScreen,
   BudgetDetailsScreen,
   CreateBudgetScreen,
+  EditBudgetScreen,
+  CreateBankScreen,
   AddTransactionScreen,
   TransactionsScreen,
+  UpdateTransactionScreen,
   GoalsScreen,
   CreateGoalScreen,
   CreateCircleScreen,
@@ -53,22 +62,35 @@ export default function App() {
           >
 
             <Stack.Screen name="StartScreen" component={StartScreen} />
+            <Stack.Screen name="PreviewDemoScreen" component={PreviewDemoScreen} />
+
+            <Stack.Screen name="MainAuthScreen" component={MainAuthScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
-            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+
+            <Stack.Screen name="SelectCircleTypeScreen" component={SelectCircleTypeScreen} />
+            <Stack.Screen name="SetupPersonalCircleScreen" component={SetupPersonalCircleScreen} />
+            <Stack.Screen name="SetupFamilyCircleScreen" component={SetupFamilyCircleScreen} />
 
             <Stack.Screen name="Dashboard" component={Dashboard} />
+            <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />
             <Stack.Screen name="Budgets" component={BudgetsScreen} />
             <Stack.Screen name="Goals" component={GoalsScreen} />
             <Stack.Screen name="Transactions" component={TransactionsScreen} />
 
+            <Stack.Screen name="CreateBank" component={CreateBankScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
             <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
             <Stack.Screen name="CreateCircle" component={CreateCircleScreen} />
             <Stack.Screen name="CircleDetailsScreen" component={CircleDetailsScreen} />
 
+            <Stack.Screen name="EditBudgetScreen" component={EditBudgetScreen} />
+
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
+            <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
+
 
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
             <Stack.Screen name="Settings" component={SettingsScreen} />

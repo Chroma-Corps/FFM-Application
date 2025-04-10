@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader'
-import PlusFAB from '../components/PlusFAB';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
-import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
-import CircleGraph from '../components/CircleGraph';
-import BudgetsScreen from './BudgetsScreen';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
@@ -16,57 +13,66 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     const [budgetTransactions, setBudgetTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchBudgetDetails = async () => {
-            try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`);
-                const data = await response.json();
-                if (response.ok) {
-                    setBudgetDetails(data.budget);
-                } else {
-                    console.error(data.message);
-                }
-                console.log('Fetch Budget Status:', data.status)
-            } catch (error) {
-                console.error('Error fetching budget details:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
 
-        const fetchBudgetTransactions = async () => {
-            try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`);
-                const data = await response.json();
-                if (response.ok) {
-                    setBudgetTransactions(data.transactions);
-                } else {
-                    console.error(data.message);
+            const fetchData = async () => {
+
+                setLoading(true);
+                try {
+                    // Using Promise.all in order to fetch details and transactions concurrently
+                    const [detailsResponse, transactionsResponse] = await Promise.all([
+                        fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`),
+                        fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`)
+                    ]);
+
+                    const detailsData = await detailsResponse.json();
+                    if (detailsResponse.ok) {
+                        setBudgetDetails(detailsData.budget);
+                    } else {
+                        console.error("Failed to fetch budget details:", detailsData.message);
+                        setBudgetDetails(null);
+                    }
+
+                    const transactionsData = await transactionsResponse.json();
+                    if (transactionsResponse.ok) {
+                        setBudgetTransactions(transactionsData.transactions);
+                    } else {
+                        console.error("Failed to fetch budget transactions:", transactionsData.message);
+                        setBudgetTransactions([]);
+                    }
+
+                    console.log('Fetch Budget Status:', detailsData.status);
+                    console.log('Fetch Budget Transactions Status:', transactionsData.status);
+
+                } catch (error) {
+                    console.error('Error fetching budget data:', error);
+
+                    setBudgetDetails(null);
+                    setBudgetTransactions([]);
+                } finally {
+
+                    setLoading(false);
                 }
-                console.log('Fetch Budget Transactions Status:', data.status)
-            } catch (error) {
-                console.error('Error Fetching Budget Transactions:', error);
-            } 
-            finally {
-                setLoading(false);
-            }
-        };
-        fetchBudgetTransactions();
-        fetchBudgetDetails();
-    }, [budgetID]);
+            };
+
+            fetchData();
+
+        }, [budgetID])
+    );
 
     if (loading) {
         return (
-          <View style={styles.centered}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+            </View>
         );
-      }
-    
+    }
+
     if (!budgetDetails) {
         return (
             <View style={styles.centered}>
-            <Text>No Budget Details Available</Text>
+                <Text>No Budget Details Available</Text>
             </View>
         );
     }
@@ -83,14 +89,14 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         );
     };
 
-
     return (
         <View style={styles.container}>
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
-                <EditButton />
-                <View style={styles.headerContainer}>
-
+                <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: budgetDetails.budgetID })} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
+                    <MaterialIcons name={"edit"} size={30} color={"white"}/>
+                </TouchableOpacity>
+                <View style={[styles.headerContainer, {borderColor: budgetDetails.color}]}>
                     <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
 
                     <Text style={styles.amountText}>
@@ -102,18 +108,19 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         <ProgressBar
                             startDate={budgetDetails.startDate}
                             endDate={budgetDetails.endDate}
-                            budgetColorTheme={budgetDetails.color || '#9ACBD0'}
+                            colorTheme={budgetDetails.color || '#9ACBD0'}
+                            amount={budgetDetails.budgetAmount} 
+                            remainingAmount={budgetDetails.remainingBudgetAmount}
                         />
 
                         <Text style={styles.categoryText}>
-                        {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
+                            {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
                         </Text>
 
                     </View>
                 </View>
 
                 <View style={styles.graphContainer}>
-                    {/* <CircleGraph transactions={budgetDetails.transactions} /> */}
                     <View style={styles.graphKey}>
                         <Text style={styles.descriptionText}>Graph Key Goes Here</Text>
                     </View>
@@ -132,8 +139,6 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         />
                     </View>
                 </View>
-
-                {/* <PlusFAB onPress={() => navigation.push('AddTransaction')}/> */}
             </InAppBackground>
         </View>
     );
@@ -153,10 +158,10 @@ const styles = StyleSheet.create({
     },
 
     headerContainer: {
-        borderColor: theme.colors.primary,
         padding: 15,
         marginTop: 30,
         borderBottomWidth: 5,
+        alignItems: 'center'
     },
 
     titleText: {
@@ -197,7 +202,6 @@ const styles = StyleSheet.create({
     },
 
     graphContainer: {
-        // flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 20,

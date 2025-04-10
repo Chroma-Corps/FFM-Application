@@ -7,28 +7,28 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-export const ProgressBar = ({ startDate, endDate, budgetColorTheme }) => {
+export const ProgressBar = ({ startDate, endDate, colorTheme, amount, remainingAmount }) => {
 
     const today = new Date();
-
     const start = new Date(startDate);
     const end = new Date(endDate);
+    const cleanBudgetAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ""));
+    const cleanRemainingBudgetAmount = parseFloat(remainingAmount.replace(/[^0-9.-]+/g, ""));
 
-    const totalDuration = end - start;
-    const elapsedTime = today - start;
+    let progress = 0;
 
-    let progress = Math.min((elapsedTime / totalDuration) * 100, 100);
-
-    progress = today > start
-        ? progress
-        : '0';
+    if (cleanRemainingBudgetAmount < cleanBudgetAmount) {
+        progress = ((cleanBudgetAmount - cleanRemainingBudgetAmount) / cleanBudgetAmount) * 100;
+      } else {
+        progress = 0;
+      }
+    progress = Math.round(Math.max(0, Math.min(progress, 100)));
 
     return (
         <View style={styles.container}>
-            <View style={styles.progressBarContainer}>
-                <View style={[styles.progressBar, { width: `${progress}%`, backgroundColor: budgetColorTheme }]} >
-                    <Text style={styles.progressBarPercent}> {Math.round(progress)}% </Text>
-                </View>
+             <View style={styles.progressBarContainer}>
+                <View style={[styles.progressBar, { width: `${progress}%`, backgroundColor: colorTheme }]} />
+                <Text style={styles.progressBarPercent}>{progress}%</Text>
             </View>
 
             <View style={styles.datesContainer}>
@@ -51,21 +51,24 @@ const styles = StyleSheet.create({
     progressBarContainer: {
         height: 20,
         width: '100%',
-        backgroundColor: '#E0E0E0',
+        backgroundColor: theme.colors.primaryDimmed,
         borderRadius: 10,
         overflow: 'hidden',
+        position: 'relative',
     },
 
     progressBar: {
         height: '100%',
         borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-
     },
 
     progressBarPercent: {
-        color: theme.colors.description,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        marginLeft: -15,
+        marginTop: -10,
+        color: theme.colors.textSecondary,
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 12,
     },

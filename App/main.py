@@ -49,4 +49,13 @@ def create_app(overrides={}):
     #     app.logger.error('Invalid token provided')
     #     return jsonify(error="Invalid token"), 422
     app.app_context().push()
+
+    # Used to Check all available routes
+    
+    # numRoutes = 0;
+    # for rule in app.url_map.iter_rules():
+    #     numRoutes += 1
+
+    # print('Available routes: ', numRoutes)
+
     return app

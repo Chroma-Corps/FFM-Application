@@ -1,11 +1,14 @@
 from App.database import db
 from App.models import Goal, UserGoal
+from App.controllers.user import get_user_json
 from App.services.datetime import convert_to_date
 from App.controllers.userGoal import create_user_goal, is_goal_owner
 
 # Create A New Goal
-def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, circleID, userIDs=None):
-    try: 
+def create_goal(goalTitle, targetAmount, goalType, color, startDate, endDate, userID, userIDs=None):
+    try:
+        user = get_user_json(userID)
+
         new_goal = Goal (
             goalTitle=goalTitle,
             targetAmount=targetAmount,
@@ -13,7 +16,8 @@ def create_goal(goalTitle, targetAmount, goalType, startDate, endDate, userID, c
             goalType=goalType,
             startDate=startDate,
             endDate=endDate,
-            circleID=circleID
+            circleID=user["activeCircle"],
+            color = color
         )
         db.session.add(new_goal)
         db.session.commit()
@@ -65,7 +69,7 @@ def get_all_goals_json():
     return goals
 
 # Update Existing Goal
-def update_goal(goalID, goalTitle=None, targetAmount=None, goalType=None, startDate=None, endDate=None):
+def update_goal(goalID, goalTitle=None, targetAmount=None, goalType=None, startDate=None, endDate=None, color=None):
     try:
         goal = get_goal(goalID)
 
@@ -81,6 +85,8 @@ def update_goal(goalID, goalTitle=None, targetAmount=None, goalType=None, startD
                 goal.startDate = convert_to_date(startDate)
             if endDate:
                 goal.endDate = convert_to_date(endDate)
+            if color:
+                goal.color = color
             db.session.commit()
 
             print(f"Goal With ID {goalID} Updated Successfully.")

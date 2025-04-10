@@ -28,7 +28,7 @@ export default function Dashboard({ navigation }) {
   const fetchActiveCircle = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
-  
+
       if (!token) {
         console.error('No Token Found');
         return;
@@ -62,12 +62,12 @@ export default function Dashboard({ navigation }) {
   const setActiveCircle = async (circleID) => {
     try {
       const token = await AsyncStorage.getItem("access_token");
-  
+
       if (!token) {
         console.error('No Token Found');
         return;
       }
-  
+
       const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'POST',
         headers: {
@@ -78,9 +78,9 @@ export default function Dashboard({ navigation }) {
           circleID: circleID,
         }),
       });
-  
+
       const data = await response.json();
-  
+
       if (response.ok && data.status === 'success') {
         setReload(prevState => !prevState);
         fetchActiveCircle();
@@ -119,6 +119,7 @@ export default function Dashboard({ navigation }) {
         console.error(data.message);
       }
       console.log('Fetch Banks Status:', data.status)
+
     } catch (error) {
       console.error("Error Fetching Banks:", error);
     } finally {
@@ -198,28 +199,29 @@ export default function Dashboard({ navigation }) {
     }, [reload])
   );
 
-  // const handleAddBank = () => {
-  //   navigation.navigate('AddBank');
-  // };
+  const handleAddBank = () => {
+    navigation.navigate('CreateBank');
+  };
 
   const handleSettings = () => {
     navigation.navigate('Settings')
   }
 
   const handleViewSwap = async () => {
-    if (circleType === 'Self') {
-      setCircleType('Group');
-      setActiveCircle(prevCircle.circleID);
-    } else {
+    if (circleType === 'Group' && selfCircle && selfCircle.circleID) {
       setCircleType('Self');
       setActiveCircle(selfCircle.circleID);
+    } else {
+      setCircleType('Group');
+      setActiveCircle(prevCircle.circleID);
     }
   };
 
-  const renderBankItem = ( {item} ) => {
+
+  const renderBankItem = ({ item }) => {
     return (
       <TouchableOpacity
-        style={styles.bankCard}
+        onPress={() => navigation.push('BankDetailsScreen', { bankID: item.bankID })} style={styles.bankCard}
       >
         <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
         <Text style={styles.bankCardAmount}>
@@ -233,26 +235,26 @@ export default function Dashboard({ navigation }) {
     const isSelected = newCurrentCircle?.circleID === item.circleID;
     return (
       <View style={styles.circleContainer}>
-          <TouchableOpacity 
-              style={[
-                  styles.circle,
-                  { borderColor: isSelected ? item.circleColor : 'transparent' }
-              ]}
-              onPress={() => {
-                setNewCurrentCircle(item);
-                setActiveCircle(item.circleID);
-              }}
-          >
-            {item.circleImage && (
-              <Image source={{ uri: item.circleImage }} style={styles.circleImage} />
-            )}
-            </TouchableOpacity>
-            <Text
-              style={[
-                styles.circleText,
-                { color: isSelected ? item.circleColor : theme.colors.textSecondary } 
-              ]}
-            >
+        <TouchableOpacity
+          style={[
+            styles.circle,
+            { borderColor: isSelected ? item.circleColor : 'transparent' }
+          ]}
+          onPress={() => {
+            setNewCurrentCircle(item);
+            setActiveCircle(item.circleID);
+          }}
+        >
+          {item.circleImage && (
+            <Image source={{ uri: item.circleImage }} style={styles.circleImage} />
+          )}
+        </TouchableOpacity>
+        <Text
+          style={[
+            styles.circleText,
+            { color: isSelected ? item.circleColor : theme.colors.textSecondary }
+          ]}
+        >
           {item.circleName}
         </Text>
       </View>
@@ -267,57 +269,57 @@ export default function Dashboard({ navigation }) {
   return (
     <InAppBackground>
       {circleType === 'Group' && (
-      <View style={styles.container}>
-        <View>
-          <TouchableOpacity
-              style={[styles.circle, { backgroundColor: "#306060"}]}
+        <View style={styles.container}>
+          <View>
+            <TouchableOpacity
+              style={[styles.circle, { backgroundColor: "#306060" }]}
               onPress={() => handleViewSwap()}
             >
-            <MaterialIcons name={"group"} size={30} color={"white"} style={styles.icon}/>
-          </TouchableOpacity>
+              <MaterialIcons name={"group"} size={30} color={"white"} style={styles.icon} />
+            </TouchableOpacity>
             <Text style={styles.circleText}>Circles</Text>
           </View>
-            <FlatList
-                data={circles.filter(circle => circle.circleType === 'Group')}
-                renderItem={renderCircleItem}
-                keyExtractor={(item, index) => item?.circleID?.toString() ?? index.toString()}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-            />
-      </View>
+          <FlatList
+            data={circles.filter(circle => circle.circleType === 'Group')}
+            renderItem={renderCircleItem}
+            keyExtractor={(item, index) => item?.circleID?.toString() ?? index.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
       )}
 
       {circleType === 'Self' && (
-            <View style={styles.container}>
-              <View>
-                <TouchableOpacity
-                    style={[styles.circle, { backgroundColor: "#306060"}]}
-                    onPress={() => handleViewSwap()}
-                  >
-                  <MaterialIcons name={"person"} size={30} color={"white"} style={styles.icon}/>
-                  </TouchableOpacity>
-                <Text style={styles.circleText}>Self</Text>
-              </View>
-              <Text style={styles.selfViewText}>Hi, {userName}</Text>
-            </View>
+        <View style={styles.container}>
+          <View>
+            <TouchableOpacity
+              style={[styles.circle, { backgroundColor: "#306060" }]}
+              onPress={() => handleViewSwap()}
+            >
+              <MaterialIcons name={"person"} size={30} color={"white"} style={styles.icon} />
+            </TouchableOpacity>
+            <Text style={styles.circleText}>Self</Text>
+          </View>
+          <Text style={styles.selfViewText}>Hi, {userName}</Text>
+        </View>
       )}
 
-    <View key={reload ? "reloadKey" : "normalKey"}>
-      <View style={styles.lineContainer}></View> 
+      <View key={reload ? "reloadKey" : "normalKey"}>
+        <View style={styles.lineContainer}></View>
         <View style={styles.headerContainer}>
           <InAppHeader>Dashboard</InAppHeader>
           <TouchableOpacity onPress={handleSettings}>
-             <MaterialIcons name="settings" size={30} color="white" />
+            <MaterialIcons name="settings" size={30} color="white" />
           </TouchableOpacity>
         </View>
         <View style={styles.streakContainer}>
-            <TouchableOpacity
-              style={[styles.streakCircle, { backgroundColor: theme.colors.primary}]}
-            >
-              <Text style={styles.streakCountText}>
-                {streak.streakCount > 0 ? streak.streakCount : 0}
-              </Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.streakCircle, { backgroundColor: theme.colors.primary }]}
+          >
+            <Text style={styles.streakCountText}>
+              {streak.streakCount > 0 ? streak.streakCount : 0}
+            </Text>
+          </TouchableOpacity>
           <View style={styles.streakInfo}>
             <View style={styles.streakHeader}>
               <Text style={styles.sectionTitle}>Streaks</Text>
@@ -325,7 +327,7 @@ export default function Dashboard({ navigation }) {
             </View>
             <View style={styles.streakMiniCirclesContainer}>
               {days.map((day, index) => (
-                <View key={index} style={{ alignItems: 'center'}}>
+                <View key={index} style={{ alignItems: 'center' }}>
                   <View style={[styles.streakMiniCircles, { backgroundColor: theme.colors.primary }]}>
                     <MaterialIcons name="check" size={20} color="white" />
                   </View>
@@ -335,7 +337,7 @@ export default function Dashboard({ navigation }) {
             </View>
           </View>
         </View>
-        <Text style={[styles.sectionTitle, {marginTop: 25}]}>Wallets</Text>
+        <Text style={[styles.sectionTitle, { marginTop: 25 }]}>Wallets</Text>
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
         ) : banks.length === 0 ? (
@@ -350,7 +352,7 @@ export default function Dashboard({ navigation }) {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.flatListContainer}
             />
-            <Button mode="contained" style={styles.addButton}>
+            <Button onPress={handleAddBank} mode="contained" style={styles.addButton}>
               <Text style={styles.buttonText}>+</Text>
             </Button>
           </View>
@@ -414,7 +416,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     margin: 5,
     padding: 15,
-    borderRadius: 5, 
+    borderRadius: 5,
   },
 
   bankCardTitle: {
@@ -422,23 +424,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: theme.fonts.bold.fontFamily,
     textAlign: 'center',
-},
+  },
 
-bankCardAmount: {
-  color: theme.colors.textSecondary,
-  fontSize: 10,
-  fontFamily: theme.fonts.medium.fontFamily,
-  marginBottom: 5,
-  textAlign: 'center',
-},
+  bankCardAmount: {
+    color: theme.colors.textSecondary,
+    fontSize: 10,
+    fontFamily: theme.fonts.medium.fontFamily,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 
-remainingBankCardAmount: {
-  color: theme.colors.textSecondary,
-  fontSize: 15,
-  fontFamily: theme.fonts.bold.fontFamily,
-  marginBottom: 5,
-  textAlign: 'center',
-},
+  remainingBankCardAmount: {
+    color: theme.colors.textSecondary,
+    fontSize: 15,
+    fontFamily: theme.fonts.bold.fontFamily,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
 
   bankItemContainer: {
     flexDirection: 'row',
@@ -503,8 +505,8 @@ remainingBankCardAmount: {
 
   streakContainer: {
     flexDirection: 'row',
-    alignItems:'center',
-    alignContent:'space-evenly'
+    alignItems: 'center',
+    alignContent: 'space-evenly'
   },
 
   streakInfo: {
@@ -521,7 +523,7 @@ remainingBankCardAmount: {
 
   streakCircle: {
     width: 80,
-    height:80,
+    height: 80,
     borderRadius: 50,
     color: theme.colors.primary,
     marginLeft: 20,
@@ -540,7 +542,7 @@ remainingBankCardAmount: {
 
   streakMiniCircles: {
     width: 25,
-    height:25,
+    height: 25,
     borderRadius: 50,
     marginLeft: 10,
     justifyContent: 'center',
