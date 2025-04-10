@@ -26,6 +26,7 @@ def new_bank():
         bankCurrency = data.get('bankCurrency')
         bankAmount = data.get('bankAmount')
         isPrimary = data.get('isPrimary')
+        color = data.get('color')
         userIDs = data.get('userIDs') or []
 
         if not all([bankTitle, bankCurrency]):
@@ -37,6 +38,7 @@ def new_bank():
             bankCurrency,
             bankAmount,
             isPrimary,
+            color, 
             userIDs=userIDs) # Associated Users
 
         if new_bank is None:

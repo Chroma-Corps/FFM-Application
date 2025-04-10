@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, Image, StyleSheet, FlatList, ActivityIndicator, Alert, ScrollView } from 'react-native';
-import { theme } from '../core/theme'
-import BackButton from '../components/BackButton'
-import Button from '../components/Button'
+import { View, Text, Image, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { theme } from '../core/theme';
+import BackButton from '../components/BackButton';
+import Button from '../components/Button';
 import ButtonSmall from '../components/ButtonSmall';
 import InAppBackground from '../components/InAppBackground';
 import EditButton from '../components/EditButton';
@@ -12,24 +12,24 @@ import BankTransactionsPopup from '../components/BankTransactionsPopup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import DonutChart from '../components/DonutChart';
 
-//Random genreated colors for the donut chart until colors are assigned to a category (Rynnia.R)
-const pieChartColors = [
-    '#FF6B6B', // Soft Red
-    '#FF8E72', // Warm Orange
-    '#FFA600', // Gold
-    '#FFD166', // Soft Yellow
-    '#06D6A0', // Mint Green
-    '#1B9AAA', // Teal Blue
-    '#2A9D8F', // Deep Turquoise
-    '#118AB2', // Light Blue
-    '#E63946', // Deep Red
-    '#F4A261', // Peach
-];
-
-const getRandomColor = () => {
-    return pieChartColors[Math.floor(Math.random() * pieChartColors.length)];
+const categoryImages = {
+    bills: require('../assets/icons/bills.png'),
+    entertainment: require('../assets/icons/entertainment.png'),
+    groceries: require('../assets/icons/groceries.png'),
+    income: require('../assets/icons/income.png'),
+    shopping: require('../assets/icons/shopping.png'),
+    transit: require('../assets/icons/transit.png'),
+    default: require('../assets/default_img.jpg')
 };
 
+const parseTransactionAmount = (amountString) => {
+    if (typeof amountString !== 'string') {
+        return { amount: 0, currencySymbol: '' };
+    }
+    const amount = parseFloat(amountString.replace(/[^0-9.]/g, '')) || 0;
+    const currencySymbol = amountString.replace(/[0-9.,\s]/g, '').trim() || '';
+    return { amount, currencySymbol };
+};
 
 
 export default function BankDetailsScreen({ navigation, route }) {
@@ -43,88 +43,87 @@ export default function BankDetailsScreen({ navigation, route }) {
     const [incomeAmount, setIncomeAmount] = useState(0);
     const [expenseAmount, setExpenseAmount] = useState(0);
     const [currencySymbol, setCurrencySymbol] = useState('');
-    const [topCategories, setTopCategories] = useState([]);
     const [bankCategories, setBankCategories] = useState([]);
+    const [topCategories, setTopCategories] = useState([]);
 
     const [showBankTransactionsPopup, setShowBankTransactionsPopup] = useState(false);
-
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const stablePieChartColors = useMemo(() => [
+        '#FF6B6B', '#FF8E72', '#FFA600', '#FFD166', '#06D6A0',
+        '#1B9AAA', '#2A9D8F', '#118AB2', '#E63946', '#F4A261',
+        '#E76F51', '#264653', '#A8DADC', '#457B9D', '#1D3557'
+    ], []);
+
+    const categoryColorMap = useMemo(() => new Map(), []);
+
+    const getCategoryColor = useCallback((categoryName, index) => {
+        if (!categoryColorMap.has(categoryName)) {
+            const colorIndex = categoryColorMap.size % stablePieChartColors.length;
+            categoryColorMap.set(categoryName, stablePieChartColors[colorIndex]);
+        }
+        return categoryColorMap.get(categoryName);
+    }, [categoryColorMap, stablePieChartColors]);
+
 
     useEffect(() => {
-        const fetchBankDetails = async () => {
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
+            const token = await AsyncStorage.getItem("access_token");
+
+            if (!token) {
+                setError('Authentication token not found. Please log in again.');
+                setLoading(false);
+                return;
+            }
+
+            const API_URL = process.env.API_BASE_URL || 'https://ffm-application-main.onrender.com';
 
             try {
-                setLoading(true);
-                const token = await AsyncStorage.getItem("access_token");
+                const [bankResponse, transactionsResponse] = await Promise.all([
+                    fetch(`${API_URL}/bank/${bankID}`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    }),
+                    fetch(`${API_URL}/bank/${bankID}/transactions`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    })
+                ]);
 
-                if (!token) {
-                    console.error('No Token Found');
-                    return;
-                }
+                const bankData = await bankResponse.json();
+                const transactionData = await transactionsResponse.json();
 
-                const response = await fetch(`https://ffm-application-main.onrender.com/bank/${bankID}`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const bankData = await response.json();
-
-                if (response.ok) {
+                if (bankResponse.ok) {
                     setBankDetails(bankData.bank);
                 } else {
-                    console.error(bankData.message);
+                    console.error('Bank Details Error:', bankData.message);
                 }
 
-                console.log('Fetch Bank Details Status:', bankData.status)
-
-            } catch (error) {
-                console.error('Error Fetching Bank Details:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchBankTransactions = async () => {
-            try {
-
-                setLoading(true);
-                const token = await AsyncStorage.getItem("access_token");
-
-                if (!token) {
-                    console.error('No Token Found');
-                    return;
-                }
-
-                const response = await fetch(`https://ffm-application-main.onrender.com/bank/${bankID}/transactions`, {
-                    methods: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    }
-                });
-
-                const transactionData = await response.json();
-
-                if (response.ok) {
-                    setBankTransactions(transactionData.transactions);
+                if (transactionsResponse.ok) {
+                    setBankTransactions(transactionData.transactions || []);
                 } else {
-                    console.error(transactionData.message);
+                    console.error('Transactions Error:', transactionData.message);
                 }
 
-                console.log('Fetch Bank Transactions Status:', transactionData.status)
+                if (!bankResponse.ok || !transactionsResponse.ok) {
+                    let combinedError = '';
+                    if (!bankResponse.ok) combinedError += `Failed to load bank details (${bankResponse.status}). `;
+                    if (!transactionsResponse.ok) combinedError += `Failed to load transactions (${transactionsResponse.status}).`;
+                    setError(combinedError.trim() || 'An error occurred while fetching data.');
+                }
 
-            } catch (error) {
-                console.error('Error Fetching Bank Transactions:', error);
+            } catch (err) {
+                console.error('Error Fetching Data:', err);
+                setError('Network error or server issue. Please try again later.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchBankDetails();
-        fetchBankTransactions();
+        fetchData();
     }, [bankID]);
 
     useEffect(() => {
@@ -133,18 +132,19 @@ export default function BankDetailsScreen({ navigation, route }) {
             let expense = 0;
             let incomeTotal = 0;
             let expenseTotal = 0;
-            let symbol = '';
+            let firstSymbol = '';
 
-            bankTransactions.forEach(transaction => {
-                const type = transaction.transactionType.toLowerCase();
+            bankTransactions.forEach((transaction, index) => {
+                const type = transaction.transactionType?.toLowerCase();
+                const { amount, currencySymbol: symbol } = parseTransactionAmount(transaction.transactionAmount);
 
-                symbol = transaction.transactionAmount.replace(/[^a-zA-Z$€£]/g, "").trim() || ''; // This will capture currency symbols like $ € £ TT$
-                let amount = parseFloat(transaction.transactionAmount.replace(/[^0-9.]/g, "")) || 0; //This Removes the Currency Symbol from the amount
+                if (index === 0 && symbol) {
+                    firstSymbol = symbol;
+                }
 
                 if (type === TransactionType.INCOME.toLowerCase()) {
                     income++;
                     incomeTotal += amount;
-
                 } else if (type === TransactionType.EXPENSE.toLowerCase()) {
                     expense++;
                     expenseTotal += amount;
@@ -155,9 +155,64 @@ export default function BankDetailsScreen({ navigation, route }) {
             setExpenseCount(expense);
             setIncomeAmount(incomeTotal);
             setExpenseAmount(expenseTotal);
-            setCurrencySymbol(symbol);
+            setCurrencySymbol(firstSymbol);
+        } else {
+            setIncomeCount(0);
+            setExpenseCount(0);
+            setIncomeAmount(0);
+            setExpenseAmount(0);
+            setCurrencySymbol('');
         }
     }, [bankTransactions]);
+
+
+    const processedCategories = useMemo(() => {
+        if (!bankTransactions || bankTransactions.length === 0) return [];
+
+        const categoriesMap = bankTransactions.reduce((acc, transaction) => {
+            const category = Array.isArray(transaction.transactionCategory)
+                ? transaction.transactionCategory[0]
+                : transaction.transactionCategory || "Uncategorized";
+            const type = transaction.transactionType?.trim().toLowerCase();
+            const { amount } = parseTransactionAmount(transaction.transactionAmount);
+
+            if (!acc[category]) {
+                acc[category] = {
+                    name: category,
+                    income: { totalAmount: 0, count: 0 },
+                    expense: { totalAmount: 0, count: 0 },
+                };
+            }
+
+            if (type === TransactionType.INCOME.toLowerCase()) {
+                acc[category].income.totalAmount += amount;
+                acc[category].income.count += 1;
+            } else if (type === TransactionType.EXPENSE.toLowerCase()) {
+                acc[category].expense.totalAmount += amount;
+                acc[category].expense.count += 1;
+            }
+
+            return acc;
+        }, {});
+
+        return Object.values(categoriesMap);
+
+    }, [bankTransactions]);
+
+    useEffect(() => {
+        const relevantCategories = processedCategories
+            .filter(cat => selectedOption === 'Income' ? cat.income.count > 0 : cat.expense.count > 0)
+            .sort((a, b) => {
+                const amountA = selectedOption === 'Income' ? a.income.totalAmount : a.expense.totalAmount;
+                const amountB = selectedOption === 'Income' ? b.income.totalAmount : b.expense.totalAmount;
+                return amountB - amountA;
+            });
+
+        setBankCategories(relevantCategories);
+        setTopCategories(relevantCategories.slice(0, 3));
+
+    }, [processedCategories, selectedOption]);
+
 
     const handleOptionPress = (option) => {
         setSelectedOption(option);
@@ -167,122 +222,104 @@ export default function BankDetailsScreen({ navigation, route }) {
         setShowBankTransactionsPopup(true);
     };
 
-    const filteredTransactions = bankTransactions.filter(transaction =>
-        transaction.transactionType && (
-            selectedOption === 'Income'
-                ? transaction.transactionType.toLowerCase() === 'income'
-                : transaction.transactionType.toLowerCase() === 'expense'
-        )
-    );
 
-    const getBankCategories = (filteredTransactions) => {
-        if (!filteredTransactions) return [];
-
-        const topCategoriesMap = {};
-
-        filteredTransactions.forEach(transaction => {
-
-            const amount = parseFloat(transaction.transactionAmount.replace(/[^\d.-]/g, "").trim()) || 0;
-            const category = Array.isArray(transaction.transactionCategory) ? transaction.transactionCategory[0] : transaction.transactionCategory || "Uncategorized";
-            const type = transaction.transactionType ? transaction.transactionType.trim().toLowerCase() : "";
-
-            if (!topCategoriesMap[category]) {
-                topCategoriesMap[category] = {
-                    Income: { totalAmount: 0, count: 0, transactions: [] },
-                    Expense: { totalAmount: 0, count: 0, transactions: [] }
-                };
-            }
-
-            if (type === 'income') {
-                topCategoriesMap[category].Income.totalAmount += amount;
-                topCategoriesMap[category].Income.count += 1;
-                topCategoriesMap[category].Income.transactions.push(transaction);
-
-            } else if (type === 'expense') {
-                topCategoriesMap[category].Expense.totalAmount += amount;
-                topCategoriesMap[category].Expense.count += 1;
-                topCategoriesMap[category].Expense.transactions.push(transaction);
-            }
-        });
-
-        const result = Object.keys(topCategoriesMap)
-            .map(category => ({
-                name: category,
-                income: {
-                    totalAmount: topCategoriesMap[category].Income.totalAmount,
-                    count: topCategoriesMap[category].Income.count,
-                    transactions: topCategoriesMap[category].Income.transactions
-                },
-                expense: {
-                    totalAmount: topCategoriesMap[category].Expense.totalAmount,
-                    count: topCategoriesMap[category].Expense.count,
-                    transactions: topCategoriesMap[category].Expense.transactions
-                }
-            }))
-            .sort((a, b) =>
-                (b.income.totalAmount + b.expense.totalAmount) - (a.income.totalAmount + a.expense.totalAmount)
-            )
-
-        return result;
-    };
-
-    useEffect(() => {
-        const bankCategoriesResult = getBankCategories(filteredTransactions);
-        const topThreeCategories = bankCategoriesResult.slice(0, 3);
-
-        setBankCategories(bankCategoriesResult)
-        setTopCategories(topThreeCategories);
-    }, [bankTransactions, selectedOption]);
-
-    const renderTopTransactions = (categories) => {
-        if (!categories) {
-            return <Text style={[styles.defaultText, { fontSize: 15 }]}>No transactions available</Text>;
+    const renderTopTransactions = useCallback((categories) => {
+        if (!categories || categories.length === 0) {
+            return <Text style={[styles.defaultText, styles.infoText, { textAlign: 'center', paddingVertical: 20 }]}>
+                No {selectedOption} transactions found.
+            </Text>;
         }
 
         return categories.map((category, index) => {
-
             const categoryData = selectedOption === 'Income' ? category.income : category.expense;
+            const isIncome = selectedOption === 'Income';
+            const color = isIncome ? theme.colors.income : theme.colors.expense;
 
             return (
-                <View key={index} style={styles.transactionRow}>
+                <View key={`${category.name}-${index}`} style={styles.transactionRow}>
                     <View style={styles.transactionCategoryTitleContainer}>
-
                         <View style={styles.transactionCountCircle}>
-                            <Text style={[styles.defaultText, { fontSize: 15 }]}>
+                            <Text style={[styles.defaultText, styles.smallText, { color: 'white' }]}>
                                 {categoryData.count}
                             </Text>
                         </View>
-
-                        <Text style={[styles.defaultText, { fontSize: 15 }]}>
+                        <Text style={[styles.defaultText, styles.mediumText]}>
                             {category.name}
                         </Text>
                     </View>
-
                     <View style={styles.transactionAmountContainer}>
-
                         <Icon
-                            name={selectedOption === 'Income' ? "arrow-up" : "arrow-down"} // Arrow-down for positive, arrow-up for negative
+                            name={isIncome ? "arrow-up" : "arrow-down"}
                             size={18}
-                            color={selectedOption === 'Income' ? '#80c582' : '#e57373'} // Red for expense, green for income
+                            color={color}
                         />
-
-                        <Text style={[
-                            styles.defaultText,
-                            { fontSize: 15, color: selectedOption === 'Income' ? '#80c582' : '#e57373' }
-                        ]}>
+                        <Text style={[styles.defaultText, styles.mediumText, { color: color }]}>
                             {currencySymbol} {categoryData.totalAmount.toFixed(2)}
                         </Text>
                     </View>
                 </View>
             );
         });
-    };
+    }, [selectedOption, currencySymbol]);
+
+    const donutData = useMemo(() => {
+        const data = bankCategories
+            .map((category, index) => {
+                const categoryData = selectedOption === 'Income' ? category.income : category.expense;
+                const categoryNameLower = category.name.toLowerCase();
+                const imageKey = categoryImages[categoryNameLower] ? categoryNameLower : 'default';
+
+                return {
+                    name: category.name,
+                    value: categoryData.count,
+                    color: getCategoryColor(category.name, index),
+                    label: category.name,
+                    image: categoryImages[imageKey],
+                };
+            })
+            .filter(data => data.value > 0);
+
+        if (data.length === 0) {
+
+            return [{
+                name: 'No Data',
+                value: 1,
+                color: theme.colors.disabled || '#CCCCCC',
+                label: 'No Data',
+                image: categoryImages.default
+            }];
+        }
+
+        return data;
+
+    }, [bankCategories, selectedOption, getCategoryColor]);
 
 
     if (loading) {
         return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
+            <View style={styles.bankDetailsScreen}>
+                <InAppBackground>
+                    <View style={styles.centeredContainer}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                        <Text style={[styles.defaultText, styles.infoText, { marginTop: 15 }]}>Loading Bank Details...</Text>
+                    </View>
+                </InAppBackground>
+            </View>
+        );
+    }
+
+    if (error) {
+        return (
+            <View style={styles.bankDetailsScreen}>
+                <InAppBackground>
+                    <BackButton goBack={navigation.goBack} />
+                    <View style={styles.centeredContainer}>
+                        <Icon name="alert-circle-outline" size={50} color={theme.colors.error} />
+                        <Text style={[styles.defaultText, styles.errorText, { marginTop: 15, marginHorizontal: 20 }]}>
+                            {error}
+                        </Text>
+                    </View>
+                </InAppBackground>
             </View>
         );
     }
@@ -291,83 +328,55 @@ export default function BankDetailsScreen({ navigation, route }) {
         return (
             <View style={styles.bankDetailsScreen}>
                 <InAppBackground>
+                    <BackButton goBack={navigation.goBack} />
                     <View style={styles.centeredContainer}>
-                        <Text style={styles.defaultText}>No Bank Details Available</Text>
+                        <Icon name="alert-circle-outline" size={50} color={theme.colors.secondary} />
+                        <Text style={[styles.defaultText, styles.infoText, { marginTop: 15 }]}>
+                            Bank details could not be loaded or found.
+                        </Text>
                     </View>
                 </InAppBackground>
             </View>
         );
     }
 
-    const defaultColor = '#d3d3d3';
-
-    const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png')
-    };
-
-    let donutData = bankCategories.map(category => {
-        const incomeAmount = category.income.count || 0;
-        const expenseAmount = category.expense.count || 0;
-        const categoryName = category.name.toLowerCase();
-
-        return {
-            name: category.name,
-            value: selectedOption === 'Income' ? incomeAmount : expenseAmount,
-            color: getRandomColor(),
-            label: {
-                text: category.name, // Add text label first (testing if images are supported)
-                image: categoryImages[categoryName] || require('../assets/default_img.jpg'), // Image as a label
-            }
-        };
-    }).filter(data => data.value > 0);
-
-    if (donutData.length === 0) {
-        donutData = [{ value: 1, color: defaultColor, label: { text: 'No Data', fontSize: 10 } }];
-
-    } else if (donutData.length === 1) {
-        donutData[0].value = 1;
-    }
-
     return (
-
         <View style={styles.bankDetailsScreen} >
             <InAppBackground>
-
                 <BackButton goBack={navigation.goBack} />
-                <EditButton />
+                {/* <EditButton onPress={() => {}} /> */}
 
                 {showBankTransactionsPopup && (
                     <BankTransactionsPopup
                         selectedOption={selectedOption}
-                        bankTransactions={bankTransactions}
+                        bankTransactions={bankTransactions.filter(t => t.transactionType?.toLowerCase() === selectedOption.toLowerCase())}
+                        currencySymbol={currencySymbol}
                         setShowBankTransactionsPopup={setShowBankTransactionsPopup}
                     />
                 )}
-                <ScrollView style={styles.scrollViewContainer}>
+
+                <ScrollView style={styles.scrollViewContainer} contentContainerStyle={styles.scrollContentContainer}>
                     <View style={styles.bankDetailsContainer}>
+
                         <View style={styles.headerContainer}>
-                            <Text style={[styles.defaultText, { fontSize: 40 }]}>{bankDetails.bankTitle}</Text>
-                            <Text style={[styles.defaultText, { fontSize: 30 }]}>{bankDetails.remainingBankAmount}</Text>
+                            <Text style={[styles.defaultText, styles.headerTitle]}>{bankDetails.bankTitle}</Text>
+                            <Text style={[styles.defaultText, styles.headerAmount]}>{bankDetails.remainingBankAmount}</Text>
 
-                            <View style={styles.transactionsListingContainer}>
-
-                                <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>All Time</Text>
-
+                            <View style={styles.allTimeSummaryContainer}>
+                                <Text style={[styles.defaultText, styles.subHeaderText]}>All Time</Text>
                                 <View style={styles.transactionRow}>
-                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>Income (x{incomeCount})</Text>
-                                    <View style={styles.line} />
-                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#80c582' }]}>{currencySymbol} {incomeAmount}</Text>
+                                    <Text style={[styles.defaultText, styles.mediumText, { color: theme.colors.income }]}>Income (x{incomeCount})</Text>
+                                    <View style={styles.lineSeparator} />
+                                    <Text style={[styles.defaultText, styles.mediumText, { color: theme.colors.income }]}>
+                                        {currencySymbol} {incomeAmount.toFixed(2)}
+                                    </Text>
                                 </View>
-
                                 <View style={styles.transactionRow}>
-                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>Expense (x{expenseCount})</Text>
-                                    <View style={styles.line} />
-                                    <Text style={[styles.defaultText, { fontSize: 15, color: '#e57373' }]}>{currencySymbol} {expenseAmount}</Text>
+                                    <Text style={[styles.defaultText, styles.mediumText, { color: theme.colors.expense }]}>Expense (x{expenseCount})</Text>
+                                    <View style={styles.lineSeparator} />
+                                    <Text style={[styles.defaultText, styles.mediumText, { color: theme.colors.expense }]}>
+                                        {currencySymbol} {expenseAmount.toFixed(2)}
+                                    </Text>
                                 </View>
                             </View>
                         </View>
@@ -377,11 +386,11 @@ export default function BankDetailsScreen({ navigation, route }) {
                                 mode={selectedOption === 'Income' ? 'contained' : 'outlined'}
                                 onPress={() => handleOptionPress('Income')}
                                 style={[
-                                    styles.button,
-                                    selectedOption === 'Income' && styles.incomeSelected,
-                                    selectedOption !== 'Income' && styles.defaultButton,
+                                    styles.optionButton,
+                                    selectedOption === 'Income' ? styles.incomeSelected : styles.defaultButton,
                                 ]}
-                                labelStyle={styles.text}
+                                labelStyle={[styles.buttonText, selectedOption !== 'Income' && styles.defaultButtonText]}
+                                theme={{ colors: { primary: theme.colors.income } }}
                             >
                                 Income
                             </Button>
@@ -389,58 +398,62 @@ export default function BankDetailsScreen({ navigation, route }) {
                                 mode={selectedOption === 'Expense' ? 'contained' : 'outlined'}
                                 onPress={() => handleOptionPress('Expense')}
                                 style={[
-                                    styles.button,
-                                    selectedOption === 'Expense' && styles.expenseSelected,
-                                    selectedOption !== 'Expense' && styles.defaultButton,
+                                    styles.optionButton,
+                                    selectedOption === 'Expense' ? styles.expenseSelected : styles.defaultButton,
                                 ]}
-                                labelStyle={styles.text}
+                                labelStyle={[styles.buttonText, selectedOption !== 'Expense' && styles.defaultButtonText]}
+                                theme={{ colors: { primary: theme.colors.expense } }}
                             >
                                 Expense
                             </Button>
                         </View>
 
                         <View style={styles.bankStatisticsContainer}>
-
-                            <View style={{ height: 250, width: 250 }}>
-                                <DonutChart
-                                    widthAndHeight={250}
-                                    series={donutData.map(data => ({
-                                        value: data.value,
-                                        color: data.color,
-                                    }))}
-                                />
-
-                            </View>
-
-
-                            <View style={styles.graphKeyContainer}>
-                                {donutData.map((data, index) => (
-                                    <View key={index} style={styles.keyRow}>
-                                        <View style={[styles.colorBlock, { backgroundColor: data.color }]} />
-
-                                        <Image
-                                            source={data.label.image}
-                                            style={styles.keyImage}
-                                        />
-
-                                        <Text style={[styles.defaultText, { fontSize: 12 }]}>{data.name}</Text>
-                                    </View>
-                                ))}
+                            <Text style={[styles.defaultText, styles.subHeaderText, { alignSelf: 'flex-start', paddingLeft: 10, marginBottom: 15 }]}>
+                                {selectedOption} Breakdown by Category
+                            </Text>
+                            <View style={styles.chartAndKeyWrapper}>
+                                <View style={styles.chartContainer}>
+                                    <DonutChart
+                                        widthAndHeight={180}
+                                        series={donutData.map(data => ({
+                                            value: data.value,
+                                            // Ensure color is passed, provide fallback
+                                            color: data.color || '#CCCCCC',
+                                        }))}
+                                        strokeWidth={20}
+                                    />
+                                </View>
+                                <View style={styles.graphKeyContainer}>
+                                    {donutData.map((data, index) => (
+                                        <View key={`${data.name}-${index}-key`} style={styles.keyRow}>
+                                            <View style={[styles.colorBlock, { backgroundColor: data.color || '#CCCCCC' }]} />
+                                            <Image
+                                                source={data.image}
+                                                style={styles.keyImage}
+                                                resizeMode="contain"
+                                            />
+                                            <Text style={[styles.defaultText, styles.smallText, { flexShrink: 1 }]}>{data.name}</Text>
+                                        </View>
+                                    ))}
+                                </View>
                             </View>
                         </View>
 
-                        <Text style={[styles.defaultText, { fontSize: 20, alignSelf: 'flex-start', marginVertical: 10, paddingLeft: 10 }]}>Transaction Overview</Text>
-
+                        <Text style={[styles.defaultText, styles.subHeaderText, { alignSelf: 'flex-start', marginVertical: 15, paddingLeft: 10 }]}>
+                            Top {selectedOption} Categories
+                        </Text>
                         <View style={styles.transactionsListingContainer}>
                             {renderTopTransactions(topCategories)}
                         </View>
 
-                        <View>
+                        <View style={styles.viewAllButtonContainer}>
                             <ButtonSmall
-                                label="View All Transactions"
+                                label={`View All ${selectedOption} Transactions`}
                                 onPress={handleViewAllTransactions}
                             />
                         </View>
+
                     </View>
                 </ScrollView>
             </InAppBackground>
@@ -452,146 +465,186 @@ const styles = StyleSheet.create({
     bankDetailsScreen: {
         flex: 1,
     },
-
-    defaultText: {
-        fontSize: 15,
-        fontFamily: theme.fonts.medium.fontFamily,
-        color: 'white',
-        lineHeight: 21,
-        textAlign: 'center',
-        paddingTop: 100
+    scrollViewContainer: {
+        flex: 1,
     },
-
+    scrollContentContainer: {
+        paddingBottom: 30,
+    },
+    centeredContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
     bankDetailsContainer: {
         flex: 1,
-        justifyContent: 'flex-start',
         alignItems: 'center',
     },
-
     defaultText: {
-        textAlign: 'center',
-        marginBottom: 5,
         fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 20,
         color: 'white',
+        textAlign: 'center',
     },
-
+    infoText: {
+        fontSize: 16,
+        lineHeight: 24,
+    },
+    errorText: {
+        fontSize: 16,
+        lineHeight: 24,
+        color: theme.colors.error,
+    },
+    smallText: {
+        fontSize: 12,
+        lineHeight: 16,
+    },
+    mediumText: {
+        fontSize: 15,
+        lineHeight: 21,
+    },
     headerContainer: {
         width: '100%',
-        // backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        marginTop: 50,
-        borderBottomWidth: 5,
-        borderColor: theme.colors.primary,
-    },
-
-    statisticsOptionsContainer: {
-        width: '98%',
-        // backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-around',
-        marginTop: 10,
-        marginBottom: 30,
+        marginTop: 60,
+        paddingBottom: 15,
+        borderBottomWidth: 3,
+        borderColor: theme.colors.primary,
+        marginBottom: 20,
     },
-
-    button: {
+    headerTitle: {
+        fontFamily: theme.fonts.bold.fontFamily,
+        fontSize: 32,
+        marginBottom: 5,
+    },
+    headerAmount: {
+        fontFamily: theme.fonts.bold.fontFamily,
+        fontSize: 26,
+        marginBottom: 15,
+        color: theme.colors.primary,
+    },
+    allTimeSummaryContainer: {
+        width: '95%',
+        marginTop: 10,
+    },
+    subHeaderText: {
+        fontSize: 18,
+        fontFamily: theme.fonts.bold.fontFamily,
+        marginBottom: 10,
+        alignSelf: 'flex-start',
+        paddingLeft: 10,
+    },
+    statisticsOptionsContainer: {
+        width: '95%',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        marginBottom: 25,
+    },
+    optionButton: {
         flex: 1,
         marginHorizontal: 5,
+        borderWidth: 1,
     },
-
     defaultButton: {
-
-        borderColor: 'white',
+        borderColor: 'rgba(255, 255, 255, 0.7)',
         backgroundColor: 'transparent',
     },
-
     incomeSelected: {
-        backgroundColor: '#80c582',
-        borderColor: '#FFCDD2',
+        backgroundColor: theme.colors.income,
+        borderColor: theme.colors.income,
     },
-
     expenseSelected: {
-        backgroundColor: '#e57373',
-        borderColor: '#C8E6C9',
+        backgroundColor: theme.colors.expense,
+        borderColor: theme.colors.expense,
     },
-
-    text: {
-        color: 'white',
+    buttonText: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 15,
         lineHeight: 26,
+        color: 'white',
     },
-
+    defaultButtonText: {
+        color: 'rgba(255, 255, 255, 0.9)',
+    },
     bankStatisticsContainer: {
+        width: '95%',
         alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
+        marginBottom: 15,
     },
-
-    graphKeyContainer: {
+    chartAndKeyWrapper: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
-        flexWrap: 'wrap',
-        paddingVertical: 10,
+        width: '100%',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 5,
     },
-
+    chartContainer: {
+    },
+    graphKeyContainer: {
+        flex: 1,
+        marginLeft: 15,
+        alignSelf: 'center',
+    },
     keyRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginRight: 10,
-        marginVertical: 5,
+        marginVertical: 4,
     },
-
     colorBlock: {
+        width: 14,
+        height: 14,
+        borderRadius: 3,
+        marginRight: 6,
+    },
+    keyImage: {
         width: 20,
         height: 20,
-        marginRight: 5,
-        borderRadius: 8,
+        marginRight: 6,
     },
-
-    keyImage: {
-        width: 30,
-        height: 30,
-        marginRight: 5,
-    },
-
     transactionsListingContainer: {
-        width: '100%',
-        padding: 10,
+        width: '95%',
+        paddingBottom: 10,
     },
-
     transactionRow: {
-        width: '98%',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        padding: 10,
-        borderRadius: 10,
-        marginVertical: 5,
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        paddingVertical: 12,
+        paddingHorizontal: 15,
+        borderRadius: 8,
+        marginVertical: 4,
     },
-
     transactionCategoryTitleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        flex: 1,
+        marginRight: 10,
     },
-
     transactionAmountContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 5,
     },
-
     transactionCountCircle: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        borderWidth: 2,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 1.5,
         borderColor: 'white',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 10,
-        backgroundColor: 'transparent',
+        marginRight: 8,
+    },
+    lineSeparator: {
+        height: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        marginHorizontal: 5,
+        flexGrow: 1,
+    },
+    viewAllButtonContainer: {
+        marginTop: 15,
+        width: '60%',
+        alignSelf: 'center',
     }
 });

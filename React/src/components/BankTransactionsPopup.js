@@ -49,7 +49,7 @@ const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTr
                     <ScrollView
                         style={styles.scrollView}
                         contentContainerStyle={styles.scrollContent}
-                        showsVerticalScrollIndicator={true}
+                        showsVerticalScrollIndicator={false}
                         indicatorStyle="white"
                     >
                         <Text style={styles.modalTitle}>All Transactions</Text>
