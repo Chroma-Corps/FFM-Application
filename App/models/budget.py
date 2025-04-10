@@ -30,6 +30,7 @@ class Budget(db.Model):
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
     bankID = db.Column(db.Integer, db.ForeignKey('bank.bankID'), nullable=True)
+    color = db.Column(db.String(120), nullable=True)
 
     # Foreign Keys
     circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
@@ -39,7 +40,7 @@ class Budget(db.Model):
     banks = db.relationship('Bank', back_populates='budgets')
     user_budgets = db.relationship('UserBudget', back_populates='budget') # UserBudget
 
-    def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, bankID, circleID):
+    def __init__(self, budgetTitle, budgetAmount, remainingBudgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, bankID, circleID, color):
         self.circleID = circleID
         self.bankID = bankID
         self.budgetTitle = budgetTitle
@@ -50,6 +51,7 @@ class Budget(db.Model):
         self.transactionScope = transactionScope
         self.startDate = convert_to_date(startDate)
         self.endDate = convert_to_date(endDate)
+        self.color = color
 
     def get_json(self):
         main_bank = None
@@ -75,7 +77,8 @@ class Budget(db.Model):
             'transactionScope': self.transactionScope.value,
             'startDate': self.startDate.strftime("%a, %d %b %Y"),
             'endDate': self.endDate.strftime("%a, %d %b %Y"),
-            'bankID': self.bankID
+            'bankID': self.bankID,
+            'color': self.color
         }
 
     def __str__(self):

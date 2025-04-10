@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
-import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
@@ -89,20 +89,14 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         );
     };
 
-
     return (
         <View style={styles.container}>
             <InAppBackground>
-                <BackButton goBack={() => navigation.goBack()} />
-
-                <EditButton
-                    navigateTo="EditBudgetScreen"
-                    params={{ budgetID: budgetID }}
-                />
-
-
-                <View style={styles.headerContainer}>
-
+                <BackButton goBack={navigation.goBack} />
+                <TouchableOpacity onPress={null} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
+                    <MaterialIcons name={"edit"} size={30} color={"white"}/>
+                </TouchableOpacity>
+                <View style={[styles.headerContainer, {borderColor: budgetDetails.color}]}>
                     <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
 
                     <Text style={styles.amountText}>
@@ -114,7 +108,9 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         <ProgressBar
                             startDate={budgetDetails.startDate}
                             endDate={budgetDetails.endDate}
-                            budgetColorTheme={budgetDetails.color || '#9ACBD0'}
+                            colorTheme={budgetDetails.color || '#9ACBD0'}
+                            amount={budgetDetails.budgetAmount} 
+                            remainingAmount={budgetDetails.remainingBudgetAmount}
                         />
 
                         <Text style={styles.categoryText}>
@@ -162,10 +158,10 @@ const styles = StyleSheet.create({
     },
 
     headerContainer: {
-        borderColor: theme.colors.primary,
         padding: 15,
         marginTop: 30,
         borderBottomWidth: 5,
+        alignItems: 'center'
     },
 
     titleText: {

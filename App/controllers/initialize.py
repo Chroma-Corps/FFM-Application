@@ -51,32 +51,105 @@ def initialize():
         startDate="2025-01-01",
         endDate="2025-01-31",
         userIDs=[alice.id, jalene.id],
+        color="#F5A623"
     )
 
     create_budget (
         userID=bob.id,
         bankID=bobberson_bank.bankID,
-        budgetTitle="Inclusive Budget",
+        budgetTitle="Violet Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
-        budgetCategory=['SHOPPING', 'TRANSIT', 'ENTERTAINMENT'],
+        budgetCategory=['TRANSIT'],
         transactionScope=TransactionScope.INCLUSIVE,
         startDate="2025-01-01",
         endDate="2025-01-31",
-        userIDs=[alice.id]
+        userIDs=[alice.id, bob.id],
+        color="#9B4AD8"
     )
 
-    exclusive_budget = create_budget (
+    create_budget (
+        userID=bob.id,
+        bankID=bobberson_bank.bankID,
+        budgetTitle="Indigo Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['SHOPPING'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#4A6CD8"
+    )
+
+    create_budget (
         userID=bob.id,
         bankID=None,
-        budgetTitle="Exclusive Budget",
+        budgetTitle="Blue Budget",
         budgetAmount=1000.00,
         budgetType=BudgetType.EXPENSE,
         budgetCategory=[],
         transactionScope=TransactionScope.EXCLUSIVE,
         startDate="2025-01-01",
         endDate="2025-01-31",
-        userIDs=[alice.id]
+        userIDs=[alice.id, bob.id],
+        color="#4A90E2"
+    )
+
+    create_budget (
+        userID=bob.id,
+        bankID=bobberson_bank.bankID,
+        budgetTitle="Green Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['ENTERTAINMENT'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#4AD88A"
+    )
+
+    create_budget (
+        userID=bob.id,
+        bankID=None,
+        budgetTitle="Yellow Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.SAVINGS,
+        budgetCategory=['INCOME'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#D8C24A"
+    )
+
+    exclusive_budget = create_budget (
+        userID=bob.id,
+        bankID=None,
+        budgetTitle="Orange Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=[],
+        transactionScope=TransactionScope.EXCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#D88F4A"
+    )
+
+    create_budget (
+        userID=bob.id,
+        bankID=bobberson_bank.bankID,
+        budgetTitle="Red Budget",
+        budgetAmount=1000.00,
+        budgetType=BudgetType.EXPENSE,
+        budgetCategory=['SHOPPING', 'TRANSIT', 'ENTERTAINMENT'],
+        transactionScope=TransactionScope.INCLUSIVE,
+        startDate="2025-01-01",
+        endDate="2025-01-31",
+        userIDs=[alice.id, bob.id],
+        color="#D85A5A"
     )
 
     add_transaction (

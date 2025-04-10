@@ -30,6 +30,7 @@ def new_budget():
         userID = get_jwt_identity()
         bankID = data.get('bankID')
         userIDs = data.get('userIDs') or []
+        color = data.get('color')
 
         if not all([budgetTitle, budgetAmount, budgetType, transactionScope, startDate, endDate, userID]):
            return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
@@ -44,7 +45,8 @@ def new_budget():
             endDate=endDate,
             userID=userID, # Creator Of Budget
             bankID=bankID,
-            userIDs=userIDs) # Associated Users
+            userIDs=userIDs, # Associated Users
+            color=color)
 
         if new_budget is None:
             return jsonify({"status":"error", "message":"Failed To Create Budget"}), 500
@@ -134,8 +136,9 @@ def update_user_budget(budgetID):
         startDate = data.get('startDate')
         endDate = data.get('endDate')
         bankID = data.get('bankID')
+        color = data.get('color')
 
-        updated_budget = update_budget(budgetID, budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, bankID)
+        updated_budget = update_budget(budgetID, budgetTitle, budgetAmount, budgetType, budgetCategory, startDate, endDate, bankID, color)
 
         if updated_budget:
             return jsonify({"status": "success", "message": "Budget Updated Successfully"}), 200
