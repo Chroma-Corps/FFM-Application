@@ -17,15 +17,16 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false)
 
   const onLoginPressed = async () => {
-    const emailError = emailValidator(email.value)
-    const passwordError = passwordValidator(password.value)
-    if (passwordError) {
-      setEmail({ ...email, error: emailError })
-      setPassword({ ...password, error: passwordError })
-      return
+    const emailError = emailValidator(email.value);
+    const passwordError = passwordValidator(password.value);
+
+    if (emailError || passwordError) {
+      setEmail({ ...email, error: emailError });
+      setPassword({ ...password, error: passwordError });
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
       const response = await fetch(`https://ffm-application-main.onrender.com/login`, {
@@ -37,28 +38,50 @@ export default function LoginScreen({ navigation }) {
           email: email.value.trim(),
           password: password.value.trim(),
         }),
-      })
+      });
 
-      const data = await response.json()
+      if (response.ok) {
+        const data = await response.json();
 
-      if (response.ok && data.status === 'success') {
-        await AsyncStorage.setItem('access_token', data.access_token);
-        console.log(data.message)
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Home' }],
-        })
+        if (data.status === 'success') {
+          await AsyncStorage.setItem('access_token', data.access_token);
+          console.log('Login Success:', data.message || 'Logged in successfully');
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Home' }],
+          });
+        } else {
+          const errorMessage = data.message || 'Login failed. Please check your credentials.';
+          console.error('Application Error:', errorMessage);
+          alert(errorMessage);
+        }
       } else {
-        console.error(data.message);
-        alert(data.message);
+        let errorMessage = `Login failed with status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || JSON.stringify(errorData);
+        } catch (e) {
+          try {
+            const errorText = await response.text();
+            errorMessage += `\nServer Response: ${errorText.substring(0, 200)}`;
+          } catch (textErr) { }
+        }
+        console.error('Error Loggin In:', errorMessage);
+        alert(errorMessage);
       }
+
     } catch (error) {
-      console.error('Error Logging In:', error)
-      alert('An Error Occurred, Please Try Again Later')
+      console.error('Error Logging In:', error);
+      if (error instanceof SyntaxError) {
+        alert('Received an invalid response from the server. Please try again.');
+      } else {
+        alert('A network error occurred, or the server is unreachable. Please try again later.');
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
 
   const onSocialGooglePressed = () => {
     navigation.reset({

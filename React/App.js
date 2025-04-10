@@ -53,7 +53,7 @@ export default function App() {
       <PaperProvider theme={theme}>
         <NavigationContainer>
           <Stack.Navigator
-            initialRouteName="LoginScreen"
+            initialRouteName="StartScreen"
             screenOptions={{
               headerShown: false,
             }}
