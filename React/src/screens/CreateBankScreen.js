@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
 import { Card } from 'react-native-paper';
@@ -13,23 +13,31 @@ import Toggle from '../components/Toggle';
 import CurrencySelectionPopUp from '../components/CurrencySelectionPopUp';
 import Currencies from '../constants/currencies.json';
 import Colors from '../constants/colors.json';
+import ColorTray from '../components/ColorTray';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const mainCurrencies = ['GBP', 'EUR', 'USD', 'TTD', 'JPY', 'CAD'];
 const colorData = Object.values(Colors);
 
-export default function CreateBudgetsScreen({ navigation }) {
+export default function CreateBanksScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
 
-    //Bank Details
-    const [selectedBankTitle, setSelectedBankTitle] = useState(null);
-    const [selectedBankAmount, setSelectedBankAmount] = useState(null);
+    const bankTitleRef = useRef(null);
+    const bankAmountRef = useRef(null);
+
+    const [selectedBankTitle, setSelectedBankTitle] = useState('');
+    const [selectedBankAmount, setSelectedBankAmount] = useState('');
     const [isPrimary, setIsPrimary] = useState(false);
     const [selectedCurrency, setSelectedCurrency] = useState('');
-    const [selectedTheme, setSelectedTheme] = useState('');
+    const [selectedColor, setSelectedColor] = useState('#4A90E2');
 
-    //Currency Data & Popup 
+
     const [currencyData, setCurrencyData] = useState([]);
     const [showCurrencyPopup, setShowCurrencyPopup] = useState(false);
+
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+    };
 
     const handleBankTitleChange = (title) => {
         setSelectedBankTitle(title);
@@ -41,17 +49,39 @@ export default function CreateBudgetsScreen({ navigation }) {
 
     const handleSelectCurrencyOption = (currency) => {
         setSelectedCurrency(currency);
+        setShowCurrencyPopup(false);
     };
 
     const handleToggleChange = (value) => {
         setIsPrimary(value);
     };
 
-    console.log('Is Primary:', isPrimary);
-
     const handleViewCurrenciesPopup = () => {
         setShowCurrencyPopup(true);
     }
+
+    const getButtonText = () => {
+        if (!selectedBankTitle) return "Set Title";
+        if (!selectedBankAmount) return "Set Amount";
+        if (!selectedCurrency) return "Select Currency";
+        return "Add Bank";
+    };
+
+    const handlePress = () => {
+        if (!selectedBankTitle) {
+            bankTitleRef.current?.focus();
+            return;
+        }
+        if (!selectedBankAmount) {
+            bankAmountRef.current?.focus();
+            return;
+        }
+        if (!selectedCurrency) {
+            Alert.alert('Missing Field', 'Please select a currency.');
+            return;
+        }
+        createBank();
+    };
 
 
     const fetchActiveCircle = async () => {
@@ -71,11 +101,9 @@ export default function CreateBudgetsScreen({ navigation }) {
             });
 
             const data = await response.json();
-            console.log('Raw Response:', data);
 
             if (response.ok) {
                 const activeCircleID = data.activeCircle.circleID;
-                console.log('Active Circle ID:', activeCircleID);
                 return activeCircleID;
             } else {
                 console.error('Error fetching active circle:', data.message);
@@ -118,7 +146,7 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
     };
 
-    const handleAddBank = async () => {
+    const createBank = async () => {
         const token = await AsyncStorage.getItem('access_token');
 
         if (!token) {
@@ -126,8 +154,9 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
         }
 
-        if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency) {
-            Alert.alert('Error', 'Please Fill In All Fields');
+
+        if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency || !selectedColor) {
+            Alert.alert('Error', 'Please ensure all fields are filled and a color is selected.');
             return;
         }
 
@@ -152,21 +181,19 @@ export default function CreateBudgetsScreen({ navigation }) {
                     bankCurrency: selectedCurrency.code,
                     bankAmount: parseFloat(selectedBankAmount),
                     isPrimary: isPrimary,
-                    userIDs: userIDs
+                    color: selectedColor,
+                    userIDs: userIDs,
                 })
             });
 
             const responseData = await response.json();
 
-            // Log the response data to understand what's being returned
-            console.log('Response Data:', responseData);
-
             if (response.ok) {
                 Alert.alert('Success', 'Bank Added Successfully');
                 navigation.goBack();
             } else {
-                Alert.alert('Error', 'Failed To Add Bank');
-                navigation.goBack();
+                Alert.alert('Error', responseData.message || 'Failed To Add Bank');
+
             }
 
         } catch (error) {
@@ -192,29 +219,26 @@ export default function CreateBudgetsScreen({ navigation }) {
         setLoading(false);
     }, []);
 
-    // Filtering out the main currencies based on `mainCurrencies` constant
+
     const mainCurrenciesList = currencyData.filter(currency =>
         mainCurrencies.includes(currency.code)
     );
 
     const renderCurrencyItem = (currency) => {
+        const isSelected = selectedCurrency?.code === currency.code;
         return (
             <TouchableOpacity
-                key={currency}
+                key={currency.code}
                 style={[
                     styles.currencyBox,
-                    selectedCurrency?.code === currency.code
-                        ? styles.selectedCurrencyBox
-                        : styles.unselectedCurrencyBox,
+                    isSelected ? styles.selectedCurrencyBox : styles.unselectedCurrencyBox,
                 ]}
                 onPress={() => handleSelectCurrencyOption(currency)}
             >
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency
-                            ? styles.selectedCurrencyText
-                            : styles.unselectedCurrencyText,
+                        isSelected ? styles.selectedCurrencyText : styles.unselectedCurrencyText,
                     ]}
                 >
                     {currency.code}
@@ -223,9 +247,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency
-                            ? styles.selectedCurrencyText
-                            : styles.unselectedCurrencyText,
+                        isSelected ? styles.selectedCurrencyText : styles.unselectedCurrencyText,
                         { fontSize: 15, textAlign: 'center', marginBottom: 5 },
                     ]}
                 >
@@ -235,9 +257,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                 <Text
                     style={[
                         styles.currencyText,
-                        selectedCurrency === currency
-                            ? styles.selectedCurrencyText
-                            : styles.unselectedCurrencyText,
+                        isSelected ? styles.selectedCurrencyText : styles.unselectedCurrencyText,
                         { fontSize: 8, textAlign: 'center' },
                     ]}
                 >
@@ -257,20 +277,22 @@ export default function CreateBudgetsScreen({ navigation }) {
                     <CurrencySelectionPopUp
                         currencyData={currencyData}
                         selectedCurrency={selectedCurrency}
-                        setSelectedCurrency={setSelectedCurrency}
+                        setSelectedCurrency={handleSelectCurrencyOption}
                         setShowCurrenciesPopup={setShowCurrencyPopup}
                     />
                 )}
 
                 <View style={styles.createBankDetailsContainer}>
 
+
                     <View style={[
                         styles.headerContainer,
-                        selectedTheme ? { borderColor: selectedTheme.hex } : { borderColor: theme.colors.primary }
+                        { borderColor: selectedColor || theme.colors.primary }
                     ]}>
                         <TextInput
+                            ref={bankTitleRef}
                             placeholderTextColor="rgba(255, 255, 255, 0.25)"
-                            placeholder="Bank Title"
+                            placeholder="Wallet Title"
                             value={selectedBankTitle}
                             onChangeText={handleBankTitleChange}
                             style={[styles.input, styles.defaultText, { alignSelf: 'center', fontSize: 30 }]}
@@ -279,6 +301,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                         <View style={styles.inputAmountContainer}>
                             <Text style={[styles.defaultText, { fontSize: 30 }]}>Starting at: </Text>
                             <TextInput
+                                ref={bankAmountRef}
                                 placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                 placeholder={`${selectedCurrency?.symbol || '$'}0.00`}
                                 value={selectedBankAmount}
@@ -292,7 +315,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                     <View style={styles.bankCurrencyOptionsContainer}>
 
 
-                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency ( {selectedCurrency.code} )</Text>
+                        <Text style={[styles.defaultText, { fontSize: 20, }]}>Select Currency {selectedCurrency ? `( ${selectedCurrency.code} )` : ''}</Text>
 
                         <View style={styles.currencyContainer}>
                             {mainCurrenciesList.map((currency) => (
@@ -325,38 +348,23 @@ export default function CreateBudgetsScreen({ navigation }) {
                         </View>
                     </View>
 
+
                     <View style={styles.bankThemeOptionsContainer}>
 
                         <Text style={[styles.defaultText, { fontSize: 20 }]}>Select Theme</Text>
 
-                        <View style={styles.themeContainer}>
-                            <FlatList
-                                data={colorData}
-                                horizontal
-                                showsHorizontalScrollIndicator={false}
-                                keyExtractor={(item) => item.hex}
-                                renderItem={({ item }) => (
-                                    <TouchableOpacity
-                                        style={[
-                                            styles.circle,
-                                            { backgroundColor: item.hex },
-                                            selectedTheme.hex === item.hex && styles.selectedCircle,
-                                        ]}
-                                        onPress={() => setSelectedTheme(item)}
-                                    >
-                                    </TouchableOpacity>
-                                )}
+                        <View style={styles.buttonContainer}>
+                            <ColorTray
+                                selectedColor={selectedColor}
+                                onColorSelect={handleColorSelect}
                             />
                         </View>
 
-                        <Button
-                            style={{ marginTop: 20, width: 250 }}
-                            onPress={handleAddBank}
-                        >
-                            <Text style={{ color: 'black' }}>Add Bank</Text>
+                        <Button mode="contained" onPress={handlePress} style={styles.buttonStyle}>
+                            {getButtonText()}
                         </Button>
-
                     </View>
+
                 </View>
             </InAppBackground >
         </View >
@@ -376,6 +384,12 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
 
+    buttonContainer: {
+        justifyContent: 'flex-end',
+        width: '100%',
+        padding: 0,
+    },
+
     defaultText: {
         textAlign: 'center',
         marginBottom: 5,
@@ -386,7 +400,7 @@ const styles = StyleSheet.create({
 
     headerContainer: {
         width: '100%',
-        marginTop: 50,
+        marginTop: 20,
         paddingBottom: 10,
         borderBottomWidth: 5,
     },
@@ -426,17 +440,16 @@ const styles = StyleSheet.create({
     },
 
     optionContainer: {
-        flexDirection: 'row',  // Keeps text and toggle on the same row
-        alignItems: 'center',  // Ensures the text and toggle are aligned
-        justifyContent: 'flex-start', // Aligns items to the left
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
         marginTop: 10,
     },
 
     toggleContainer: {
-        marginTop: 5,  // Adjusts space between the text and toggle if necessary
+        marginTop: 5,
         marginLeft: 10,
     },
-
 
     button: {
         flex: 1,

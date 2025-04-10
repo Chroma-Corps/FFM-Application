@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { theme } from '../core/theme'
 import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
@@ -240,17 +240,18 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                             const imageSource = categoryImages[imageKey] || categoryImages.default;
 
                             return (
-                                <View key={`${item.transactionID}-${index}`} style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}>
+                                <View
+                                    key={index}
+                                    style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}
+                                >
                                     <Image
                                         source={imageSource}
                                         style={[styles.categoryImage, { marginRight: 4 }]}
                                         resizeMode="contain"
                                     />
-                                    <Text style={[styles.descriptionText, styles.categoryTextWithImage]}>
-                                        {cat}
-                                    </Text>
+                                    <Text style={[styles.descriptionText, styles.categoryTextWithImage]}>{cat}</Text>
                                     {index < item.transactionCategory.length - 1 && (
-                                        <Text style={[styles.descriptionText, { marginHorizontal: 4 }]}> •</Text>
+                                        <Text style={[styles.descriptionText, { marginHorizontal: 4 }]}>•</Text>
                                     )}
                                 </View>
                             );
@@ -267,6 +268,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     )}
                 </View>
 
+
                 <Text style={styles.descriptionText}>
                     {new Date(item.transactionDate).toLocaleDateString()}
                 </Text>
@@ -280,12 +282,12 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             <InAppBackground>
+                <BackButton goBack={navigation.goBack} />
+                <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: budgetDetails.budgetID })} style={{ alignSelf: 'flex-end', marginRight: 20, marginTop: 10 }}>
+                    <MaterialIcons name={"edit"} size={30} color={"white"} />
+                </TouchableOpacity>
                 <ScrollView>
-                    <BackButton goBack={navigation.goBack} />
-                    <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: budgetDetails.budgetID })} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
-                        <MaterialIcons name={"edit"} size={30} color={"white"} />
-                    </TouchableOpacity>
-                    <View style={[styles.headerContainer, { borderColor: budgetDetails.color }]}>
+                    <View style={[styles.contentContainer, { borderColor: budgetDetails.color }]}>
                         <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
 
                         <Text style={styles.amountText}>
@@ -294,32 +296,28 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                         </Text>
 
                         <View style={styles.progressBarContainer}>
-                            <ProgressBar
-                                startDate={budgetDetails.startDate}
-                                endDate={budgetDetails.endDate}
-                                colorTheme={budgetDetails.color || '#9ACBD0'}
-                                amount={budgetDetails.budgetAmount}
-                                remainingAmount={budgetDetails.remainingBudgetAmount}
-                            />
 
-                            <Text style={styles.categoryText}>
-                                {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
-                            </Text>
                             <View style={styles.progressBarContainer}>
                                 <ProgressBar
                                     startDate={budgetDetails.startDate}
                                     endDate={budgetDetails.endDate}
-                                    budgetColorTheme={theme.colors.secondary}
+                                    colorTheme={budgetDetails.color || '#9ACBD0'}
+                                    amount={budgetDetails.budgetAmount}
+                                    remainingAmount={budgetDetails.remainingBudgetAmount}
                                 />
-                                <Text style={[styles.categoryText,
-                                {
-                                    backgroundColor: (budgetDetails.budgetType || '').toUpperCase() === 'EXPENSE' ? '#E57373' : '#81C784'
-                                }
-                                ]}>
-                                    {budgetDetails.budgetType ?? 'Type N/A'} Budget
-                                </Text>
-
                             </View>
+
+                            <Text style={[
+                                styles.categoryText,
+                                {
+                                    backgroundColor:
+                                        budgetDetails.budgetType === 'EXPENSE' ? '#81C784' : '#E57373'
+                                }
+                            ]}>
+                                {budgetDetails.budgetType ?? 'Type N/A'} Budget - {budgetDetails.transactionScope}
+                            </Text>
+
+
                         </View>
 
                         <View style={styles.chartSectionContainer}>
@@ -382,7 +380,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         padding: 20,
     },
-    headerContainer: {
+    contentContainer: {
         padding: 15,
         marginTop: 30,
         borderBottomWidth: 5,
@@ -475,6 +473,7 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.bold.fontFamily,
     },
     transactionsActivityContainer: {
+        alignSelf: 'left',
         marginTop: 20,
         paddingHorizontal: 15,
     },

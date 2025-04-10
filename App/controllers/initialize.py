@@ -39,6 +39,7 @@ def initialize():
         bankCurrency="TTD",
         bankAmount=5000.00,
         isPrimary=True,
+        color="#48A6A7",
         userIDs=[alice.id, jalene.id],
     )
 
@@ -214,6 +215,7 @@ def initialize():
         bankCurrency="TTD",
         bankAmount=5000.00,
         isPrimary=True,
+        color="#FFA500",
         userIDs=[rynnia.id, tamia.id],
     )
 
@@ -256,6 +258,7 @@ def initialize():
         bankCurrency="TTD",
         bankAmount=100.00,
         isPrimary=True,
+        color="#48A6A7",
         userIDs=[],
     )
 

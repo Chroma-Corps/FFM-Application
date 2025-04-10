@@ -11,6 +11,7 @@ class Bank(db.Model):
     bankAmount = db.Column(db.Float, nullable=False)
     remainingBankAmount = db.Column(db.Float, nullable=False)
     isPrimary = db.Column(db.Boolean, default=False)
+    color = db.Column(db.String(120), nullable=False)
 
     # Foreign Keys
     circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
@@ -20,13 +21,14 @@ class Bank(db.Model):
     budgets = db.relationship('Budget', back_populates='banks', cascade='all, delete-orphan')
     user_banks = db.relationship('UserBank', back_populates='bank') # UserBanks
 
-    def __init__(self, bankTitle, bankCurrency, bankAmount, remainingBankAmount, isPrimary, circleID):
+    def __init__(self, bankTitle, bankCurrency, bankAmount, remainingBankAmount, isPrimary, color, circleID):
         self.circleID = circleID
         self.bankTitle = bankTitle
         self.bankCurrency = bankCurrency
         self.bankAmount = bankAmount
         self.remainingBankAmount = remainingBankAmount
         self.isPrimary = isPrimary
+        self.color = color
 
     def get_json(self):
         balance = CurrencyService.format_currency(self.bankAmount, self.bankCurrency)
@@ -38,7 +40,8 @@ class Bank(db.Model):
             'bankCurrency': self.bankCurrency,
             'bankAmount': balance,
             'remainingBankAmount': remainingBalance,
-            'isPrimary': self.isPrimary
+            'isPrimary': self.isPrimary,
+            'color': self.color
         }
 
     def __str__(self):
@@ -50,6 +53,7 @@ class Bank(db.Model):
             f"Currency: {self.bankCurrency}, Amount: {balance}, "
             f"Remaining Amount: {remainingBalance}"
             f"Primary Bank: {self.isPrimary}"
+            f"Color: {self.color}"
         )
 
     def __repr__(self):
@@ -58,4 +62,5 @@ class Bank(db.Model):
             f"bankCurrency='{self.bankCurrency}', bankAmount='{self.bankAmount}', "
             f"remainingBankAmount={self.remainingBankAmount}',"
             f"isPrimary='{self.isPrimary}'"
+            f"color='{self.color}')"
         )

@@ -5,7 +5,7 @@ from App.models import Bank, Budget, UserBank, Transaction
 from App.controllers.userBank import create_user_bank, is_bank_owner
 
 # Create A New Bank
-def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=None):
+def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, color, userIDs=None):
     try:
         user = get_user_json(userID)
 
@@ -15,6 +15,7 @@ def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, userIDs=
             bankAmount=bankAmount,
             remainingBankAmount=bankAmount,
             isPrimary=isPrimary,
+            color=color,
             circleID=user["activeCircle"]
         )
         db.session.add(new_bank)
