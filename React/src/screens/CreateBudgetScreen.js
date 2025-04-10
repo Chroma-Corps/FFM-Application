@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
-import { Card } from 'react-native-paper';
 import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import BackButton from '../components/BackButton';
+import BottomDrawer from '../components/BottomDrawer';
 import { theme } from '../core/theme';
 import DateSelector from '../components/DateSelector';
 import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
+import ColorTray from '../components/ColorTray'
 
 const formatDate = (date) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -66,17 +67,26 @@ export default function CreateBudgetsScreen({ navigation }) {
 
     //Budget Details
     const [budgetTitle, setBudgetTitle] = useState('');
+    const budgetTitleRef = useRef(null);
+
     const [budgetAmount, setBudgetAmount] = useState('');
+    const budgetAmountRef = useRef(null);
+
     const [budgetType, setBudgetType] = useState('');
     const [budgetCategories, setBudgetCategories] = useState([]);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState(null);
     const [selectedBankID, setSelectedBankID] = useState(null);
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState('');
     const [duration, setDuration] = useState(''); // To help with calclation of end date
+    const budgetDurationRef = useRef(null);
+    const [selectedColor, setSelectedColor] = useState('#4A90E2');
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+      };
 
     //Pop-up Triggers
-    const [selectedPeriod, setSelectedPeriod] = useState(null);
+    const [selectedPeriod, setSelectedPeriod] = useState('');
     const [showPeriodPopup, setShowPeriodPopup] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
@@ -130,11 +140,28 @@ export default function CreateBudgetsScreen({ navigation }) {
     }, [startDate, duration, selectedPeriod]);
 
     const displayPeriodSelected = (period) => {
-        let formattedPeriod = period;
-        if (period === 'Daily') formattedPeriod = 'Day(s)';
-        if (period === 'Weekly') formattedPeriod = 'Week(s)';
-        if (period === 'Monthly') formattedPeriod = 'Month(s)';
-        if (period === 'Yearly') formattedPeriod = 'Year(s)';
+        let formattedPeriod = '';
+    
+        switch (period) {
+            case 'Daily':
+                formattedPeriod = 'Day';
+                break;
+            case 'Weekly':
+                formattedPeriod = 'Week';
+                break;
+            case 'Monthly':
+                formattedPeriod = 'Month';
+                break;
+            case 'Yearly':
+                formattedPeriod = 'Year';
+                break;
+            default:
+                formattedPeriod = period;
+        }
+
+        if (duration > 1 && formattedPeriod.length > 0) {
+            formattedPeriod += 's';
+        }
         return formattedPeriod;
     };
 
@@ -184,6 +211,62 @@ export default function CreateBudgetsScreen({ navigation }) {
         setShowDatePicker(false);
     };
 
+    const handlePress = () => {
+        if(!budgetTitle) {
+            budgetTitleRef.current.focus();
+            return;
+        }
+
+        if(!budgetAmount) {
+            budgetAmountRef.current.focus();
+            return;
+        }
+
+        if (!duration) {
+            budgetDurationRef.current.focus();
+            return;
+        }
+
+        if (!selectedPeriod) {
+            handlePeriodFocus();
+            return;
+        }
+
+        if (!startDate) {
+            handleShowDatePicker();
+            return;
+        }
+
+        createBudget();
+    }
+
+    const getButtonText = () => {
+        if (budgetScope === "Exclusive") {
+            if (!budgetTitle) return "Set Title";
+            if (!budgetAmount) return "Set Amount";
+            if (!duration) return "Set Duration";
+            if (!selectedPeriod) return "Set Period";
+            if (!startDate) return "Set Start Date";
+            if (!budgetType) return "Set Type";
+            if (!budgetScope) return "Set Scope";
+          return "Create Budget";
+        }
+
+        if (!budgetTitle) return "Set Title";
+        if (!budgetAmount) return "Set Amount";
+        if (!duration) return "Set Duration";
+        if (!selectedPeriod) return "Set Period";
+        if (!startDate) return "Set Start Date";
+        if (!budgetType) return "Set Type";
+        if (!budgetScope) return "Set Scope";
+        if (!selectedBankID) return "Select Bank";
+        if (Array.isArray(budgetCategories) && budgetCategories.length === 0) {
+            return "Select Categories";
+        }
+
+        return "Create Budget";
+    };
+
     const renderBankCard = ({ item }) => (
         <TouchableOpacity
             style={[
@@ -226,8 +309,24 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
         }
 
-        if (!budgetTitle || !startDate || !endDate || !budgetScope) {
-            Alert.alert('Error', 'Please Fill In All Fields');
+        let missingFields = [];
+
+        if (!budgetTitle) missingFields.push('Budget Title');
+        if (!budgetAmount) missingFields.push('Budget Amount');
+        if (!startDate) missingFields.push('Budget Period');
+        if (!budgetType) missingFields.push('Budget Type');
+        if (!budgetScope) missingFields.push('Budget Scope');
+
+        if (budgetScope === "Inclusive") {
+            if (!selectedBankID) missingFields.push('Budget Bank');
+            if (Array.isArray(budgetCategories) && budgetCategories.length === 0) {
+                missingFields.push('Budget Categories');
+            }
+        }
+
+        if (missingFields.length > 0) {
+            const message = `Please Fill In The Following Fields:\n\n• ${missingFields.join('\n• ')}`;
+            Alert.alert('Hold Up!', message, [{ text: 'OK' }]);
             return;
         }
 
@@ -247,6 +346,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                     transactionScope: budgetScope.toUpperCase(),
                     startDate: startDate,
                     endDate: endDate,
+                    color: selectedColor,
                 })
             });
 
@@ -296,26 +396,26 @@ export default function CreateBudgetsScreen({ navigation }) {
         } finally {
           setLoading(false);
         }
-      };
-    
-      useFocusEffect(
-        useCallback(() => {
-          fetchBanks();
-        }, [])
-      );
+    };
+
+    useFocusEffect(
+    useCallback(() => {
+        fetchBanks();
+    }, [])
+    );
 
       return (
         <View style={styles.createBudgetScreen}>
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
-    
+
                 {showPeriodPopup && (
                     <PeriodSelectionPopup
                         setShowPeriodPopup={setShowPeriodPopup}
                         setSelectedPeriod={setSelectedPeriod}
                     />
                 )}
-    
+
                 {showDatePicker && (
                     <DateSelector
                         showDatePicker={showDatePicker}
@@ -323,7 +423,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                         onCancel={handleDateCancel}
                     />
                 )}
-    
+
                 <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
                     <View style={styles.screenContainer}>
                         <View style={styles.headerContainer}>
@@ -331,19 +431,21 @@ export default function CreateBudgetsScreen({ navigation }) {
                                 <InAppHeader>New Budget</InAppHeader>
                             </View>
                         </View>
-    
+
                         <View style={styles.card}>
                             <View style={styles.cardTopHalfContainer}>
                                 <TextInput
+                                    ref={budgetTitleRef}
                                     placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                     placeholder="Enter Title"
                                     value={budgetTitle}
                                     onChangeText={setBudgetTitle}
                                     style={[styles.input, styles.defaultText, isFocused ? styles.focused : null]}
                                 />
-    
+
                                 <View style={styles.budgetAmountContainer}>
                                     <TextInput
+                                        ref={budgetAmountRef}
                                         placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                         placeholder="$0.00"
                                         value={budgetAmount}
@@ -351,10 +453,11 @@ export default function CreateBudgetsScreen({ navigation }) {
                                         style={[styles.input, styles.shortInput, styles.defaultText]}
                                         keyboardType="numeric"
                                     />
-    
+
                                     <Text style={styles.slashText}>/</Text>
-    
+
                                     <TextInput
+                                        ref={budgetDurationRef}
                                         placeholderTextColor="rgba(255, 255, 255, 0.25)"
                                         placeholder="0"
                                         value={duration}
@@ -379,7 +482,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                                 </View>
     
                                 <Text style={styles.defaultText}>Starting:</Text>
-    
+
                                 <ButtonSmall
                                     label={
                                         startDate
@@ -392,12 +495,22 @@ export default function CreateBudgetsScreen({ navigation }) {
                                 />
     
                                 <Text style={[styles.defaultText, { marginTop: 35 }]}>Budget Period</Text>
-                                <Text style={[styles.defaultText, { fontSize: 16, color: theme.colors.primary }]}>
+                                <Text style={[styles.defaultText, { fontSize: 16, color: theme.colors.primary, marginBottom: 35 }]}>
                                     {displayBudgetPeriod()}
                                 </Text>
                             </View>
     
                             {/* Filter Tags - Budget Type */}
+                            <View style={styles.filterHeader}>
+                                <BottomDrawer
+                                    title="Budget Type"
+                                    heading1="Savings Budget"
+                                    text1="• Track your income and budget your savings"
+                                    heading2="Expense Budget"
+                                    text2="• Track your expenses and budget your spending"
+                                />
+                                <Text style={styles.defaultText}>Budget Type</Text>
+                            </View>
                             <View style={styles.filterTagsContainer}>
                                 <FilterTag
                                     label="Savings"
@@ -410,7 +523,17 @@ export default function CreateBudgetsScreen({ navigation }) {
                                     onPress={() => setBudgetType('Expense')}
                                 />
                             </View>
-    
+
+                            <View style={styles.filterHeader}>
+                                <BottomDrawer 
+                                    title="Budget Scope"
+                                    heading1="Inclusive Budget"
+                                    text1="• All transactions within selected categories"
+                                    heading2="Exclusive Budget"
+                                    text2="• Only the transactions you add"
+                                />
+                                <Text style={styles.defaultText}>Budget Scope</Text>
+                            </View>
                             {/* Filter Tags - Budget Scope */}
                             <View style={styles.filterTagsContainer}>
                                 <FilterTag
@@ -428,47 +551,50 @@ export default function CreateBudgetsScreen({ navigation }) {
     
                         {/* Scrollable Content Section */}
                         {budgetScope === 'Inclusive' && (
-                            <View style={styles.cardBottomHalfContainer}>
-                                <View style={styles.budgetPropertiesContainer}>
-                                    <Text style={styles.defaultText}>Select Bank:</Text>
-    
-                                    {loading ? (
-                                        <ActivityIndicator size="large" color={theme.colors.primary} />
-                                    ) : banks.length === 0 ? (
-                                        <Text style={styles.defaultText}>You Have No Banks</Text>
-                                    ) : (
-                                        <FlatList
-                                            data={banks}
-                                            renderItem={renderBankCard}
-                                            keyExtractor={(item) => item?.bankID}
-                                            horizontal
-                                            showsHorizontalScrollIndicator={false}
-                                            contentContainerStyle={styles.scrollContainer}
-                                        />
-                                    )}
-    
-                                    <Text style={[styles.defaultText, { marginTop: 8 }]}>Select Budget Category:</Text>
-    
-                                    {categories.length > 0 ? (
-                                        <FlatList
-                                            data={categories}
-                                            renderItem={renderCategoryItem}
-                                            keyExtractor={(item) => item.id.toString()}
-                                            horizontal
-                                            showsHorizontalScrollIndicator={false}
-                                            contentContainerStyle={styles.scrollContainer}
-                                        />
-                                    ) : (
-                                        <Text>Loading Categories...</Text>
-                                    )}
-                                </View>
+                            <View style={styles.budgetPropertiesContainer}>
+                                <Text style={styles.defaultText}>Select Bank:</Text>
+
+                                {loading ? (
+                                    <ActivityIndicator size="large" color={theme.colors.primary} />
+                                ) : banks.length === 0 ? (
+                                    <Text style={styles.defaultText}>You Have No Banks</Text>
+                                ) : (
+                                    <FlatList
+                                        data={banks}
+                                        renderItem={renderBankCard}
+                                        keyExtractor={(item) => item?.bankID}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={styles.scrollContainer}
+                                    />
+                                )}
+
+                                <Text style={[styles.defaultText, { marginTop: 8 }]}>Select Budget Category:</Text>
+
+                                {categories.length > 0 ? (
+                                    <FlatList
+                                        data={categories}
+                                        renderItem={renderCategoryItem}
+                                        keyExtractor={(item) => item.id.toString()}
+                                        horizontal
+                                        showsHorizontalScrollIndicator={false}
+                                        contentContainerStyle={styles.scrollContainer}
+                                    />
+                                ) : (
+                                    <Text>Loading Categories...</Text>
+                                )}
                             </View>
                         )}
                     </View>
                 </ScrollView>
+
                 <View style={styles.buttonContainer}>
-                    <Button mode="contained" onPress={createBudget} style={styles.buttonStyle}>
-                        Create Budget
+                    <ColorTray 
+                        selectedColor={selectedColor} 
+                        onColorSelect={handleColorSelect}
+                    />
+                    <Button mode="contained" onPress={handlePress} style={styles.buttonStyle}>
+                        {getButtonText()}
                     </Button>
                 </View>
             </InAppBackground>
@@ -489,15 +615,14 @@ const styles = StyleSheet.create({
     },
 
     defaultText: {
-        fontSize: 20,
+        marginBottom: 10,
+        fontSize: 17,
         fontFamily: theme.fonts.bold.fontFamily,
         color: 'white',
-        lineHeight: 20,
-        marginBottom: 10,
     },
 
     selectedPeriod: {
-        fontSize: 20,
+        fontSize: 17,
         width: 80,
         fontFamily: theme.fonts.bold.fontFamily,
         color: 'rgba(255, 255, 255, 0.25)',
@@ -540,7 +665,6 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        backgroundColor: 'transparent',
         borderBottomWidth: 2,
         borderBottomColor: '#fff',
         fontSize: 25,
@@ -586,12 +710,11 @@ const styles = StyleSheet.create({
 
     budgetPropertiesContainer: {
         width: '90%',
-        marginTop: 20,
-        padding: 20,
+        paddingLeft: 20,
+        paddingRight: 20,
         alignSelf: 'center',
-        backgroundColor: '#222',
+        // backgroundColor: '#222',
         borderRadius: 5,
-        gap: 10,
     },
 
     scrollContainer: {
@@ -646,8 +769,14 @@ const styles = StyleSheet.create({
 
     filterTagsContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 20,
+        marginTop: 10,
+        marginBottom: 20,
+        justifyContent: 'space-between'
+    },
+
+    filterHeader: {
+        flexDirection: 'row',
+        alignItems: 'center'
     },
 
     categoryItem: {

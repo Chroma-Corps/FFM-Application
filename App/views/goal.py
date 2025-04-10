@@ -28,6 +28,7 @@ def new_goal():
         endDate = data.get('endDate')
         userID = get_jwt_identity()
         userIDs = data.get('userIDs') or []
+        color = data.get('color')
 
         if not all([goalTitle, targetAmount, goalType, startDate, endDate, userID]):
            return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
@@ -39,7 +40,8 @@ def new_goal():
             startDate=startDate,
             endDate=endDate,
             userID=userID, # Creator Of Goal
-            userIDs=userIDs) # Associated Users
+            userIDs=userIDs, # Associated Users
+            color=color)
 
         if new_goal is None:
             return jsonify({"status":"error", "message":"Failed To Create Goal"}), 500
@@ -127,8 +129,9 @@ def update_user_goal(goalID):
         goalType = data.get('goalType')
         startDate = data.get('startDate')
         endDate = data.get('endDate')
+        color = data.get('color')
 
-        updated_goal = update_goal(goalID, goalTitle, targetAmount, goalType, startDate, endDate)
+        updated_goal = update_goal(goalID, goalTitle, targetAmount, goalType, startDate, endDate, color)
 
         if updated_goal:
             return jsonify({"status": "success", "message": "Goal Updated Successfully"}), 200

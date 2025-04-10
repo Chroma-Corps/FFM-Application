@@ -16,10 +16,10 @@ const ButtonSmall = ({ label, onPress, style }) => {
 const styles = StyleSheet.create({
     tag: {
         paddingVertical: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 50,
         borderRadius: 8,
-        borderWidth: 1,
-        backgroundColor: theme.colors.primary,
+        borderWidth: 2,
+        borderColor: theme.colors.primaryDimmed,
         marginHorizontal: 5,
     },
     selected: {
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         borderColor: 'black',
     },
     text: {
-        color: "#000",
+        color: theme.colors.textSecondary,
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: "center",
     },

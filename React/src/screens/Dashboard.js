@@ -33,7 +33,7 @@ export default function Dashboard({ navigation }) {
         console.error('No Token Found');
         return;
       }
-
+  
       const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'GET',
         headers: {
