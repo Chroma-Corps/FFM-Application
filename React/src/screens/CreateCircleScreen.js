@@ -50,9 +50,9 @@ export default function CreateCircleScreen({ navigation }) {
         },
         body: JSON.stringify({
           circleName: circleName.trim(),
-          circleType,
-          circleColor,
-          circleImage,
+          circleType: circleType.toUpperCase(),
+          circleColor: circleColor,
+          circleImage: circleImage,
         }),
       });
 
