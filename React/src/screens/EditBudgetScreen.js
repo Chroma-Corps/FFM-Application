@@ -441,7 +441,7 @@ export default function EditBudgetScreen({ navigation, route }) {
     return (
         <View style={styles.editBudgetScreen}>
             <InAppBackground>
-                <BackButton goBack={() => navigation.navigate('BudgetDetails', { budgetID })} />
+                <BackButton goBack={navigation.goBack} />
 
                 {showPeriodPopup && (
                     <PeriodSelectionPopup

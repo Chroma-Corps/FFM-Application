@@ -196,7 +196,7 @@ export default function BudgetsScreen({ navigation }) {
               </Text>
             </View>
             <View style={styles.editModeIcons}>
-              <TouchableOpacity onPress={null}>
+              <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: item.budgetID })}>
                 <MaterialIcons name={"edit"} size={25} color={"white"} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeleteBudget(item.budgetID)}>

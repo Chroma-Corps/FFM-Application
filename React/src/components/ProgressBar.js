@@ -22,7 +22,7 @@ export const ProgressBar = ({ startDate, endDate, colorTheme, amount, remainingA
       } else {
         progress = 0;
       }
-    progress = Math.max(0, Math.min(progress, 100));
+    progress = Math.round(Math.max(0, Math.min(progress, 100)));
 
     return (
         <View style={styles.container}>

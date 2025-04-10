@@ -93,7 +93,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         <View style={styles.container}>
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
-                <TouchableOpacity onPress={null} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
+                <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: budgetDetails.budgetID })} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
                     <MaterialIcons name={"edit"} size={30} color={"white"}/>
                 </TouchableOpacity>
                 <View style={[styles.headerContainer, {borderColor: budgetDetails.color}]}>
