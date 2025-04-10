@@ -71,9 +71,7 @@ export default function GoalsScreen({ navigation }) {
     const goalColorTheme = item.color || '#9ACBD0';
 
     return (
-      <TouchableOpacity
-        onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}
-      >
+      <TouchableOpacity onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}>
         <Card style={[styles.card, { borderColor: goalColorTheme }]}>
           <View style={styles.cardContentContainer}>
             <View style={[styles.colorStrip, { backgroundColor: goalColorTheme }]} />
