@@ -6,6 +6,8 @@ export const theme = {
   colors: {
     ...DefaultTheme.colors,
     text: '#000000',
+    grayedText: '#747474',
+    grayed: '#2F2F2F2F',
     textSecondary: '#fff',
     heading: '#F2EFE7',
     description: '#F2EFE7',
@@ -16,7 +18,8 @@ export const theme = {
     surface: '#F2EFE7',
     background: '#181818',
     expense: '#E57373',
-    income: '#81C784'
+    income: '#81C784',
+    primaryDimmed: '#264242'
   },
 
   fonts: {

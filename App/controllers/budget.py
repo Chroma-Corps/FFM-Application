@@ -6,7 +6,7 @@ from App.services.datetime import convert_to_date
 from App.controllers.userBudget import create_user_budget, is_budget_owner
 
 # Create A New Budget
-def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, startDate, endDate, userID, bankID, userIDs=None):
+def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transactionScope, color, startDate, endDate, userID, bankID, userIDs=None):
     try: 
         if budgetCategory is not None:
             selectedCategory = CategoryService.get_category(budgetCategory)
@@ -25,7 +25,8 @@ def create_budget(budgetTitle, budgetAmount, budgetType, budgetCategory, transac
             startDate=startDate,
             endDate=endDate,
             bankID=bankID,
-            circleID=user["activeCircle"]
+            circleID=user["activeCircle"],
+            color = color
         )
         db.session.add(new_budget)
         db.session.commit()
@@ -74,7 +75,7 @@ def get_all_budgets_json():
     return budgets
 
 # Update Existing Budget
-def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None, budgetCategory=None, startDate=None, endDate=None, bankID=None):
+def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None, budgetCategory=None, startDate=None, endDate=None, bankID=None, color=None):
     try:
         budget = get_budget(budgetID)
 
@@ -94,6 +95,8 @@ def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None
                 budget.endDate = convert_to_date(endDate)
             if bankID:
                 budget.bankID = bankID
+            if color:
+                budget.color = color
             db.session.commit()
 
             print(f"Budget With ID {budgetID} Updated Successfully.")

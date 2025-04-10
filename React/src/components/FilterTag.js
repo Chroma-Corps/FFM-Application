@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { theme } from '../core/theme';
 
-const FilterTag = ({ label, shape = "rectangular", onPress, isSelected }) => {
+const FilterTag = ({ label, shape = "rectangular", onPress, isSelected, style }) => {
 
     const getTagStyle = () => {
         if (label === "Savings" && isSelected) {
@@ -20,7 +20,8 @@ const FilterTag = ({ label, shape = "rectangular", onPress, isSelected }) => {
                 styles.tag,
                 isSelected && styles.selected,
                 shape === 'round' && styles.round,
-                getTagStyle()
+                getTagStyle(),
+                style
             ]}
             onPress={onPress}
         >
@@ -32,11 +33,10 @@ const FilterTag = ({ label, shape = "rectangular", onPress, isSelected }) => {
 const styles = StyleSheet.create({
     tag: {
         paddingVertical: 8,
-        paddingHorizontal: 16,
+        paddingHorizontal: 50,
         borderRadius: 8,
-        borderWidth: 1,
-        borderColor: "#ccc",
-        backgroundColor: "white",
+        borderWidth: 2,
+        borderColor: theme.colors.primaryDimmed,
         marginHorizontal: 5,
     },
 
@@ -46,11 +46,11 @@ const styles = StyleSheet.create({
 
     selected: {
         backgroundColor: theme.colors.primary,
-        borderColor: 'black',
+        borderColor: theme.colors.primary,
     },
 
     text: {
-        color: "#000",
+        color: theme.colors.textSecondary,
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: "center",
     },

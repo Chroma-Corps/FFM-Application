@@ -21,6 +21,7 @@ class Goal(db.Model):
     goalType = db.Column(db.Enum(GoalType), nullable=False)
     startDate = db.Column(db.Date,nullable=False)
     endDate = db.Column(db.Date,nullable=False)
+    color = db.Column(db.String(120), nullable=True)
 
     # Foreign Keys
     circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)
@@ -29,7 +30,7 @@ class Goal(db.Model):
     user_goals = db.relationship('UserGoal', back_populates='goal') # UserGoal
     circle = db.relationship('Circle', backref='goals', lazy=True) # 1 Circle -> Many Goals
 
-    def __init__(self, goalTitle, targetAmount, currentAmount, goalType, startDate, endDate, circleID):
+    def __init__(self, goalTitle, targetAmount, currentAmount, goalType, startDate, endDate, circleID, color):
         self.circleID = circleID
         self.goalTitle = goalTitle
         self.targetAmount = targetAmount
@@ -37,6 +38,7 @@ class Goal(db.Model):
         self.goalType = goalType
         self.startDate = convert_to_date(startDate)
         self.endDate = convert_to_date(endDate)
+        self.color = color
 
     def get_json(self):
         main_bank = None
@@ -60,6 +62,7 @@ class Goal(db.Model):
             'goalType': self.goalType.value,
             'startDate': self.startDate.strftime("%a, %d %b %Y"),
             'endDate': self.endDate.strftime("%a, %d %b %Y"),
+            'color': self.color
         }
 
     def __str__(self):
