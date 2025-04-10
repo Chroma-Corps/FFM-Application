@@ -27,7 +27,7 @@ export default function CreateCircleScreen({ navigation }) {
         // }
 
         // try {
-        //     const response = await fetch(`http://192.168.0.4:8080/create-goal`, {
+        //     const response = await fetch(`https://ffm-application-main.onrender.com/create-goal`, {
         //         method: 'POST',
         //         headers: {
         //             'Authorization': `Bearer ${token}`,

@@ -62,7 +62,7 @@ export default function BankDetailsScreen({ navigation, route }) {
                     return;
                 }
 
-                const response = await fetch(`http://192.168.0.4:8080/bank/${bankID}`, {
+                const response = await fetch(`https://ffm-application-main.onrender.com/bank/${bankID}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -98,7 +98,7 @@ export default function BankDetailsScreen({ navigation, route }) {
                     return;
                 }
 
-                const response = await fetch(`http://192.168.0.4:8080/bank/${bankID}/transactions`, {
+                const response = await fetch(`https://ffm-application-main.onrender.com/bank/${bankID}/transactions`, {
                     methods: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,

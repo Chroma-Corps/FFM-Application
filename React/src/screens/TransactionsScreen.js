@@ -61,7 +61,7 @@ export default function TransactionsScreen({ navigation }) {
     ];
 
     const index = parseInt(monthCode, 10);
-    return monthNames[index] || 'Unknown';
+    return monthNames[index];
   };
   
 
@@ -75,7 +75,7 @@ export default function TransactionsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.4:8080/transactions`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/transactions`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -108,9 +108,15 @@ export default function TransactionsScreen({ navigation }) {
   const filteredTransactions = data.filter((transaction) => {
     const transactionMonth = new Date(transaction.transactionDate).getMonth();
     const matchesSearch =
-      transaction.transactionTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      transaction.transactionCategory.toLowerCase().includes(searchQuery.toLowerCase());
-  
+      (typeof transaction.transactionTitle === 'string' &&
+        transaction.transactionTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (Array.isArray(transaction.transactionCategory) ?
+        transaction.transactionCategory.some(category =>
+          category.toLowerCase().includes(searchQuery.toLowerCase())
+        ) :
+        (typeof transaction.transactionCategory === 'string' && 
+          transaction.transactionCategory.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
     return (selectedMonth === "all" || transactionMonth === parseInt(selectedMonth)) && matchesSearch;
   });
 
@@ -228,7 +234,10 @@ export default function TransactionsScreen({ navigation }) {
                   style={styles.image}
                   source={require('../assets/empty.png')}
                 />
-                <Text style={styles.defaultText}>You Have No Transactions For {getMonthName(selectedMonth)}</Text>
+                <Text style={styles.defaultText}>
+                  You Have No Transactions
+                  {String(selectedMonth).toLowerCase() !== 'all' && ` For ${getMonthName(parseInt(selectedMonth))}`}
+                </Text>
               </View>
             ) : (
               renderGroupedTransactions()

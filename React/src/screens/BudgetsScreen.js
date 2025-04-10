@@ -85,7 +85,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.4:8080/budget/${budgetID}`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -120,7 +120,7 @@ export default function BudgetsScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch(`http://192.168.0.4:8080/budgets`, {
+      const response = await fetch(`https://ffm-application-main.onrender.com/budgets`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

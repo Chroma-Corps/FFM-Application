@@ -45,8 +45,8 @@ def new_budget():
             endDate=endDate,
             userID=userID, # Creator Of Budget
             bankID=bankID,
-            userIDs=userIDs,
-            color=color) # Associated Users
+            userIDs=userIDs, # Associated Users
+            color=color)
 
         if new_budget is None:
             return jsonify({"status":"error", "message":"Failed To Create Budget"}), 500

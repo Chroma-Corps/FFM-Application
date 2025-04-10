@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import InAppHeader from '../components/InAppHeader';
-import { Card } from 'react-native-paper';
 import Button from '../components/Button';
 import InAppBackground from '../components/InAppBackground';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,7 +12,6 @@ import DateSelector from '../components/DateSelector';
 import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
-import { MaterialIcons } from '@expo/vector-icons'
 import ColorTray from '../components/ColorTray'
 
 const formatDate = (date) => {
@@ -107,7 +105,7 @@ export default function CreateBudgetsScreen({ navigation }) {
       };
 
     useEffect(() => {
-        fetch('http://192.168.0.4:8080/ffm/categories')
+        fetch('https://ffm-application-main.onrender.com/ffm/categories')
             .then(response => response.json())
             .then(data => {
 
@@ -333,7 +331,7 @@ export default function CreateBudgetsScreen({ navigation }) {
         }
 
         try {
-            const response = await fetch(`http://192.168.0.4:8080/create-budget`, {
+            const response = await fetch(`https://ffm-application-main.onrender.com/create-budget`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -377,7 +375,7 @@ export default function CreateBudgetsScreen({ navigation }) {
             return;
           }
     
-          const response = await fetch('http://192.168.0.4:8080/banks', {
+          const response = await fetch('https://ffm-application-main.onrender.com/banks', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,

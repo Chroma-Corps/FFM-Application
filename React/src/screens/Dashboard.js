@@ -34,7 +34,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
   
-      const response = await fetch('http://192.168.0.4:8080/active-circle', {
+      const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -68,7 +68,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.4:8080/active-circle', {
+      const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -103,7 +103,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.4:8080/banks', {
+      const response = await fetch('https://ffm-application-main.onrender.com/banks', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -136,7 +136,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.4:8080/user', {
+      const response = await fetch('https://ffm-application-main.onrender.com/user', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -166,7 +166,7 @@ export default function Dashboard({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.0.4:8080/circles', {
+      const response = await fetch('https://ffm-application-main.onrender.com/circles', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

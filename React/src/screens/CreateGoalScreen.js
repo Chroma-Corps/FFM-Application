@@ -9,6 +9,7 @@ import FilterTag from '../components/FilterTag';
 import ButtonSmall from '../components/ButtonSmall';
 import DateSelector from '../components/DateSelector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ColorTray from '../components/ColorTray'
 
 export default function CreateGoalsScreen({ navigation }) {
 
@@ -21,6 +22,10 @@ export default function CreateGoalsScreen({ navigation }) {
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+    const [selectedColor, setSelectedColor] = useState('#4A90E2');
+    const handleColorSelect = (color) => {
+        setSelectedColor(color);
+        };
 
     const formatDate = (date) => {
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -82,7 +87,7 @@ export default function CreateGoalsScreen({ navigation }) {
         }
 
         try {
-            const response = await fetch(`http://192.168.0.4:8080/create-goal`, {
+            const response = await fetch(`https://ffm-application-main.onrender.com/create-goal`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -94,6 +99,7 @@ export default function CreateGoalsScreen({ navigation }) {
                     goalType: goalType.toUpperCase(),
                     startDate: startDate,
                     endDate: endDate,
+                    color: selectedColor
                 })
             });
 
@@ -203,6 +209,10 @@ return (
                 </View>
             </ScrollView>
             <View style={styles.buttonContainer}>
+                <ColorTray 
+                    selectedColor={selectedColor} 
+                    onColorSelect={handleColorSelect}
+                />
                 <Button mode="contained" onPress={createGoal} style={styles.buttonStyle}>
                     Create Goal
                 </Button>

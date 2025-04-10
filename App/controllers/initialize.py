@@ -51,6 +51,7 @@ def initialize():
         startDate="2025-01-01",
         endDate="2025-01-31",
         userIDs=[alice.id, jalene.id],
+        color="#F5A623"
     )
 
     create_budget (
