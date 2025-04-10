@@ -5,7 +5,7 @@ import { theme } from '../core/theme'
 
 export default function BackButton({ goBack }) {
   return (
-    <TouchableOpacity onPress={goBack} style={styles.container}>
+    <TouchableOpacity onPress={goBack} style={styles.container} hitSlop={100}>
       <Image
         style={[styles.image, styles.imageColor]}
         source={require('../assets/arrow_back.png')}
