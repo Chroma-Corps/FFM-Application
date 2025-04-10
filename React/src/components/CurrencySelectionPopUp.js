@@ -60,13 +60,11 @@ const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCur
         );
     };
 
-    // Filter currencies based on the search query
     const filteredCurrencyData = currencyData.filter(currency =>
         currency.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
         currency.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Sorting the currencies alphabetically
     const sortedCurrencyData = [...filteredCurrencyData].sort((a, b) => a.code.localeCompare(b.code));
 
     return (
@@ -83,7 +81,6 @@ const CurrencySelectionPopUp = ({ currencyData, selectedCurrency, setSelectedCur
 
                     <Text style={styles.modalTitle}>Select Currency</Text>
 
-                    {/* Search Bar */}
                     <View style={styles.searchContainer}>
                         <Icon name="magnify" size={20} color="white" />
                         <TextInput

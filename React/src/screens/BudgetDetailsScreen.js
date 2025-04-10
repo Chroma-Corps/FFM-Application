@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { View, Text, FlatList, ActivityIndicator, ScrollView, Image, StyleSheet } from 'react-native';
-import { theme } from '../core/theme';
-import BackButton from '../components/BackButton';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { theme } from '../core/theme'
+import BackButton from '../components/BackButton'
 import InAppBackground from '../components/InAppBackground';
-import EditButton from '../components/EditButton';
 import ProgressBar from '../components/ProgressBar';
 import DonutChart from '../components/DonutChart';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const categoryImages = {
     shopping: require('../assets/icons/shopping.png'),
@@ -19,6 +20,7 @@ const categoryImages = {
 
 const parseTransactionAmount = (amountString) =>
     ({ amount: parseFloat(String(amountString).replace(/[^0-9.]/g, '')) || 0 });
+
 
 export default function BudgetDetailsScreen({ navigation, route }) {
     const { budgetID } = route.params;
@@ -278,70 +280,87 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     return (
         <View style={styles.container}>
             <InAppBackground>
-                <BackButton goBack={navigation.goBack} />
-                <EditButton />
-                <ScrollView contentContainerStyle={styles.scrollContentContainer}>
-                    <View style={styles.headerContainer}>
+                <ScrollView>
+                    <BackButton goBack={navigation.goBack} />
+                    <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: budgetDetails.budgetID })} style={{ alignSelf: 'flex-end', marginRight: 20 }}>
+                        <MaterialIcons name={"edit"} size={30} color={"white"} />
+                    </TouchableOpacity>
+                    <View style={[styles.headerContainer, { borderColor: budgetDetails.color }]}>
                         <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
+
                         <Text style={styles.amountText}>
                             <Text style={styles.amountTextBold}>{budgetDetails.remainingBudgetAmount} </Text>
                             left of {budgetDetails.budgetAmount}
                         </Text>
+
                         <View style={styles.progressBarContainer}>
                             <ProgressBar
                                 startDate={budgetDetails.startDate}
                                 endDate={budgetDetails.endDate}
-                                budgetColorTheme={theme.colors.secondary}
+                                colorTheme={budgetDetails.color || '#9ACBD0'}
+                                amount={budgetDetails.budgetAmount}
+                                remainingAmount={budgetDetails.remainingBudgetAmount}
                             />
-                            <Text style={[styles.categoryText,
-                            {
-                                backgroundColor: (budgetDetails.budgetType || '').toUpperCase() === 'EXPENSE' ? '#E57373' : '#81C784'
-                            }
-                            ]}>
-                                {budgetDetails.budgetType ?? 'Type N/A'} Budget
+
+                            <Text style={styles.categoryText}>
+                                {budgetDetails.budgetType ?? "BudgetType_Placeholder"}
                             </Text>
-
-                        </View>
-                    </View>
-
-                    <View style={styles.chartSectionContainer}>
-                        <Text style={[styles.descriptionText, styles.sectionTitle]}>Budget Activity</Text>
-                        <View style={styles.chartAndKeyWrapper}>
-                            <View style={styles.chartContainer}>
-                                <DonutChart
-                                    widthAndHeight={180}
-                                    series={chartData.series}
-                                    coverRadius={0.45}
-                                    coverFill={theme.colors.background || '#181818'}
+                            <View style={styles.progressBarContainer}>
+                                <ProgressBar
+                                    startDate={budgetDetails.startDate}
+                                    endDate={budgetDetails.endDate}
+                                    budgetColorTheme={theme.colors.secondary}
                                 />
-                            </View>
-                            <View style={styles.graphKeyContainer}>
-                                {chartData.keyData.map((data, index) => (
-                                    <View key={`${data.name}-${index}-key`} style={styles.keyRow}>
-                                        <View style={[styles.keyColorBlock, { backgroundColor: data.color }]} />
-                                        <Image source={data.image} style={styles.keyImage} resizeMode="contain" />
-                                        <Text style={[styles.keyText, { flexShrink: 1 }]}>{data.name}</Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-                    </View>
-
-                    <View style={styles.transactionsActivityContainer}>
-                        <Text style={[styles.descriptionText, styles.sectionTitle, { color: theme.colors.textSecondary }]}>
-                            Transactions Activity
-                        </Text>
-                        <View style={styles.transactionsList}>
-                            {budgetTransactions.length > 0 ? (
-                                budgetTransactions.map(item => renderTransaction({ item, key: item.id }))
-                            ) : (
-                                <Text style={[styles.descriptionText, { textAlign: 'center', marginTop: 20 }]}>
-                                    No transactions recorded for this budget yet.
+                                <Text style={[styles.categoryText,
+                                {
+                                    backgroundColor: (budgetDetails.budgetType || '').toUpperCase() === 'EXPENSE' ? '#E57373' : '#81C784'
+                                }
+                                ]}>
+                                    {budgetDetails.budgetType ?? 'Type N/A'} Budget
                                 </Text>
-                            )}
-                        </View>
-                    </View>
 
+                            </View>
+                        </View>
+
+                        <View style={styles.chartSectionContainer}>
+                            <Text style={[styles.descriptionText, styles.sectionTitle]}>Budget Activity</Text>
+                            <View style={styles.chartAndKeyWrapper}>
+                                <View style={styles.chartContainer}>
+                                    <DonutChart
+                                        widthAndHeight={180}
+                                        series={chartData.series}
+                                        coverRadius={0.45}
+                                        coverFill={theme.colors.background || '#181818'}
+                                    />
+                                </View>
+                                <View style={styles.graphKeyContainer}>
+                                    {chartData.keyData.map((data, index) => (
+                                        <View key={`${data.name}-${index}-key`} style={styles.keyRow}>
+                                            <View style={[styles.keyColorBlock, { backgroundColor: data.color }]} />
+                                            <Image source={data.image} style={styles.keyImage} resizeMode="contain" />
+                                            <Text style={[styles.keyText, { flexShrink: 1 }]}>{data.name}</Text>
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={styles.transactionsActivityContainer}>
+                            <Text style={[styles.descriptionText, styles.sectionTitle, { color: theme.colors.textSecondary }]}>
+                                Transactions Activity
+                            </Text>
+                            <View style={styles.transactionsList}>
+                                {budgetTransactions.length > 0 ? (
+                                    budgetTransactions.map(item => renderTransaction({ item, key: item.id }))
+                                ) : (
+                                    <Text style={[styles.descriptionText, { textAlign: 'center', marginTop: 20 }]}>
+                                        No transactions recorded for this budget yet.
+                                    </Text>
+                                )}
+                            </View>
+                        </View>
+
+                    </View>
                 </ScrollView>
             </InAppBackground>
         </View>
@@ -364,12 +383,10 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     headerContainer: {
-        borderColor: theme.colors.primary,
         padding: 15,
-        marginTop: 40,
-        borderBottomWidth: 3,
-        marginHorizontal: 10,
-        borderRadius: 5,
+        marginTop: 30,
+        borderBottomWidth: 5,
+        alignItems: 'center'
     },
     titleText: {
         fontSize: 24,

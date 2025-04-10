@@ -23,8 +23,8 @@ const MonthFilter = ({ selectedMonth, onSelectMonth }) => {
     <View style={styles.container}>
       <FlatList
         data={months}
-        horizontal  // 🔹 Enables horizontal scrolling
-        showsHorizontalScrollIndicator={false} // 🔹 Hides the scroll bar for a cleaner look
+        horizontal
+        showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
@@ -51,33 +51,40 @@ const MonthFilter = ({ selectedMonth, onSelectMonth }) => {
 };
 
 const styles = StyleSheet.create({
+
   container: {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
+
   list: {
     flexDirection: "row",
     paddingHorizontal: 10,
   },
+
   monthButton: {
     paddingVertical: 8,
     paddingHorizontal: 15,
     marginHorizontal: 5,
     borderRadius: 10,
-    backgroundColor: "#f0f0f0",
   },
+
   selectedMonthButton: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.primaryDimmed,
   },
+
   monthText: {
     fontSize: 14,
     fontFamily: theme.fonts.medium.fontFamily,
+    color: theme.colors.textSecondary
   },
+
   selectedMonthText: {
     color: "white",
     fontFamily: theme.fonts.bold.fontFamily,
   },
+
 });
 
 export default MonthFilter;

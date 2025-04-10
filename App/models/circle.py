@@ -15,7 +15,7 @@ class Circle(db.Model):
     circleName = db.Column(db.String(120), nullable=False)
     circleType = db.Column(db.Enum(CircleType), nullable=False)
     circleColor = db.Column(db.String(120), nullable=False)
-    circleImage = db.Column(db.String(120), nullable=False)
+    circleImage = db.Column(db.String(255), nullable=False)
 
     # Relationships
     user_circles = db.relationship('UserCircle', back_populates='circle') # UserCircle

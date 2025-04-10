@@ -33,7 +33,7 @@ export default function Dashboard({ navigation }) {
         console.error('No Token Found');
         return;
       }
-
+  
       const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
         method: 'GET',
         headers: {
@@ -357,16 +357,18 @@ export default function Dashboard({ navigation }) {
             </Button>
           </View>
         )}
-        {circleType === 'Group' && (
-          <View>
-            <Text style={styles.sectionTitle}>Most Recent Activity</Text>
-            <TouchableOpacity style={styles.viewCircleContainer}>
+       {circleType === 'Group' && (
+        <View>
+          <Text style={styles.sectionTitle}>Most Recent Activity</Text>
+          <TouchableOpacity 
+              style={styles.viewCircleContainer}
+              onPress={() => navigation.navigate('CircleDetailsScreen', { circle: currentCircle })}>
               <Text style={styles.viewCircleText}>View Circle</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-      <RadialMenu navigation={navigation} />
+        </TouchableOpacity>
+        </View>
+      )}
+        </View>
+        <RadialMenu navigation={navigation} />
     </InAppBackground>
   );
 }
