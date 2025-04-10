@@ -19,8 +19,9 @@ import { ScrollView } from 'react-native-gesture-handler';
 const mainCurrencies = ['GBP', 'EUR', 'USD', 'TTD', 'JPY', 'CAD'];
 const colorData = Object.values(Colors);
 
-export default function CreateBanksScreen({ navigation }) {
+export default function CreateBudgetsScreen({ navigation, route }) {
     const [loading, setLoading] = useState(true);
+    const { newUserSelectedCircleType } = route.params || {};
 
     const bankTitleRef = useRef(null);
     const bankAmountRef = useRef(null);
@@ -115,6 +116,70 @@ export default function CreateBanksScreen({ navigation }) {
         }
     };
 
+    const createBank = async () => {
+        const token = await AsyncStorage.getItem('access_token');
+
+        if (!token) {
+            console.error('No Token Found');
+            return;
+        }
+
+
+        if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency) {
+            Alert.alert('Error', 'Please Ensure All Fields Are Filled.');
+            return;
+        }
+
+        try {
+
+            const circleID = await fetchActiveCircle();
+            if (!circleID) {
+                Alert.alert('Error', 'No active circle found.');
+                return;
+            }
+
+            const userIDs = await fetchCircleUsers(circleID);
+
+            const response = await fetch('https://ffm-application-main.onrender.com/create-bank', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    bankTitle: selectedBankTitle.trim(),
+                    bankCurrency: selectedCurrency.code,
+                    bankAmount: parseFloat(selectedBankAmount),
+                    isPrimary: isPrimary,
+                    color: selectedColor,
+                    userIDs: userIDs,
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok && data.status === 'success') {
+                if (newUserSelectedCircleType === null) {
+                    // If newUserSelectedCircleType is NULL, Proceed as usual - Already Registered Users
+                    Alert.alert('Success', 'Bank Added Successfully');
+                    navigation.goBack();
+                } else {
+                    // If newUserSelectedCircleType is NOT null - New Users
+                    Alert.alert('Success', 'Bank Added Successfully');
+                    navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'Home' }],
+                    });
+                }
+            } else {
+                Alert.alert('Error', data.message || 'Failed To Add Bank');
+
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Alert.alert('Error', 'Something went wrong. Please try again later.');
+        }
+    };
+
     const fetchCircleUsers = async (circleID) => {
         const token = await AsyncStorage.getItem('access_token');
 
@@ -145,63 +210,6 @@ export default function CreateBanksScreen({ navigation }) {
             return [];
         }
     };
-
-    const createBank = async () => {
-        const token = await AsyncStorage.getItem('access_token');
-
-        if (!token) {
-            console.error('No Token Found');
-            return;
-        }
-
-
-        if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency || !selectedColor) {
-            Alert.alert('Error', 'Please ensure all fields are filled and a color is selected.');
-            return;
-        }
-
-        try {
-
-            const circleID = await fetchActiveCircle();
-            if (!circleID) {
-                Alert.alert('Error', 'No active circle found.');
-                return;
-            }
-
-            const userIDs = await fetchCircleUsers(circleID);
-
-            const response = await fetch('https://ffm-application-main.onrender.com/create-bank', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    bankTitle: selectedBankTitle.trim(),
-                    bankCurrency: selectedCurrency.code,
-                    bankAmount: parseFloat(selectedBankAmount),
-                    isPrimary: isPrimary,
-                    color: selectedColor,
-                    userIDs: userIDs,
-                })
-            });
-
-            const responseData = await response.json();
-
-            if (response.ok) {
-                Alert.alert('Success', 'Bank Added Successfully');
-                navigation.goBack();
-            } else {
-                Alert.alert('Error', responseData.message || 'Failed To Add Bank');
-
-            }
-
-        } catch (error) {
-            console.error('Error:', error);
-            Alert.alert('Error', 'Something went wrong. Please try again later.');
-        }
-    };
-
 
     useEffect(() => {
         const formattedCurrencies = Object.entries(Currencies).map(([code, currency], index) => {
@@ -285,7 +293,8 @@ export default function CreateBanksScreen({ navigation }) {
                 <View style={styles.createBankDetailsContainer}>
 
 
-                    <View style={[
+                    <View 
+                        style={[
                         styles.headerContainer,
                         { borderColor: selectedColor || theme.colors.primary }
                     ]}>
@@ -335,7 +344,6 @@ export default function CreateBanksScreen({ navigation }) {
                     </View>
 
                     <View style={styles.bankTypeOptionsContainer}>
-                        <Text style={[styles.defaultText, { fontSize: 20 }]}>Bank Options</Text>
                         <View style={styles.optionContainer}>
                             <Text style={[styles.defaultText, { fontSize: 18 }]}>Primary Bank :
                             </Text>
@@ -350,9 +358,6 @@ export default function CreateBanksScreen({ navigation }) {
 
 
                     <View style={styles.bankThemeOptionsContainer}>
-
-                        <Text style={[styles.defaultText, { fontSize: 20 }]}>Select Theme</Text>
-
                         <View style={styles.buttonContainer}>
                             <ColorTray
                                 selectedColor={selectedColor}

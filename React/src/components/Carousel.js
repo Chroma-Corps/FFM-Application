@@ -225,7 +225,7 @@ const CarouselAnimation = () => {
 
 export default function Carousel() {
     return (
-        <View style={{ alignItems: 'center' }}>
+        <View>
             <CarouselAnimation />
         </View>
     );
@@ -262,5 +262,5 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginHorizontal: 8,
         backgroundColor: '#CCCCCC',
-    }
+    },
 });

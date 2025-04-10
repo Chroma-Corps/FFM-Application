@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { theme } from '../core/theme';
 import ArrowButton from '../components/ArrowButton';
@@ -6,31 +6,56 @@ import Background from '../components/Background';
 import Button from '../components/Button';
 import Header from '../components/Header';
 import Paragraph from '../components/Paragraph';
+import StartSlider from '../components/StartSlider';
 
 export default function StartScreen({ navigation }) {
+  const [startImages] = useState([
+    {
+      image: require('../assets/pig_bank.png'),
+    },
+    {
+      image: require('../assets/bank_or_pig.png'),
+    },
+    {
+      image: require('../assets/search_pig.png'),
+    },
+  ]);
+
   return (
     <View style={styles.startScreenContainer}>
-      <Background justifyContent='flex-start'>
-
-        <View style={{ alignItems: 'center', width: '100%', marginTop: 40 }}>
-          <Header fontSize={60}>Welcome</Header>
-          <Paragraph>
-            Ready to take control of your finances with confidence?
-            Let's build a smart, sustainable budget that works for you—one step at a time.
+      <Background justifyContent='center'>
+        <View style={{ alignItems: 'center'}}>
+          <Header fontSize={50}>Welcome!</Header>
+          <Header fontSize={20}>Track. Save. Succeed.</Header>
+          <Paragraph style={{ marginTop: 10 }}>
+             Your financial journey starts here!
           </Paragraph>
         </View>
 
-        {/* Image */}
-        <View style={{ alignItems: 'center', width: '100%', marginTop: 40 }}>
-          <Image
-            source={require('../assets/start_screen_image.png')}
-          />
-        </View>
+          {/* Image */}
+          {/* <View style={{ alignItems: 'center' }}>
+            <Image
+              source={require('../assets/PigBank.png')}
+              style={{
+                width: '100%',
+                maxWidth:400, 
+                height: undefined, 
+                aspectRatio: 1,
+                resizeMode: 'contain',
+              }}
+            />
+          </View> */}
 
-        <View style={{ alignItems: 'center', width: '100%', marginTop: 20 }}>
-          <Header fontSize={25}>Let's get you started on your budgeting journey!</Header>
-          <Paragraph style={{ marginTop: 10 }}>
-            Track. Save. Succeed. Your financial journey starts here!
+                <View style={styles.sliderContainer}>
+                  <StartSlider
+                      data={startImages}
+                      width={350}
+                      height={350}
+                  />
+                    </View>
+        <View style={{ alignItems: 'center', width: '100%'}}>
+          <Paragraph>
+            Let's build a smart, sustainable budget that works for you—one step at a time.
           </Paragraph>
         </View>
 

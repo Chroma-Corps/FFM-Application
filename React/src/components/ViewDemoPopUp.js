@@ -20,7 +20,7 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
             image: require('../assets/default_img.jpg'),
         },
         {
-            title: 'Set Shorterm Goals',
+            title: 'Set Personal Goals',
             color: '#8B4513',
             description: 'Set and track your short-term financial goals, no matter how small, and stay motivated as you achieve each milestone.',
             image: require('../assets/default_img.jpg'),
@@ -57,11 +57,6 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
             onRequestClose={() => setShowPreviewDemoPopup(false)}
         >
             <Background justifyContent="center">
-
-                <Text style={styles.popupTitle}>
-                    {selectedCircleType === 'Self' ? "Personal View" : "Family View"}
-                </Text>
-
                 <View style={styles.modalContent}>
                     <View style={styles.imageCircleContainer}>
                         <Image source={imageSource} style={styles.imageCircle} />
@@ -92,25 +87,10 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
 
 const styles = StyleSheet.create({
     modalContent: {
-        width: '100%',
-        height: '90%',
         backgroundColor: 'transparent',
         padding: 20,
         borderRadius: 10,
         alignItems: 'center',
-    },
-
-    popupTitle: {
-        fontFamily: theme.fonts.bold.fontFamily,
-        color: 'white',
-        backgroundColor: theme.colors.primary,
-        width: '70%',
-        borderRadius: 15,
-        position: 'absolute',
-        top: 35,
-        fontSize: 32,
-        textAlign: 'center',
-        zIndex: 10,
     },
 
     imageCircleContainer: {
@@ -139,22 +119,16 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
     },
 
-    text: {
-        fontSize: 18,
-        marginTop: 10,
-        color: '#666',
-    },
-
     closeButton: {
         marginTop: 20,
-        backgroundColor: '#E57373',
+        backgroundColor: theme.colors.expense,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
     },
     closeText: {
         fontFamily: theme.fonts.bold.fontFamily,
-        color: 'white',
+        color: theme.colors.textSecondary,
         fontSize: 18,
     },
 });

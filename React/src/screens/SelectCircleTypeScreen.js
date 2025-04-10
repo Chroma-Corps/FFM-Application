@@ -1,95 +1,102 @@
 import { React, useState } from 'react'
-import { useRoute } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Background from '../components/Background'
 import Header from '../components/Header'
 import Paragraph from '../components/Paragraph'
 import Button from '../components/Button'
 import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { theme } from '../core/theme'
+import { MaterialIcons } from '@expo/vector-icons'; 
 
 export default function SelectCircleTypeScreen({ navigation }) {
-    const [selectedCircleType, setSelectedCircleType] = useState(null);
+    const [newUserSelectedCircleType, setNewUserSelectedCircleType] = useState(null);
 
     const handlePress = (id) => {
-        setSelectedCircleType(id);
+        setNewUserSelectedCircleType(id);
     };
 
     const handleRegistrationContinue = async () => {
-        if (selectedCircleType === 'Self') {
-            navigation.navigate('SetupPersonalCircleScreen', { selectedCircleType });
-        } else {
-            navigation.navigate('SetupFamilyCircleScreen', { selectedCircleType });
-        }
+        navigation.navigate('CreateCircle', { newUserSelectedCircleType });
     };
 
-    const Card = ({ id, source, text, isSelected }) => (
-        <TouchableOpacity onPress={() => handlePress(id)}>
-            <Image
-                source={source}
-                style={[
-                    styles.image,
-                    isSelected && styles.selected,
-                    !isSelected && styles.unselected,
-                ]}
-            />
-            <Text style={styles.cardText}>{text}</Text>
+    const Card = ({ id, iconName, text, isSelected }) => (
+        <TouchableOpacity onPress={() => handlePress(id)} style={{ alignItems: 'center' }}>
+          <MaterialIcons
+            name={iconName}
+            size={150}
+            color={isSelected ? theme.colors.primary : '#888'}
+            style={[
+              isSelected && { backgroundColor: '#E0F0FF', borderRadius: 12, padding: 8 },
+            ]}
+          />
+          <Text style={{
+                        fontFamily: theme.fonts.bold.fontFamily, 
+                        color: isSelected ? '#007AFF' : '#333' }}>
+            {text}
+          </Text>
         </TouchableOpacity>
-    );
+      );
 
     return (
         <View style={styles.startScreenContainer}>
-            <Background justifyContent='flex-start'>
+            <Background>
                 <View style={{ alignItems: 'center', justifyContent: 'center', width: '100%', marginTop: 40 }}>
-                    <Header fontSize={40}>Get Started with Your Account</Header>
+                    <Header fontSize={30}>Getting Started</Header>
                     <Paragraph>
                         Choose the type of account that best suits your needs.
                     </Paragraph>
                 </View>
 
                 <View style={{ marginTop: 30 }}>
-                    <Text style={styles.descriptionTitle}>Select Your Account Type</Text>
                     <View style={styles.container}>
 
                         <Card
                             id="Self"
-                            source={require('../assets/personal_icon.png')}
-                            text="Personal"
-                            isSelected={selectedCircleType === 'Self'}
+                            iconName="person"
+                            isSelected={newUserSelectedCircleType === 'Self'}
                         />
-
+                    
                         <Card
                             id="Group"
-                            source={require('../assets/family_icon.png')}
-                            text="Family"
-                            isSelected={selectedCircleType === 'Group'}
+                            iconName="group"
+                            isSelected={newUserSelectedCircleType === 'Group'}
                         />
                     </View>
                 </View>
 
-                <View style={{ flex: 1, justifyContent: 'flex-end', marginBottom: 60 }}>
+                <View>
                     <View style={styles.descriptionContainer}>
-                        {selectedCircleType === 'Self' && (
+                        {newUserSelectedCircleType === 'Self' && (
                             <View>
-                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Personal Circle</Text>
+                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Self Circle</Text>
                                 <Text style={styles.descriptionText}>
-                                    This circle is for managing your personal finances.
-                                    Set budgeting goals, track expenses, and stay on top of your financial progress.
+                                    This circle is for managing your personal finances. 
+                                    Set budgeting goals, track your spending, and monitor your financial progress. 
+                                    Gain insights into your spending habits and make informed decisions to achieve your financial goals.
                                 </Text>
                             </View>
                         )}
-                        {selectedCircleType === 'Group' && (
+                        {newUserSelectedCircleType === 'Group' && (
                             <View>
-                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Family Circle</Text>
+                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Group Circle</Text>
                                 <Text style={styles.descriptionText}>
                                     This circle is for managing shared household finances.
-                                    Set joint budgeting goals, track family expenses, and stay on the same page with everyone’s spending.
+                                    Set joint budgeting goals, track expenses, and stay on top of everyone's spending.
+                                    Collaborate in real-time to ensure financial harmony and avoid misunderstandings.
+                                </Text>
+                            </View>
+                        )}
+                        {newUserSelectedCircleType === null && (
+                            <View>
+                                <Text style={[styles.descriptionTitle, { backgroundColor: theme.colors.primary, paddingVertical: 5, borderRadius: 5 }]}>Circles</Text>
+                                <Text style={styles.descriptionText}>
+                                    Circles help you organize your finances by purpose!
+                                    Choose 'Self' to manage personal budgets, or 'Group' to collaborate on shared expenses.
                                 </Text>
                             </View>
                         )}
                     </View>
 
-                    {selectedCircleType && (
+                    {newUserSelectedCircleType && (
                         <View style={{ alignSelf: 'center', width: '50%', marginTop: 40 }}>
                             <Button
                                 mode="contained"
@@ -109,25 +116,13 @@ export default function SelectCircleTypeScreen({ navigation }) {
 const styles = StyleSheet.create({
     startScreenContainer: {
         flex: 1,
-        backgroundColor: theme.colors.surface,
-        width: '100%',
     },
 
     container: {
-        marginTop: 0,
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'space-evenly',
         padding: 20,
         gap: 20,
-    },
-
-    image: {
-        width: 150,
-        height: 150,
-        borderRadius: 10,
-        borderWidth: 3,
-        borderColor: 'white',
-        tintColor: 'white'
     },
 
     cardText: {
@@ -148,21 +143,20 @@ const styles = StyleSheet.create({
     },
 
     descriptionContainer: {
-        marginTop: 20,
-        paddingHorizontal: 20,
+        marginTop: 10,
     },
 
     descriptionTitle: {
         fontFamily: theme.fonts.bold.fontFamily,
         color: theme.colors.description,
-        fontSize: 24,
+        fontSize: 20,
         textAlign: 'center',
         marginBottom: 10,
     },
 
     descriptionText: {
-        fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 20,
+        fontFamily: theme.fonts.medium.fontFamily,
+        fontSize: 15,
         textAlign: 'center',
         color: theme.colors.description,
     },

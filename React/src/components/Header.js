@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native'
 import { Text } from 'react-native-paper'
 import { theme } from '../core/theme'
 
-export default function Header({ children, fontSize = 45, style, ...props }) {
+export default function Header({ children, fontSize = 35, style, ...props }) {
   return (
     <Text style={[styles.header, { fontSize }, style]} {...props}>
       {children}

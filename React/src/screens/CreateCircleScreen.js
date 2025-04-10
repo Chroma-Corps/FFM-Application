@@ -11,9 +11,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import ColorPicker from 'react-native-wheel-color-picker';
 
-export default function CreateCircleScreen({ navigation }) {
+export default function CreateCircleScreen({ navigation, route }) {
+  const { newUserSelectedCircleType } = route.params || {};
   const [circleName, setCircleName] = useState('');
-  const [circleType, setCircleType] = useState('Self');
+  const [circleType, setCircleType] = useState('');
   const [circleColor, setCircleColor] = useState('#9ACBD0');
   const [circleImage, setCircleImage] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -33,11 +34,48 @@ export default function CreateCircleScreen({ navigation }) {
     }
   };
 
+  // For New Users
+   const setActiveCircle = async (circleID) => {
+      try {
+        const token = await AsyncStorage.getItem("access_token");
+  
+        if (!token) {
+          console.error('No Token Found');
+          return;
+        }
+  
+        const response = await fetch('https://ffm-application-main.onrender.com/active-circle', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            circleID: circleID,
+          }),
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok && data.status === 'success') {
+          console.log(data.message)
+        } else {
+          console.error(data.message);
+        }
+        console.log('Set Active Circle Status:', data.status)
+      } catch (error) {
+        console.error("Error Setting Active Circle:", error);
+      }
+    };
+
   const createCircle = async () => {
     const token = await AsyncStorage.getItem('access_token');
     if (!token) return Alert.alert('Error', 'No access token found');
 
-    if (!circleName || !circleType || !circleColor || !circleImage) {
+    // Conditional Considering New Users
+    const finalCircleType = newUserSelectedCircleType ? newUserSelectedCircleType : circleType;
+
+    if (!circleName || !finalCircleType || !circleColor || !circleImage) {
       return Alert.alert('Missing Fields', 'Please complete all fields.');
     }
 
@@ -50,7 +88,7 @@ export default function CreateCircleScreen({ navigation }) {
         },
         body: JSON.stringify({
           circleName: circleName.trim(),
-          circleType: circleType.toUpperCase(),
+          circleType: finalCircleType.toUpperCase(),
           circleColor: circleColor,
           circleImage: circleImage,
         }),
@@ -59,10 +97,18 @@ export default function CreateCircleScreen({ navigation }) {
       const data = await response.json();
 
       if (response.ok && data.status === 'success') {
-        Alert.alert('Success', 'Circle created successfully');
-        navigation.goBack();
+        if (newUserSelectedCircleType == null) {
+          // If newUserSelectedCircleType is NULL, Proceed as usual - Already Registered Users
+          Alert.alert('Success', 'Circle Created Successfully');
+          navigation.goBack();
+        } else {
+          // If newUserSelectedCircleType is NOT null - New Users
+          Alert.alert('Success', 'Circle Created Successfully');
+          setActiveCircle(data.circleID);
+          navigation.navigate('CreateBank', { newUserSelectedCircleType });
+        }
       } else {
-        Alert.alert('Error', data.message || 'Failed to create circle');
+        Alert.alert('Error', data.message || 'Failed To Create Circle');
       }
     } catch (error) {
       console.error(error);
@@ -80,7 +126,6 @@ export default function CreateCircleScreen({ navigation }) {
             <View style={{alignSelf: 'center'}}>
               <InAppHeader >New Circle</InAppHeader>
             </View>
-            
 
             <TextInput
               placeholder="Circle Name"
@@ -90,28 +135,30 @@ export default function CreateCircleScreen({ navigation }) {
               placeholderTextColor="#aaa"
             />
 
-            <Text style={styles.label}>Select Circle Type:</Text>
-            <View style={styles.typeSelector}>
-              {['Self', 'Group'].map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  onPress={() => setCircleType(type)}
-                  style={[
-                    styles.typeButton,
-                    circleType === type && { backgroundColor: theme.colors.primary },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      color: circleType === type ? 'white' : theme.colors.textSecondary,
-                      fontFamily: theme.fonts.medium.fontFamily,
-                    }}
+            {newUserSelectedCircleType == null && (
+              <View style={styles.typeSelector}>
+                <Text style={styles.label}>Select Circle Type:</Text>
+                {['Self', 'Group'].map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    onPress={() => setCircleType(type)}
+                    style={[
+                      styles.typeButton,
+                      circleType === type && { backgroundColor: theme.colors.primary },
+                    ]}
                   >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                    <Text
+                      style={{
+                        color: circleType === type ? 'white' : theme.colors.textSecondary,
+                        fontFamily: theme.fonts.medium.fontFamily,
+                      }}
+                    >
+                      {type}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
 
             <Text style={styles.label}>Choose Colour:</Text>
             <View style={styles.colorPalette}>
@@ -153,9 +200,17 @@ export default function CreateCircleScreen({ navigation }) {
         </ScrollView>
 
         <View style={styles.buttonContainer}>
-          <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
-            Create Circle
-          </Button>
+          {newUserSelectedCircleType === null ? (
+              // For Non-New Users
+              <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
+                Create Circle
+              </Button>
+            ) : (
+              // For New Users
+              <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
+              Create Circle
+              </Button>
+          )}
         </View>
 
         {/* Modal for Custom Color Picker */}

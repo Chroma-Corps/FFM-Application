@@ -1,9 +1,8 @@
 import React from 'react'
 import { PaperProvider, Provider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+import { createStackNavigator, TransitionPresets} from '@react-navigation/stack'
 import { theme } from './src/core/theme'
-import PlusFAB from './src/components/PlusFAB'
 import { useFonts } from 'expo-font'
 import {
   StartScreen,
@@ -60,11 +59,16 @@ export default function App() {
               headerShown: false,
             }}
           >
-
             <Stack.Screen name="StartScreen" component={StartScreen} />
             <Stack.Screen name="PreviewDemoScreen" component={PreviewDemoScreen} />
 
-            <Stack.Screen name="MainAuthScreen" component={MainAuthScreen} />
+            <Stack.Screen
+              name="MainAuthScreen"
+              component={MainAuthScreen}
+              options={{
+                ...TransitionPresets.SlideFromRightIOS,
+              }}
+            />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
@@ -85,13 +89,9 @@ export default function App() {
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
             <Stack.Screen name="CreateCircle" component={CreateCircleScreen} />
             <Stack.Screen name="CircleDetailsScreen" component={CircleDetailsScreen} />
-
             <Stack.Screen name="EditBudgetScreen" component={EditBudgetScreen} />
-
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
             <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
-
-
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
           </Stack.Navigator>
