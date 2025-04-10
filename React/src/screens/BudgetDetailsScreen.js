@@ -307,17 +307,21 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                                 />
                             </View>
 
-                            <Text style={[
-                                styles.categoryText,
-                                {
-                                    backgroundColor:
-                                        budgetDetails.budgetType === 'EXPENSE' ? '#81C784' : '#E57373'
-                                }
-                            ]}>
+                            <Text
+                                style={[
+                                    styles.categoryText,
+                                    {
+                                        backgroundColor:
+                                            budgetDetails.budgetType?.toLowerCase() === 'savings'
+                                                ? '#81C784' // green
+                                                : budgetDetails.budgetType?.toLowerCase() === 'expense'
+                                                    ? '#E57373' // red
+                                                    : '#B0BEC5' // fallback gray
+                                    }
+                                ]}
+                            >
                                 {budgetDetails.budgetType ?? 'Type N/A'} Budget - {budgetDetails.transactionScope}
                             </Text>
-
-
                         </View>
 
                         <View style={styles.chartSectionContainer}>
@@ -475,7 +479,7 @@ const styles = StyleSheet.create({
     transactionsActivityContainer: {
         alignSelf: 'left',
         marginTop: 20,
-        paddingHorizontal: 15,
+        paddingHorizontal: 2,
     },
     transactionsList: {
         marginTop: 5,
