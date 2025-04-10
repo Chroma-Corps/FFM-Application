@@ -9,8 +9,8 @@ export const theme = {
     grayedText: '#747474',
     grayed: '#2F2F2F2F',
     textSecondary: '#fff',
-    heading: '#333333',
-    description: '#666666',
+    heading: '#F2EFE7',
+    description: '#F2EFE7',
     caption: '#888888',
     primary: '#48A6A7',
     secondary: '#9ACBD0',
@@ -26,8 +26,8 @@ export const theme = {
     ...DefaultTheme.fonts,
     light: { fontFamily: 'Quicksand-Light', fontWeight: '300' },
     regular: { fontFamily: 'Quicksand-Regular', fontWeight: '400' },
-    medium: { fontFamily: 'Quicksand-Medium', fontWeight: '500' }, 
+    medium: { fontFamily: 'Quicksand-Medium', fontWeight: '500' },
     bold: { fontFamily: 'Quicksand-Bold', fontWeight: '700' },
   },
-  
+
 }

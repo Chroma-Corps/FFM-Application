@@ -7,9 +7,14 @@ import PlusFAB from './src/components/PlusFAB'
 import { useFonts } from 'expo-font'
 import {
   StartScreen,
+  PreviewDemoScreen,
+  MainAuthScreen,
   LoginScreen,
-  RegisterScreen,
   ResetPasswordScreen,
+  RegisterScreen,
+  SelectCircleTypeScreen,
+  SetupPersonalCircleScreen,
+  SetupFamilyCircleScreen,
   Dashboard,
   BankDetailsScreen,
   BudgetsScreen,
@@ -55,9 +60,16 @@ export default function App() {
           >
 
             <Stack.Screen name="StartScreen" component={StartScreen} />
+            <Stack.Screen name="PreviewDemoScreen" component={PreviewDemoScreen} />
+
+            <Stack.Screen name="MainAuthScreen" component={MainAuthScreen} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
-            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
+
+            <Stack.Screen name="SelectCircleTypeScreen" component={SelectCircleTypeScreen} />
+            <Stack.Screen name="SetupPersonalCircleScreen" component={SetupPersonalCircleScreen} />
+            <Stack.Screen name="SetupFamilyCircleScreen" component={SetupFamilyCircleScreen} />
 
             <Stack.Screen name="Dashboard" component={Dashboard} />
             <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />

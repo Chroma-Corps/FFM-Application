@@ -101,8 +101,8 @@ export default function LoginScreen({ navigation }) {
       </View>
 
       <Button mode="contained" onPress={onLoginPressed} loading={loading}>Login</Button>
-      <Text style={styles.orText}>- Or Login With -</Text>
-      <Button mode="outlined" icon="google">Google</Button>
+      {/* <Text style={styles.orText}>- Or Login With -</Text>
+      <Button mode="outlined" icon="google">Google</Button> */}
       <View style={[styles.row, { marginTop: 50 }]}>
         <Text style={styles.signUpLabel}>Don't Have An Account? </Text>
         <TouchableOpacity onPress={() => navigation.replace('RegisterScreen')}>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
 
   input: {
     fontFamily: theme.fonts.regular.fontFamily,
-    color: theme.colors.text,
+    color: theme.colors.description,
     backgroundColor: 'transparent',
     marginBottom: 12,
   },
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 12,
     fontFamily: theme.fonts.light.fontFamily,
-    color: theme.colors.text
+    color: theme.colors.description
   },
 
   row: {
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   signUpLabel: {
     fontFamily: theme.fonts.regular.fontFamily,
     fontSize: 15,
-    color: theme.colors.text,
+    color: theme.colors.description,
   },
 
   link: {

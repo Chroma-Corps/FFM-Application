@@ -1,4 +1,5 @@
 from App.models.user import User
+from App.controllers.user import create_user
 from flask_jwt_extended import create_access_token, JWTManager, get_jwt_identity, verify_jwt_in_request
 
 def login(email, password):
@@ -7,10 +8,15 @@ def login(email, password):
     return create_access_token(identity=email)
   return None
 
+def signup(name, email, password):
+  user = create_user(name, email, password)
+  if user:
+    return create_access_token(identity=email)
+  return None
+
 def setup_jwt(app):
   jwt = JWTManager(app)
 
-  # configure's flask jwt to resolve get_current_identity() to the corresponding user's ID
   @jwt.user_identity_loader
   def user_identity_lookup(identity):
     user = User.query.filter_by(email=identity).one_or_none()
