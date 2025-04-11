@@ -20,6 +20,7 @@ export default function Dashboard({ navigation }) {
   const [circles, setCircles] = useState([]);
   const [newCurrentCircle, setNewCurrentCircle] = useState([]);
   const [selfCircle, setSelfCircle] = useState([]);
+  const [haveGroupCircle, setHaveGroup] = useState([]);
   const [currentCircle, setCurrentCircle] = useState(null);
   const [prevCircle, setPrevCircle] = useState(null);
   const [defaultCirle, setDefaultCircle] = useState(null);
@@ -174,12 +175,22 @@ export default function Dashboard({ navigation }) {
         },
       });
       const data = await response.json();
-
       if (response.ok) {
         setCircles(data.circles);
+        
         const self = data.circles.find(circle => circle.circleType === 'Self');
+        const group = data.circles.find(circle => circle.circleType === 'Group');
+ 
         if (self) {
-          setSelfCircle(self);
+            setSelfCircle(self);
+        } else {
+            setSelfCircle(null); 
+        }
+    
+        if (group) {
+            setHaveGroup(group);
+        } else {
+            setHaveGroup(null);
         }
       } else {
         console.error(data.message);
@@ -212,8 +223,12 @@ export default function Dashboard({ navigation }) {
       setCircleType('Self');
       setActiveCircle(selfCircle.circleID);
     } else {
-      setCircleType('Group');
-      setActiveCircle(prevCircle.circleID);
+      if (!haveGroupCircle) {
+        return;
+      } else {
+        setActiveCircle(haveGroupCircle.circleID);
+        setCircleType('Group');
+      }
     }
   };
 
@@ -224,7 +239,7 @@ export default function Dashboard({ navigation }) {
       >
         <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
         <Text style={styles.bankCardAmount}>
-          <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount} /</Text> {item.bankAmount}
+          <Text style={styles.remainingBankCardAmount}>{item.remainingBankAmount}</Text>
         </Text>
       </TouchableOpacity>
     );

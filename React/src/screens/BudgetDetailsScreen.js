@@ -229,7 +229,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         const categoryImageSource = getPrimaryCategoryImage(item.transactionCategory);
 
         return (
-            <View style={styles.transactionCard}>
+            <View key={item.transactionID} style={styles.transactionCard}>
                 <Text style={styles.transactionTitle}>{item.transactionTitle}</Text>
                 <Text style={styles.transactionAmount}>{item.transactionAmount}</Text>
 
@@ -241,7 +241,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
                             return (
                                 <View
-                                    key={index}
+                                    key={cat}
                                     style={{ flexDirection: 'row', alignItems: 'center', marginRight: 6 }}
                                 >
                                     <Image
@@ -352,13 +352,13 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                                 Transactions Activity
                             </Text>
                             <View style={styles.transactionsList}>
-                                {budgetTransactions.length > 0 ? (
-                                    budgetTransactions.map(item => renderTransaction({ item, key: item.id }))
-                                ) : (
-                                    <Text style={[styles.descriptionText, { textAlign: 'center', marginTop: 20 }]}>
-                                        No transactions recorded for this budget yet.
-                                    </Text>
-                                )}
+                            {budgetTransactions.length > 0 ? (
+                                budgetTransactions.map(item => renderTransaction({ item }))
+                            ) : (
+                                <Text style={[styles.descriptionText, { textAlign: 'center', marginTop: 20 }]}>
+                                    No transactions recorded for this budget yet.
+                                </Text>
+                            )}
                             </View>
                         </View>
 

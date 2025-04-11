@@ -144,7 +144,7 @@ export default function TransactionsScreen({ navigation }) {
 
     return (
     <View>
-        <TouchableOpacity style={styles.cardStyle} onPress={() => navigation.push('UpdateTransaction', { transactionID: item.transactionID })}>
+        <TouchableOpacity style={styles.cardStyle} onPress={() => navigation.navigate('TransactionDetails', { transactionID: item.transactionID })}>
             <View style={styles.cardRow}>
               <Text style={styles.titleText}>{item.transactionTitle}</Text>
               <View style={styles.amountContainer}>

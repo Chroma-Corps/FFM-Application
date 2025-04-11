@@ -11,6 +11,7 @@ import InAppBackground from '../components/InAppBackground';
 import React, { useState, useEffect, useCallback } from 'react';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as DocumentPicker from 'expo-document-picker';
 import { View, ActivityIndicator, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, Platform, Image} from 'react-native';
 
 export default function AddTransactionScreen({ navigation }) {
@@ -33,6 +34,7 @@ export default function AddTransactionScreen({ navigation }) {
     const [transactionTitle, setTransactionTitle] = useState('');
     const [transactionAmount, setTransactionAmount] = useState('');
     const [transactionCategory, setTransactionCategory] = useState('');
+    const [transactionAttachment, setTransactionAttachment] = useState([]);
 
     // Date-Time Spinner
     const [date, setDate] = useState(new Date());
@@ -51,6 +53,45 @@ export default function AddTransactionScreen({ navigation }) {
     // Helper Functions
     const toggleDatepicker = () => {
         setShowPicker(!showPicker);
+    };
+
+    const handleAddAttachment = async () => {
+        try {
+          const result = await DocumentPicker.getDocumentAsync({
+            type: '*/*',
+            multiple: true,
+            copyToCacheDirectory: true,
+          });
+
+          if (result?.assets?.length) {
+            const attachments = result.assets.map(file => ({
+              name: file.name,
+              size: file.size,
+              uri: file.uri,
+              mimeType: file.mimeType || 'application/octet-stream',
+            }));
+            setTransactionAttachment(prev => [...prev, ...attachments]);
+          } else if (result.type === 'success') {
+                // Fallback For Older Behavior
+                const file = result;
+                const attachment = {
+                name: file.name,
+                size: file.size,
+                uri: file.uri,
+                mimeType: file.mimeType || 'application/octet-stream',
+            };
+            setTransactionAttachment(prev => [...prev, attachment]);
+          } else {
+            console.log("No Document Selected Or Cancelled.");
+          }
+      
+        } catch (error) {
+          console.error("File Picker Error:", error);
+        }
+      };
+
+    const handleRemoveAttachment = (indexToRemove) => {
+        setTransactionAttachment(prev => prev.filter((_, index) => index !== indexToRemove));
     };
 
     const handleCategorySelect = (item) => {
@@ -429,10 +470,14 @@ export default function AddTransactionScreen({ navigation }) {
                     budgetID: selectedBudget,
                     bankID: selectedBankID,
                     goalID: selectedGoal,
+                    attachments: transactionAttachment
                 }),
             });
 
+            console.log('Attachment To Be Added', transactionAttachment);
+
             const data = await response.json();
+            console.log('Transaction Data:', data);
 
             if (response.ok) {
                 alert(data.message)
@@ -605,18 +650,81 @@ export default function AddTransactionScreen({ navigation }) {
                                     style={styles.input}
                                     placeholderTextColor={theme.colors.grayedText}
                                 />
-                                <TextInput
-                                    placeholder="Notes"
-                                    value={transactionDesc}
-                                    onChangeText={setTransactionDesc}
-                                    style={styles.description}
-                                    placeholderTextColor={theme.colors.grayedText}
-                                    multiline
-                                    numberOfLines={4}
-                                    textAlignVertical="top"
-                                />
-
+                                <View style={styles.inputContainer}>
+                                    <TextInput
+                                        placeholder="Notes"
+                                        value={transactionDesc}
+                                        onChangeText={setTransactionDesc}
+                                        style={[styles.description, { color: theme.colors.textSecondary, flex: 1 }]}
+                                        placeholderTextColor={theme.colors.grayedText}
+                                        multiline
+                                        numberOfLines={10}
+                                        textAlignVertical="top"
+                                    />
+                                    <View style={{ alignItems:'flex-end' }}>
+                                        <TouchableOpacity onPress={handleAddAttachment}>
+                                        <MaterialIcons
+                                            name="attach-file"
+                                            size={25}
+                                            color={theme.colors.textSecondary}
+                                            style={styles.icon}
+                                        />
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
                             </View>
+
+                            {/* Attachments */}
+                            {transactionAttachment.length > 0 && (
+                            <View>
+                                <Text style={styles.sectionTitle}>Attachments</Text>
+
+                                {/* Image Attachments In Horizontal Scroll */}
+                                {transactionAttachment.some(file => file.mimeType?.startsWith('image/')) && (
+                                <ScrollView
+                                    horizontal
+                                    showsHorizontalScrollIndicator={false}
+                                    contentContainerStyle={styles.attachmentPreviewContainer}
+                                >
+                                    {transactionAttachment.map((file, index) => {
+                                    if (!file.mimeType?.startsWith('image/')) return null;
+                                    return (
+                                        <View key={index} style={styles.attachmentItem}>
+                                        <Image
+                                            source={{ uri: file.uri }}
+                                            style={styles.attachmentImage}
+                                        />
+                                        <TouchableOpacity
+                                            onPress={() => handleRemoveAttachment(index)}
+                                            style={styles.removeIcon}
+                                        >
+                                            <MaterialIcons name="close" size={16} color={theme.colors.expense} />
+                                        </TouchableOpacity>
+                                        </View>
+                                    );
+                                    })}
+                                </ScrollView>
+                                )}
+
+                                {/* Non-Image Attachments Listed Vertically */}
+                                {transactionAttachment.some(file => !file.mimeType?.startsWith('image/')) && (
+                                <View style={styles.nonImageList}>
+                                    {transactionAttachment.map((file, index) => {
+                                    if (file.mimeType?.startsWith('image/')) return null;
+                                    return (
+                                        <View key={index} style={styles.attachmentRow}>
+                                            <Text style={styles.attachmentText} numberOfLines={1} ellipsizeMode="tail">{file.name}</Text>
+                                            <TouchableOpacity onPress={() => handleRemoveAttachment(index)}>
+                                                <MaterialIcons name="close" size={18} color={theme.colors.expense} />
+                                            </TouchableOpacity>
+                                        </View>
+                                    );
+                                    })}
+                                </View>
+                                )}
+                            </View>
+                            )}
+
 
                             {/* Categories */}
                             <Text style={styles.sectionTitle}>Categories</Text>
@@ -726,18 +834,72 @@ const styles = StyleSheet.create({
         fontFamily: theme.fonts.medium.fontFamily,
     },
 
-    description: {
+    inputContainer: {
         borderWidth: 1,
         borderColor: theme.colors.primary,
-        padding: 5,
         borderRadius: 8,
-        fontSize: 20,
-        marginBottom: 15,
+        padding: 8,
+        marginBottom: 20,
+      },
+
+      icon: {
+        marginRight: 8,
+      },
+
+    description: {
+        borderRadius: 8,
+        fontSize: 18,
         color: theme.colors.textSecondary,
         fontFamily: theme.fonts.medium.fontFamily,
         height: 150,
         textAlignVertical: 'top',
     },
+
+    attachmentPreviewContainer: {
+        marginTop: 6,
+        flexDirection: 'row',
+        gap: 5,
+      },
+      
+      attachmentItem: {
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 20,
+      },
+      
+      attachmentImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 5,
+      },
+
+      nonImageList: {
+        gap: 5,
+        marginBottom: 20
+      },
+
+      attachmentRow:{
+        flexDirection: 'row',
+        alignItems: 'center'
+      },
+
+      attachmentText: {
+        fontSize: 13,
+        color: theme.colors.textSecondary,
+        fontFamily: theme.fonts.medium.fontFamily,
+        textDecorationLine: 'underline',
+      },
+      
+      removeIcon: {
+        position: 'absolute',
+        top: -6,
+        right: -6,
+        backgroundColor: theme.colors.textSecondary,
+        borderRadius: 8,
+        padding: 2,
+        elevation: 2,
+      },
 
     amountContainer: {
         borderRadius: 100,

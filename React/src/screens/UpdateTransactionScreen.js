@@ -175,16 +175,16 @@ export default function EditTransactionScreen({ navigation, route }) {
             
             if (response.ok) {
                 // Transaction Details
-                setTransactionDate(data.message.transactionDate);
-                setTransactionTime(data.message.transactionTime);
-                setTransactionDesc(data.message.transactionDesc);
-                setTransactionType(data.message.transactionType);
-                setTransactionTitle(data.message.transactionTitle);
-                setTransactionAmount(data.message.transactionAmount);
-                setTransactionCategory(data.message.transactionCategory);
-                setSelectedGoal(data.message.transactionGoal)
-                setSelectedBudget(data.message.transactionBudget)
-                setSelectedBankID(data.message.transactionBank)
+                setTransactionDate(data.transaction.transactionDate);
+                setTransactionTime(data.transaction.transactionTime);
+                setTransactionDesc(data.transaction.transactionDescription);
+                setTransactionType(data.transaction.transactionType);
+                setTransactionTitle(data.transaction.transactionTitle);
+                setTransactionAmount(data.transaction.transactionAmount);
+                setTransactionCategory(data.transaction.transactionCategory);
+                setSelectedGoal(data.transaction.transactionGoal)
+                setSelectedBudget(data.transaction.transactionBudget)
+                setSelectedBankID(data.transaction.transactionBank)
             } else {
                 console.error(data.message);
             }
@@ -632,7 +632,7 @@ export default function EditTransactionScreen({ navigation, route }) {
                                     style={styles.description}
                                     placeholderTextColor={theme.colors.grayedText}
                                     multiline
-                                    numberOfLines={4}
+                                    numberOfLines={10}
                                     textAlignVertical="top"
                                 />
 
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
         borderColor: theme.colors.primary,
         padding: 5,
         borderRadius: 8,
-        fontSize: 20,
+        fontSize: 17,
         marginBottom: 15,
         color: theme.colors.textSecondary,
         fontFamily: theme.fonts.medium.fontFamily,

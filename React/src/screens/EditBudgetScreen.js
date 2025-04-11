@@ -274,15 +274,7 @@ export default function EditBudgetScreen({ navigation, route }) {
         }
     }, [startDate, duration, selectedPeriod]);
 
-    const displayPeriodSelected = (period) => {
-        if (!period) return 'Period';
-        let formattedPeriod = period;
-        if (period === 'Daily') formattedPeriod = 'Day(s)';
-        if (period === 'Weekly') formattedPeriod = 'Week(s)';
-        if (period === 'Monthly') formattedPeriod = 'Month(s)';
-        if (period === 'Yearly') formattedPeriod = 'Year(s)';
-        return formattedPeriod;
-    };
+    
 
     const displayBudgetPeriod = () => {
         if (!startDate || !endDate) return '--';
@@ -400,7 +392,7 @@ export default function EditBudgetScreen({ navigation, route }) {
 
             if (response.ok && responseData.status === 'success') {
                 Alert.alert('Success', responseData.message || 'Budget Updated Successfully');
-                navigation.navigate('BudgetDetails', { budgetID });
+                navigation.goBack();
 
             } else {
                 Alert.alert('Error', `Failed To Update Budget: ${responseData.message || response.statusText || 'Unknown error'}`);
@@ -775,10 +767,9 @@ const styles = StyleSheet.create({
     },
     filterTagsContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 20,
-        marginBottom: 10,
-        flexWrap: 'wrap',
+        marginTop: 10,
+        marginBottom: 20,
+        justifyContent: 'space-between'
     },
     categoryItemContainer: {
         marginHorizontal: 5,

@@ -21,8 +21,8 @@ const styles = StyleSheet.create({
     left: 10,
   },
   image: {
-    width: 35,
-    height: 35,
+    width: 40,
+    height: 40,
   },
   imageColor: {
     tintColor: theme.colors.textSecondary,

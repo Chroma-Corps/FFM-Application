@@ -165,6 +165,7 @@ def initialize():
         budgetID=exclusive_budget.budgetID,
         bankID=bobberson_bank.bankID,
         goalID=None,
+        attachments=[]
     )
 
     add_transaction (
@@ -178,6 +179,7 @@ def initialize():
         transactionTime="09:30",
         bankID=bobberson_bank.bankID,
         goalID=None,
+        attachments=[]
     )
 
     add_transaction (
@@ -190,7 +192,8 @@ def initialize():
         transactionDate="2025-03-10",
         transactionTime="09:30",
         bankID=bobberson_bank.bankID,
-        goalID=bobberson_goal.goalID
+        goalID=bobberson_goal.goalID,
+        attachments=[]
     )
 
     # Users - Chroma Corps

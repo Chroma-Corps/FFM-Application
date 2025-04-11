@@ -34,11 +34,16 @@ class Goal(db.Model):
         self.circleID = circleID
         self.goalTitle = goalTitle
         self.targetAmount = targetAmount
-        self.currentAmount = currentAmount
         self.goalType = goalType
         self.startDate = convert_to_date(startDate)
         self.endDate = convert_to_date(endDate)
         self.color = color
+
+        # Set currentAmount Based On GoalType Enum
+        if self.goalType == GoalType.SAVINGS:
+            self.currentAmount = 0
+        else:
+            self.currentAmount = currentAmount
 
     def get_json(self):
         main_bank = None

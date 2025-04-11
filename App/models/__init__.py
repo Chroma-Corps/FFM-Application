@@ -9,3 +9,4 @@ from .userGoal import *
 from .userBudget import *
 from .userCircle import *
 from .userTransaction import *
+from .transactionAttachment import *

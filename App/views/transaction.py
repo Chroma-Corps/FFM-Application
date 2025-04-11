@@ -30,6 +30,7 @@ def new_transaction():
         bankID = data.get('bankID')
         goalID = data.get('goalID')
         userIDs = data.get('userIDs') or []
+        attachments = data.get('attachments') or []
 
         if not all([userID, transactionTitle, transactionType,
                     transactionCategory, transactionAmount, transactionDate,
@@ -51,7 +52,8 @@ def new_transaction():
             userIDs=userIDs,
             budgetID=budgetID,
             bankID=bankID,
-            goalID=goalID
+            goalID=goalID,
+            attachments=attachments
         )
 
         if error_message:
@@ -88,7 +90,7 @@ def list_user_transactions():
 def get_transation_details(transactionID):
     try:
         transaction_data = get_transaction_json(transactionID)
-        return jsonify({"status": "success", "message": transaction_data}), 200
+        return jsonify({"status": "success", "transaction": transaction_data}), 200
 
     except Exception as e:
         print(f"An Error Occurred: {e}")

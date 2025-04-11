@@ -35,8 +35,9 @@ class Transaction(db.Model):
     bank = db.relationship('Bank', backref='transactions', lazy=True) # 1 Bank -> Many Transactions
     circle = db.relationship('Circle', backref='transactions', lazy=True) # 1 Circle -> Many Transactions
     user_transactions = db.relationship('UserTransaction', back_populates='transaction') # UserTransaction
+    attachments = db.relationship('TransactionAttachment', backref='transaction', cascade="all, delete-orphan") # TransactionAttachments
 
-    def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, circleID, bankID, goalID=None, budgetID=None):
+    def __init__(self, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, attachments, circleID, bankID, goalID=None, budgetID=None):
         self.bankID = bankID
         self.budgetID = budgetID
         self.goalID = goalID
@@ -48,6 +49,7 @@ class Transaction(db.Model):
         self.transactionAmount = transactionAmount
         self.transactionDate = convert_to_date(transactionDate)
         self.transactionTime = convert_to_time(transactionTime)
+        self.attachments = attachments if attachments else []
 
     def get_json(self):
         amount = CurrencyService.format_currency(self.transactionAmount, self.bank.bankCurrency)
@@ -63,9 +65,10 @@ class Transaction(db.Model):
             'transactionTime': self.transactionTime.strftime("%H:%M"),
             'transactionBank': self.bankID,
             'transactionBudget': self.budgetID,
-            'transactionGoal': self.goalID
+            'transactionGoal': self.goalID,
+            'attachments': [attachment.get_json() for attachment in self.attachments]
         }
-
+        
     def __str__(self):
         amount = CurrencyService.format_currency(self.transactionAmount, self.bank.bankCurrency)
         return f"{self.transactionTitle} ({self.transactionType.value} | {self.transactionCategory}): {amount} on {self.transactionDate} at {self.transactionTime}"

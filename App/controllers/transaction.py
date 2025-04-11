@@ -1,8 +1,11 @@
+from App.controllers.transactionAttachment import add_transaction_attachment
 from App.database import db
 from App.controllers.goal import get_goal
 from App.controllers.bank import get_bank
 from App.controllers.budget import get_budget
 from App.controllers.user import get_user_json
+from App.models.bank import Bank
+from App.models.goal import Goal
 from App.services.category import CategoryService
 from App.controllers.userBudget import get_user_budgets_json
 from App.services.datetime import convert_to_date, convert_to_time
@@ -10,10 +13,16 @@ from App.models import Transaction, TransactionType, Budget, TransactionScope
 from App.controllers.userTransaction import create_user_transaction, is_transaction_owner, get_user_transaction_by_transaction_id
 
 # Add A New Transaction
-def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, goalID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None):
+def add_transaction(transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, bankID, userID, goalID, userIDs=None, transactionDate=None, transactionTime=None, budgetID=None, attachments=None):
     try:
         userIDs = userIDs or []
-        transaction_data, error = transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID)
+        attachments = attachments or []
+
+        transaction_data, error = transaction_handler(
+            userID, userIDs, transactionTitle, transactionDesc, 
+            transactionType, transactionCategory, transactionAmount, 
+            transactionDate, transactionTime, budgetID, bankID, goalID, attachments
+        )
         if error:
             return None, error
 
@@ -30,10 +39,22 @@ def add_transaction(transactionTitle, transactionDesc, transactionType, transact
             budgetID=transaction_data['budgetID'],
             bankID=transaction_data['bankID'],
             circleID=user['activeCircle'],
-            goalID=transaction_data['goalID']
+            goalID=transaction_data['goalID'],
+            attachments=None
         )
         db.session.add(new_transaction)
         db.session.commit()
+
+        if attachments:
+            for attachment in attachments:
+                print(attachment)
+                add_transaction_attachment(
+                    transactionID=new_transaction.transactionID,
+                    fileName=attachment.get('name'),
+                    fileType=attachment.get('mimeType'),
+                    fileSize=attachment.get('size'),
+                    fileUri=attachment.get('uri')
+                )
 
         create_user_transaction(userID, new_transaction.transactionID)
         if userIDs:
@@ -93,7 +114,7 @@ def get_all_budget_transactions(budgetID):
 
     transactions = []
     if budget.transactionScope.value == TransactionScope.INCLUSIVE.value:
-        all_transactions = Transaction.query.all()
+        all_transactions = Transaction.query.filter_by(circleID=budget.circleID).all()
         for transaction in all_transactions:
             if isinstance(transaction.transactionCategory, list):
                 if any(cat in budget.budgetCategory for cat in transaction.transactionCategory):
@@ -108,12 +129,18 @@ def get_all_budget_transactions(budgetID):
 
 # Get Transaction Associated With A Bank
 def get_all_bank_transactions(bankID):
-    transactions = Transaction.query.filter_by(bankID=bankID).all()
+    bank = Bank.query.get(bankID)
+    if not bank:
+        return {"error": "Bank Not Found"}
+    transactions = Transaction.query.filter_by(circleID=bank.circleID).all()
     return [transaction.get_json() for transaction in transactions]
 
 # Get Transaction Associated With A Goal
 def get_all_goal_transactions(goalID):
-    transactions = Transaction.query.filter_by(goalID=goalID).all()
+    goal = Goal.query.get(goalID)
+    if not goal:
+        return {"error": "Budget Not Found"}
+    transactions = Transaction.query.filter_by(circleID=goal.circleID).all()
     return [transaction.get_json() for transaction in transactions]
 
 # Get Transaction Associated With A Circle
@@ -307,7 +334,7 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
         db.session.rollback()
         raise ValueError(f"Error adjusting inclusive budgets: {str(e)}")
 
-def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID):
+def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID, attachments):
     try:
         adjust_bank_balance(bankID, transactionType, transactionAmount)
         if goalID is not None:
@@ -328,7 +355,8 @@ def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, tran
             'transactionTime': transactionTime,
             'budgetID': budgetID,  # Can be None
             'bankID': bankID,
-            'goalID': goalID
+            'goalID': goalID,
+            'attachments': attachments
         }
         return transaction_data, None
 
