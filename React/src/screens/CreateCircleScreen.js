@@ -10,17 +10,14 @@ import { theme } from '../core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import ColorPicker from 'react-native-wheel-color-picker';
+import ColorTray from '../components/ColorTray'
 
 export default function CreateCircleScreen({ navigation, route }) {
   const { newUserSelectedCircleType } = route.params || {};
   const [circleName, setCircleName] = useState('');
   const [circleType, setCircleType] = useState('');
-  const [circleColor, setCircleColor] = useState('#9ACBD0');
+  const [selectedColor, setSelectedColor] = useState('#4A90E2');
   const [circleImage, setCircleImage] = useState(null);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [tempColor, setTempColor] = useState(circleColor);
-
-  const presetColors = ['#9ACBD0', '#F28D8D', '#FFD700', '#48A6A7', '#B980F0'];
 
   const handleImagePick = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -32,6 +29,14 @@ export default function CreateCircleScreen({ navigation, route }) {
     if (!result.canceled) {
       setCircleImage(result.assets[0].uri);
     }
+  };
+
+  const handleCircleCodePopUp = async () => {
+    navigation.goBack();
+  }
+
+  const handleColorSelect = (color) => {
+    setSelectedColor(color);
   };
 
   // For New Users
@@ -75,7 +80,7 @@ export default function CreateCircleScreen({ navigation, route }) {
     // Conditional Considering New Users
     const finalCircleType = newUserSelectedCircleType ? newUserSelectedCircleType : circleType;
 
-    if (!circleName || !finalCircleType || !circleColor || !circleImage) {
+    if (!circleName || !finalCircleType || !circleImage) {
       return Alert.alert('Missing Fields', 'Please complete all fields.');
     }
 
@@ -89,7 +94,7 @@ export default function CreateCircleScreen({ navigation, route }) {
         body: JSON.stringify({
           circleName: circleName.trim(),
           circleType: finalCircleType.toUpperCase(),
-          circleColor: circleColor,
+          circleColor: selectedColor,
           circleImage: circleImage,
         }),
       });
@@ -100,7 +105,7 @@ export default function CreateCircleScreen({ navigation, route }) {
         if (newUserSelectedCircleType == null) {
           // If newUserSelectedCircleType is NULL, Proceed as usual - Already Registered Users
           Alert.alert('Success', 'Circle Created Successfully');
-          navigation.goBack();
+          handleCircleCodePopUp();
         } else {
           // If newUserSelectedCircleType is NOT null - New Users
           Alert.alert('Success', 'Circle Created Successfully');
@@ -160,7 +165,7 @@ export default function CreateCircleScreen({ navigation, route }) {
               </View>
             )}
 
-            <Text style={styles.label}>Choose Colour:</Text>
+            {/* <Text style={styles.label}>Choose Colour:</Text>
             <View style={styles.colorPalette}>
               {presetColors.map((color) => (
                 <TouchableOpacity
@@ -181,40 +186,35 @@ export default function CreateCircleScreen({ navigation, route }) {
                   <Text style={styles.plusText}>+</Text>
                 </View>
               </TouchableOpacity>
-            </View>
-
-            <Text style={styles.label}>Current Colour:</Text>
-            <View style={[styles.colorPreview, { backgroundColor: circleColor }]}>
-              <Text style={styles.hexPreview}>{circleColor}</Text>
-            </View>
+            </View> */}
 
             <Text style={styles.label}>Select Circle Image:</Text>
             <TouchableOpacity onPress={handleImagePick} style={styles.imagePicker}>
               {circleImage ? (
                 <Image source={{ uri: circleImage }} style={styles.circleImage} />
               ) : (
-                <Text style={styles.imageText}>Tap to select image</Text>
+                <Text style={styles.imageText}>Tap To Select Image</Text>
               )}
             </TouchableOpacity>
+            <Text style={styles.label}>Current Colour:</Text>
+            <View style={[styles.colorPreview, { backgroundColor: selectedColor }]}>
+              <Text style={styles.hexPreview}>{selectedColor}</Text>
+            </View>
           </View>
         </ScrollView>
 
         <View style={styles.buttonContainer}>
-          {newUserSelectedCircleType === null ? (
-              // For Non-New Users
-              <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
-                Create Circle
-              </Button>
-            ) : (
-              // For New Users
-              <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
-              Create Circle
-              </Button>
-          )}
-        </View>
+          <ColorTray 
+            selectedColor={selectedColor} 
+            onColorSelect={handleColorSelect}
+          />
+          <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
+            Create Circle
+          </Button>
+      </View>
 
         {/* Modal for Custom Color Picker */}
-        <Modal visible={showColorPicker} transparent animationType="slide">
+        {/* <Modal visible={showColorPicker} transparent animationType="slide">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.label}>Pick a Custom Colour</Text>
@@ -257,7 +257,7 @@ export default function CreateCircleScreen({ navigation, route }) {
               </View>
             </View>
           </View>
-        </Modal>
+        </Modal> */}
       </InAppBackground>
     </View>
   );

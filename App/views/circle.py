@@ -14,6 +14,7 @@ from App.controllers import (
     set_active_circle,
     get_active_circle
 )
+from App.controllers.userCircle import add_to_circle
 
 circle_views = Blueprint('circle_views', __name__)
 
@@ -170,3 +171,26 @@ def set_active_circle_route():
     except Exception as e:
         print(f"Error setting active circle: {e}")
         return jsonify({"status": "error", "message": "An Error Occurred While Setting The Active Circle"}), 500
+
+# 10. Add User To Circle
+@circle_views.route('/add-to-circle', methods=['POST'])
+@jwt_required()
+def add_user_to_circle():
+    try:
+        data = request.get_json()
+        circleCode = data.get('circleCode')
+        userID = get_jwt_identity()
+
+        if not circleCode:
+            return jsonify({"status": "error", "message": "Missing Circle Code"}), 400
+
+        result = add_to_circle(circleCode, userID)
+
+        if result is None:
+            return jsonify({"status": "error", "message": "Failed To Add User To Circle"}), 500
+        else:
+            return jsonify({"status": "success", "message": result['message']}), 200
+
+    except Exception as e:
+        print(f"An Error Occurred: {e}")
+        return jsonify({"status": "error", "message": "An error occurred while processing your request."}), 500

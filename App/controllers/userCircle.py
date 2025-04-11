@@ -1,5 +1,6 @@
 from App.database import db
 from App.models import UserCircle
+from App.models.circle import Circle
 
 # Associates A User With A Circle
 def create_user_circle(userID, circleID):
@@ -40,3 +41,28 @@ def get_circle_users_json(circleID):
     except Exception as e:
         print(f"Error Fetching Users For Circle {circleID}: {e}")
         return []
+
+# Adds A Users To An Existing Circle
+def add_to_circle(circleCode, userID):
+    try:
+        circle = Circle.query.filter_by(circleCode=circleCode).first()
+
+        if not circle:
+            print("Invalid Circle Code.")
+            return {"status": "error", "message": "Invalid Circle Code."}
+        
+        existing_user_circle = UserCircle.query.filter_by(userID=userID, circleID=circle.circleID).first()
+        if existing_user_circle:
+            print("User Is Already A Member Of This Circle.")
+            return {"status": "error", "message": "User is already a member of this circle."}
+
+        create_user_circle(userID, circle.circleID)
+        print(f"User Successfully Added To Circle: {circle.circleName}")
+        
+        return {"status": "success", "message": f"User successfully added to circle: {circle.circleName}"}
+
+    except Exception as e:
+        db.session.rollback()
+        print(f"Failed To Add User To Circle: {e}")
+        print("An Error Occurred While Adding The User To The Circle.")
+        return {"status": "error", "message": "An error occurred while adding the user to the circle."}

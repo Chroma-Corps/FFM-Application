@@ -1,4 +1,5 @@
 import enum
+import secrets  # To Generate A Random Code
 from App.database import db
 
 class CircleType(enum.Enum):
@@ -16,6 +17,7 @@ class Circle(db.Model):
     circleType = db.Column(db.Enum(CircleType), nullable=False)
     circleColor = db.Column(db.String(120), nullable=False)
     circleImage = db.Column(db.String(255), nullable=False)
+    circleCode = db.Column(db.String(120), nullable=False, unique=True)
 
     # Relationships
     user_circles = db.relationship('UserCircle', back_populates='circle') # UserCircle
@@ -25,6 +27,12 @@ class Circle(db.Model):
         self.circleType = circleType
         self.circleColor = circleColor
         self.circleImage = circleImage
+        self.circleCode = self.generate_circle_code()
+
+    def generate_circle_code(self):
+        """Generates A Unique Code For The Circle."""
+        return f"{self.circleName[:3].upper()}-{secrets.token_hex(4)}"
+
 
     def get_json(self):
         return{
@@ -32,7 +40,8 @@ class Circle(db.Model):
             'circleName': self.circleName,
             'circleType': self.circleType.value,
             'circleColor': self.circleColor,
-            'circleImage': self.circleImage
+            'circleImage': self.circleImage,
+            'circleCode': self.circleCode
         }
 
     def __str__(self):

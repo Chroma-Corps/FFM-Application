@@ -217,7 +217,6 @@ export default function Dashboard({ navigation }) {
     }
   };
 
-
   const renderBankItem = ({ item }) => {
     return (
       <TouchableOpacity
@@ -341,7 +340,12 @@ export default function Dashboard({ navigation }) {
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
         ) : banks.length === 0 ? (
-          <Text style={styles.defaultText}>You Have No Wallets Added Yet!</Text>
+          <View style={styles.bankItemContainer}>
+            <Text style={[styles.defaultText, {paddingHorizontal: 17}]}>You Have No Wallets Added Yet!</Text>
+            <Button onPress={handleAddBank} mode="contained" style={styles.addButton}>
+              <Text style={styles.buttonText}>+</Text>
+            </Button>
+          </View>
         ) : (
           <View style={styles.bankItemContainer}>
             <FlatList

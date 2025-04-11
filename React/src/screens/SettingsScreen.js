@@ -31,7 +31,7 @@ export default function SettingsScreen({ navigation }) {
           if (response.ok) {
             navigation.reset({
               index: 0,
-              routes: [{ name: 'StartScreen' }],
+              routes: [{ name: 'MainAuthScreen' }],
             });
     
             AsyncStorage.removeItem('access_token');
@@ -55,6 +55,9 @@ return (
                         <View style={styles.cardTitle}>
                             <InAppHeader>Settings</InAppHeader>
                         </View>
+                    </View>
+                    <View style={styles.settingContent}>
+                        <Button mode="contained" onPress={() => navigation.navigate('AllCircles')}>Circles</Button>
                     </View>
                 </View>
             </ScrollView>
@@ -89,4 +92,9 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 10,
     },
+    settingContent: {
+      justifyContent: 'center',
+      width: '100%',
+      padding: 10,
+  },
 });

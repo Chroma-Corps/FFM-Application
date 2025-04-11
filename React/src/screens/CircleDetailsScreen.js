@@ -1,14 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
 import InAppBackground from '../components/InAppBackground';
 import BackButton from '../components/BackButton';
 import { theme } from '../core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
+import { MaterialIcons } from '@expo/vector-icons';
+import { showToast } from '../components/ToastNotification';
 
 export default function CircleDetailsScreen({ route, navigation }) {
   const { circle } = route.params;
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const copyToClipboard = async (text) => {
+    await Clipboard.setStringAsync(text);
+  };
+
+  const handleCopyToClipboard = () => {
+    copyToClipboard(circle.circleCode)
+    console.log("Copied")
+    showToast({
+      type: 'success',
+      title: 'Copied!',
+      message: 'Code Copied To Clipboard',
+    });
+  };
 
   useEffect(() => {
     const fetchMembers = async () => {
@@ -54,6 +71,18 @@ export default function CircleDetailsScreen({ route, navigation }) {
         <Image source={{ uri: circle.circleImage }} style={styles.circleImage} />
         <Text style={styles.circleName}>{circle.circleName}</Text>
         <Text style={styles.circleType}>{circle.circleType}</Text>
+        <Text style={styles.sectionTitle}>Invite Code</Text>
+        <View style={styles.circleCodeContainer}>
+          <TouchableOpacity 
+            onPress={handleCopyToClipboard} 
+            style={{flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 20,}}
+          >
+            <Text style={[styles.circleCode, { color: circle.circleColor }]}>
+              {circle.circleCode}
+            </Text>
+            <MaterialIcons name="content-copy" size={24} color={theme.colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.sectionTitle}>Members</Text>
         {loading ? (
           <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -89,6 +118,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.description,
     marginBottom: 20,
+    fontFamily: theme.fonts.medium.fontFamily
+  },
+  circleCode: {
+    fontSize: 20,
+    fontFamily: theme.fonts.bold.fontFamily,
   },
   sectionTitle: {
     fontSize: 18,

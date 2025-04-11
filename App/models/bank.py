@@ -11,7 +11,7 @@ class Bank(db.Model):
     bankAmount = db.Column(db.Float, nullable=False)
     remainingBankAmount = db.Column(db.Float, nullable=False)
     isPrimary = db.Column(db.Boolean, default=False)
-    color = db.Column(db.String(120), nullable=False)
+    color = db.Column(db.String(120), nullable=True)
 
     # Foreign Keys
     circleID = db.Column(db.Integer, db.ForeignKey('circle.circleID'), nullable=False)

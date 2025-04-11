@@ -2,8 +2,9 @@ import React from 'react'
 import { PaperProvider, Provider } from 'react-native-paper'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator, TransitionPresets} from '@react-navigation/stack'
-import { theme } from './src/core/theme'
-import { useFonts } from 'expo-font'
+import { theme } from './src/core/theme';
+import Toast from 'react-native-toast-message';
+import { useFonts } from 'expo-font';
 import {
   StartScreen,
   PreviewDemoScreen,
@@ -28,7 +29,8 @@ import {
   CreateGoalScreen,
   CreateCircleScreen,
   SettingsScreen,
-  CircleDetailsScreen
+  CircleDetailsScreen,
+  AllCirclesScreen
 } from './src/screens'
 
 import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
@@ -94,8 +96,10 @@ export default function App() {
             <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="AllCircles" component={AllCirclesScreen} />
           </Stack.Navigator>
         </NavigationContainer>
+        <Toast />
       </PaperProvider>
     </Provider>
   )
