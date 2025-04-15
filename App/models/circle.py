@@ -41,7 +41,8 @@ class Circle(db.Model):
             'circleType': self.circleType.value,
             'circleColor': self.circleColor,
             'circleImage': self.circleImage,
-            'circleCode': self.circleCode
+            'circleCode': self.circleCode,
+            'owner': self.user_circles[0].user.name
         }
 
     def __str__(self):

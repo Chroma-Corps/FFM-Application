@@ -2,8 +2,9 @@ import React from 'react';
 import { View, TouchableOpacity, Modal, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { theme } from '../core/theme';
+import categoryIcons from '../constants/categoryIcons';
 
-const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTransactionsPopup }) => {
+const BankTransactionsPopup = ({ visible, selectedOption, bankTransactions, setShowBankTransactionsPopup }) => {
     let previousTransactionDate = '';
     const transactionsByDate = [];
 
@@ -23,19 +24,11 @@ const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTr
     transactionsByDate.reverse();
 
     const getCategoryImage = (category) => {
-        const categoryImages = {
-            bills: require('../assets/icons/bills.png'),
-            entertainment: require('../assets/icons/entertainment.png'),
-            groceries: require('../assets/icons/groceries.png'),
-            income: require('../assets/icons/income.png'),
-            shopping: require('../assets/icons/shopping.png'),
-            transit: require('../assets/icons/transit.png'),
-        };
-        return categoryImages[category.toLowerCase()] || require('../assets/default_img.jpg');
+        return categoryIcons[category.toLowerCase()] || require('../assets/default_img.jpg');
     };
 
     return (
-        <Modal transparent={true} visible={true} animationType='fade'>
+        <Modal transparent={true} visible={visible} animationType='fade'>
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
 
@@ -112,6 +105,7 @@ const styles = StyleSheet.create({
         right: 10,
         top: 10,
         padding: 10,
+        zIndex: 10,
     },
 
     scrollView: {

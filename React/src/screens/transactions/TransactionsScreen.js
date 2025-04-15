@@ -1,21 +1,14 @@
 // rfce
 import React, {useState, useCallback} from 'react';
-import {View, 
-        Image, 
-        Text,
-        TextInput, 
-        StyleSheet, 
-        FlatList, 
-        TouchableOpacity, 
-        ActivityIndicator} from 'react-native';
+import {View, Image, Text, TextInput, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import InAppHeader from '../components/InAppHeader'
-import InAppBackground from '../components/InAppBackground';
-import { theme } from '../core/theme'
+import InAppHeader from '../../components/InAppHeader'
+import InAppBackground from '../../components/InAppBackground';
+import { theme } from '../../core/theme'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MonthFilter from '../components/MonthFilter';
+import MonthFilter from '../../components/MonthFilter';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import RadialMenu from '../components/RadialMenu';
+import RadialMenu from '../../components/RadialMenu';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export default function TransactionsScreen({ navigation }) {
@@ -232,7 +225,7 @@ export default function TransactionsScreen({ navigation }) {
               <View>
                 <Image
                   style={styles.image}
-                  source={require('../assets/empty.png')}
+                  source={require('../../assets/empty.png')}
                 />
                 <Text style={styles.defaultText}>
                   You Have No Transactions

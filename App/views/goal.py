@@ -126,12 +126,11 @@ def update_user_goal(goalID):
         data = request.get_json()
         goalTitle = data.get('goalTitle')
         targetAmount = data.get('targetAmount')
-        goalType = data.get('goalType')
         startDate = data.get('startDate')
         endDate = data.get('endDate')
         color = data.get('color')
 
-        updated_goal = update_goal(goalID, goalTitle, targetAmount, goalType, startDate, endDate, color)
+        updated_goal = update_goal(goalID, goalTitle, targetAmount, startDate, endDate, color)
 
         if updated_goal:
             return jsonify({"status": "success", "message": "Goal Updated Successfully"}), 200

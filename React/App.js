@@ -5,36 +5,36 @@ import { createStackNavigator, TransitionPresets} from '@react-navigation/stack'
 import { theme } from './src/core/theme';
 import Toast from 'react-native-toast-message';
 import { useFonts } from 'expo-font';
+import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
+
 import {
-  StartScreen,
-  PreviewDemoScreen,
-  MainAuthScreen,
   LoginScreen,
-  ResetPasswordScreen,
+  MainAuthScreen,
+  PreviewDemoScreen,
   RegisterScreen,
+  ResetPasswordScreen,
   SelectCircleTypeScreen,
-  SetupPersonalCircleScreen,
-  SetupFamilyCircleScreen,
-  Dashboard,
+  StartScreen,
+  CreateBankScreen,
   BankDetailsScreen,
-  BudgetsScreen,
   BudgetDetailsScreen,
+  BudgetsScreen,
   CreateBudgetScreen,
   EditBudgetScreen,
-  CreateBankScreen,
-  AddTransactionScreen,
-  TransactionsScreen,
-  TransactionDetailsScreen,
-  UpdateTransactionScreen,
-  GoalsScreen,
-  CreateGoalScreen,
-  CreateCircleScreen,
-  SettingsScreen,
+  AllCirclesScreen,
   CircleDetailsScreen,
-  AllCirclesScreen
+  CreateCircleScreen,
+  Dashboard,
+  SettingsScreen,
+  CreateGoalScreen,
+  EditGoalScreen,
+  GoalDetailsScreen,
+  GoalsScreen,
+  AddTransactionScreen,
+  TransactionDetailsScreen,
+  TransactionsScreen,
+  UpdateTransactionScreen,
 } from './src/screens'
-
-import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
 
 const Stack = createStackNavigator()
 
@@ -72,30 +72,41 @@ export default function App() {
                 ...TransitionPresets.SlideFromRightIOS,
               }}
             />
+
+            {/* Auth Screens */}
             <Stack.Screen name="LoginScreen" component={LoginScreen} />
             <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-
             <Stack.Screen name="SelectCircleTypeScreen" component={SelectCircleTypeScreen} />
-            <Stack.Screen name="SetupPersonalCircleScreen" component={SetupPersonalCircleScreen} />
-            <Stack.Screen name="SetupFamilyCircleScreen" component={SetupFamilyCircleScreen} />
 
+            {/* Home Screens */}
             <Stack.Screen name="Dashboard" component={Dashboard} />
-            <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />
             <Stack.Screen name="Budgets" component={BudgetsScreen} />
             <Stack.Screen name="Goals" component={GoalsScreen} />
             <Stack.Screen name="Transactions" component={TransactionsScreen} />
 
+            {/* Creation Screens */}
+            <Stack.Screen name="CreateCircle" component={CreateCircleScreen} />
             <Stack.Screen name="CreateBank" component={CreateBankScreen} />
             <Stack.Screen name="CreateBudget" component={CreateBudgetScreen} />
             <Stack.Screen name="CreateGoal" component={CreateGoalScreen} />
             <Stack.Screen name="AddTransaction" component={AddTransactionScreen} />
-            <Stack.Screen name="CreateCircle" component={CreateCircleScreen} />
-            <Stack.Screen name="CircleDetailsScreen" component={CircleDetailsScreen} />
-            <Stack.Screen name="EditBudgetScreen" component={EditBudgetScreen} />
+
+            {/* Details Screens */}
+            <Stack.Screen name="CircleDetails" component={CircleDetailsScreen} />
+            <Stack.Screen name="BankDetails" component={BankDetailsScreen} />
             <Stack.Screen name="BudgetDetails" component={BudgetDetailsScreen} />
-            <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
+            <Stack.Screen name="GoalDetails" component={GoalDetailsScreen} />
             <Stack.Screen name="TransactionDetails" component={TransactionDetailsScreen} />
+
+            {/* Edit Screens */}
+            <Stack.Screen name="EditCircle" component={EditBudgetScreen} />
+            <Stack.Screen name="EditBank" component={EditBudgetScreen} />
+            <Stack.Screen name="EditBudget" component={EditBudgetScreen} />
+            <Stack.Screen name="EditGoal" component={EditGoalScreen}/>
+            <Stack.Screen name="UpdateTransaction" component={UpdateTransactionScreen} />
+
+            {/* Dashboard */}
             <Stack.Screen name="Home" component={BottomTabsNavigator} />
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="AllCircles" component={AllCirclesScreen} />

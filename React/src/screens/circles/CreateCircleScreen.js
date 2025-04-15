@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
-import {
-  ScrollView, View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image, Modal
-} from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
+import InAppHeader from '../../components/InAppHeader';
+import Button from '../../components/Button';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
-import ColorPicker from 'react-native-wheel-color-picker';
-import ColorTray from '../components/ColorTray'
+import ColorTray from '../../components/ColorTray'
 
 export default function CreateCircleScreen({ navigation, route }) {
   const { newUserSelectedCircleType } = route.params || {};

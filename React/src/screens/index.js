@@ -1,26 +1,39 @@
-export { default as StartScreen } from './StartScreen'
-export { default as MainAuthScreen } from './MainAuthScreen'
-export { default as PreviewDemoScreen } from './PreviewDemoScreen'
-export { default as SelectCircleTypeScreen } from './SelectCircleTypeScreen'
-export { default as SetupPersonalCircleScreen } from './SetupPersonalCircleScreen'
-export { default as SetupFamilyCircleScreen } from './SetupFamilyCircleScreen'
-export { default as LoginScreen } from './LoginScreen'
-export { default as RegisterScreen } from './RegisterScreen'
-export { default as ResetPasswordScreen } from './ResetPasswordScreen'
-export { default as Dashboard } from './Dashboard'
-export { default as BudgetsScreen } from './BudgetsScreen'
-export { default as CreateBankScreen } from './CreateBankScreen'
-export { default as CreateBudgetScreen } from './CreateBudgetScreen'
-export { default as EditBudgetScreen } from './EditBudgetScreen'
-export { default as BankDetailsScreen } from './BankDetailsScreen'
-export { default as BudgetDetailsScreen } from './BudgetDetailsScreen'
-export { default as AddTransactionScreen } from './AddTransactionScreen'
-export { default as TransactionsScreen } from './TransactionsScreen'
-export { default as TransactionDetailsScreen } from './TransactionDetailsScreen'
-export { default as UpdateTransactionScreen } from './UpdateTransactionScreen'
-export { default as GoalsScreen } from './GoalsScreen'
-export { default as CreateGoalScreen } from './CreateGoalScreen'
-export {default as CreateCircleScreen } from './CreateCircleScreen'
-export { default as SettingsScreen }from './SettingsScreen'
-export { default as CircleDetailsScreen } from './CircleDetailsScreen'
-export {default as AllCirclesScreen } from './AllCirclesScreen'
+// Auth
+export { default as LoginScreen } from './auth/LoginScreen'
+export { default as MainAuthScreen } from './auth/MainAuthScreen'
+export { default as PreviewDemoScreen } from './auth/PreviewDemoScreen'
+export { default as RegisterScreen } from './auth/RegisterScreen'
+export { default as ResetPasswordScreen } from './auth/ResetPasswordScreen'
+export { default as SelectCircleTypeScreen } from './auth/SelectCircleTypeScreen'
+export { default as StartScreen } from './auth/StartScreen'
+
+// Banks
+export { default as BankDetailsScreen } from './banks/BankDetailsScreen'
+export { default as CreateBankScreen } from './banks/CreateBankScreen'
+
+// Budgets
+export { default as BudgetDetailsScreen } from './budgets/BudgetDetailsScreen'
+export { default as BudgetsScreen } from './budgets/BudgetsScreen'
+export { default as CreateBudgetScreen } from './budgets/CreateBudgetScreen'
+export { default as EditBudgetScreen } from './budgets/EditBudgetScreen'
+
+// Circles
+export {default as AllCirclesScreen } from './circles/AllCirclesScreen'
+export { default as CircleDetailsScreen } from './circles/CircleDetailsScreen'
+export {default as CreateCircleScreen } from './circles/CreateCircleScreen'
+
+// Dashboard
+export { default as Dashboard } from './main/Dashboard'
+export { default as SettingsScreen }from './main/SettingsScreen'
+
+// Goals
+export { default as CreateGoalScreen } from './goals/CreateGoalScreen'
+export { default as EditGoalScreen } from './goals/EditGoalScreen'
+export { default as GoalDetailsScreen } from './goals/GoalDetailsScreen'
+export { default as GoalsScreen } from './goals/GoalsScreen'
+
+// Transactions
+export { default as AddTransactionScreen } from './transactions/AddTransactionScreen'
+export { default as TransactionDetailsScreen } from './transactions/TransactionDetailsScreen'
+export { default as TransactionsScreen } from './transactions/TransactionsScreen'
+export { default as UpdateTransactionScreen } from './transactions/UpdateTransactionScreen'

@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert} from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
+import React from 'react';
+import { ScrollView, View, StyleSheet} from 'react-native';
+import InAppHeader from '../../components/InAppHeader';
+import Button from '../../components/Button';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen({ navigation }) {

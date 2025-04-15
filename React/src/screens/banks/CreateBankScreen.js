@@ -1,20 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import { Card } from 'react-native-paper';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView} from 'react-native';
+import Button from '../../components/Button';
+import InAppBackground from '../../components/InAppBackground';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
-import ButtonSmall from '../components/ButtonSmall';
-import Toggle from '../components/Toggle';
-import CurrencySelectionPopUp from '../components/CurrencySelectionPopUp';
-import Currencies from '../constants/currencies.json';
-import Colors from '../constants/colors.json';
-import ColorTray from '../components/ColorTray';
-import { ScrollView } from 'react-native-gesture-handler';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
+import ButtonSmall from '../../components/ButtonSmall';
+import Toggle from '../../components/Toggle';
+import CurrencySelectionPopUp from '../../components/CurrencySelectionPopUp';
+import Currencies from '../../constants/currencies.json';
+import Colors from '../../constants/colors.json';
+import ColorTray from '../../components/ColorTray';
 
 const mainCurrencies = ['GBP', 'EUR', 'USD', 'TTD', 'JPY', 'CAD'];
 const colorData = Object.values(Colors);
@@ -31,6 +27,7 @@ export default function CreateBudgetsScreen({ navigation, route }) {
     const [isPrimary, setIsPrimary] = useState(false);
     const [selectedCurrency, setSelectedCurrency] = useState('');
     const [selectedColor, setSelectedColor] = useState('#4A90E2');
+    const [havePrimaryBank, setHavePrimaryBank] = useState([]);
 
 
     const [currencyData, setCurrencyData] = useState([]);
@@ -65,7 +62,7 @@ export default function CreateBudgetsScreen({ navigation, route }) {
         if (!selectedBankTitle) return "Set Title";
         if (!selectedBankAmount) return "Set Amount";
         if (!selectedCurrency) return "Select Currency";
-        return "Add Bank";
+        return "Add Wallet";
     };
 
     const handlePress = () => {
@@ -124,7 +121,6 @@ export default function CreateBudgetsScreen({ navigation, route }) {
             return;
         }
 
-
         if (!selectedBankTitle || !selectedBankAmount || !selectedCurrency) {
             Alert.alert('Error', 'Please Ensure All Fields Are Filled.');
             return;
@@ -160,18 +156,18 @@ export default function CreateBudgetsScreen({ navigation, route }) {
             if (response.ok && data.status === 'success') {
                 if (newUserSelectedCircleType === null) {
                     // If newUserSelectedCircleType is NULL, Proceed as usual - Already Registered Users
-                    Alert.alert('Success', 'Bank Added Successfully');
+                    Alert.alert('Success', 'Wallet Added Successfully');
                     navigation.goBack();
                 } else {
                     // If newUserSelectedCircleType is NOT null - New Users
-                    Alert.alert('Success', 'Bank Added Successfully');
+                    Alert.alert('Success', 'Wallet Added Successfully');
                     navigation.reset({
                         index: 0,
                         routes: [{ name: 'Home' }],
                     });
                 }
             } else {
-                Alert.alert('Error', data.message || 'Failed To Add Bank');
+                Alert.alert('Error', data.message || 'Failed To Add Wallet');
 
             }
         } catch (error) {
@@ -179,6 +175,51 @@ export default function CreateBudgetsScreen({ navigation, route }) {
             Alert.alert('Error', 'Something went wrong. Please try again later.');
         }
     };
+
+    useEffect(() => {
+        if (newUserSelectedCircleType) {
+            handleToggleChange(true);
+        }
+    }, [newUserSelectedCircleType]);
+
+    useEffect(() => {
+        const fetchBanks = async () => {
+            try {
+            setLoading(true);
+            const token = await AsyncStorage.getItem("access_token");
+        
+            if (!token) {
+                console.error('No Token Found');
+                return;
+            }
+        
+            const response = await fetch('https://ffm-application-main.onrender.com/banks', {
+                method: 'GET',
+                headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                },
+            });
+        
+            const data = await response.json();
+        
+            if (response.ok) {
+                const primaryBank = data.banks.find(bank => bank.isPrimary === true);
+                setHavePrimaryBank(primaryBank || null);
+            }
+             else {
+                console.error(data.message);
+            }
+            console.log('Fetch Banks Status:', data.status)
+        
+            } catch (error) {
+            console.error("Error Fetching Banks:", error);
+            } finally {
+            setLoading(false);
+            }
+        };
+      fetchBanks();
+    }, [newUserSelectedCircleType]);
 
     const fetchCircleUsers = async (circleID) => {
         const token = await AsyncStorage.getItem('access_token');
@@ -292,7 +333,7 @@ export default function CreateBudgetsScreen({ navigation, route }) {
 
                 <View style={styles.createBankDetailsContainer}>
 
-
+                <ScrollView>
                     <View 
                         style={[
                         styles.headerContainer,
@@ -304,11 +345,11 @@ export default function CreateBudgetsScreen({ navigation, route }) {
                             placeholder="Wallet Title"
                             value={selectedBankTitle}
                             onChangeText={handleBankTitleChange}
-                            style={[styles.input, styles.defaultText, { alignSelf: 'center', fontSize: 30 }]}
+                            style={[styles.input, styles.defaultText, { alignSelf: 'center', fontSize: 25 }]}
                         />
 
                         <View style={styles.inputAmountContainer}>
-                            <Text style={[styles.defaultText, { fontSize: 30 }]}>Starting at: </Text>
+                            <Text style={[styles.defaultText, { fontSize: 20 }]}>Starting at: </Text>
                             <TextInput
                                 ref={bankAmountRef}
                                 placeholderTextColor="rgba(255, 255, 255, 0.25)"
@@ -344,8 +385,14 @@ export default function CreateBudgetsScreen({ navigation, route }) {
                     </View>
 
                     <View style={styles.bankTypeOptionsContainer}>
+                        {havePrimaryBank && isPrimary && (
+                            <Text style={[styles.defaultText, { fontSize: 14, color: 'gray', marginTop: 8 }]}>
+                                Enabling this will switch your primary wallet. The current one will no longer be set as primary.
+                            </Text>
+                        )}
                         <View style={styles.optionContainer}>
-                            <Text style={[styles.defaultText, { fontSize: 18 }]}>Primary Bank :
+                            <Text style={[styles.defaultText, { fontSize: 18 }]}>
+                                Primary Wallet :
                             </Text>
                             <View style={styles.toggleContainer}>
                                 <Toggle
@@ -355,21 +402,18 @@ export default function CreateBudgetsScreen({ navigation, route }) {
                             </View>
                         </View>
                     </View>
-
-
+                    </ScrollView>
                     <View style={styles.bankThemeOptionsContainer}>
-                        <View style={styles.buttonContainer}>
-                            <ColorTray
-                                selectedColor={selectedColor}
-                                onColorSelect={handleColorSelect}
-                            />
+                            <View style={styles.buttonContainer}>
+                                <ColorTray
+                                    selectedColor={selectedColor}
+                                    onColorSelect={handleColorSelect}
+                                />
                         </View>
-
-                        <Button mode="contained" onPress={handlePress} style={styles.buttonStyle}>
-                            {getButtonText()}
-                        </Button>
                     </View>
-
+                    <Button mode="contained" onPress={handlePress} style={styles.buttonStyle}>
+                        {getButtonText()}
+                    </Button>
                 </View>
             </InAppBackground >
         </View >
@@ -397,7 +441,6 @@ const styles = StyleSheet.create({
 
     defaultText: {
         textAlign: 'center',
-        marginBottom: 5,
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 20,
         color: 'white',
@@ -413,16 +456,17 @@ const styles = StyleSheet.create({
     inputAmountContainer: {
         flexDirection: 'row',
         alignSelf: 'center',
+        alignItems: 'center',
         gap: 15,
+        marginTop: 20,
+        marginBottom: 20,
     },
 
     input: {
         backgroundColor: 'transparent',
         borderBottomWidth: 2,
         borderBottomColor: '#fff',
-        fontSize: 25,
-        paddingVertical: 8,
-        marginBottom: 20,
+        fontSize: 20,
         color: '#fff',
         borderWidth: 0,
         textAlign: 'center',
@@ -480,14 +524,14 @@ const styles = StyleSheet.create({
     },
 
     bankCurrencyOptionsContainer: {
-        width: '90%',
+        width: '100%',
         marginTop: 10,
     },
 
     currencyContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'space-evenly',
         maxWidth: '100%',
         flexShrink: 1,
         overflow: 'hidden',

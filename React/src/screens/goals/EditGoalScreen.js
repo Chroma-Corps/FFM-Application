@@ -1,18 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
-import FilterTag from '../components/FilterTag';
-import ButtonSmall from '../components/ButtonSmall';
-import DateSelector from '../components/DateSelector';
+import React, { useState, useCallback } from 'react';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert} from 'react-native';
+import InAppHeader from '../../components/InAppHeader';
+import Button from '../../components/Button';
+import { useFocusEffect } from '@react-navigation/native';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
+import FilterTag from '../../components/FilterTag';
+import ButtonSmall from '../../components/ButtonSmall';
+import DateSelector from '../../components/DateSelector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ColorTray from '../components/ColorTray'
+import ColorTray from '../../components/ColorTray'
 
-export default function CreateGoalsScreen({ navigation }) {
-
+export default function EditGoalScreen({ navigation, route }) {
+    const { goalID } = route.params;
     const [goalTitle, setGoalTitle] = useState('');
     const [targetAmount, setTargetAmount] = useState('');
     const [goalType, setGoalType] = useState('');
@@ -22,17 +23,11 @@ export default function CreateGoalsScreen({ navigation }) {
     const [showStartDatePicker, setShowStartDatePicker] = useState(false);
     const [showEndDatePicker, setShowEndDatePicker] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
-    const [selectedColor, setSelectedColor] = useState('#4A90E2');
+    const [selectedColor, setSelectedColor] = useState('#');
+
     const handleColorSelect = (color) => {
         setSelectedColor(color);
         };
-
-    const formatDate = (date) => {
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    
-        const [year, month, day] = date.split("-");
-        return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
-    };
 
     const handleAmountChange = (value) => {
         setTargetAmount(value);
@@ -64,60 +59,126 @@ export default function CreateGoalsScreen({ navigation }) {
         setShowEndDatePicker(false);
     };
 
+    const isFormValid = () => {
+        if (!goalTitle || !targetAmount || !goalType || !startDate || !endDate) return false;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        if (end < start) return false;
+        return true;
+    };
+
+    const formatDate = (date) => {
+        if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return '--';
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const [year, month, day] = date.split("-");
+        return `${months[parseInt(month, 10) - 1]} ${parseInt(day, 10)}, ${year}`;
+    };
+
     const displayGoalPeriod = () => {
         if (!startDate || !endDate) return '--';
 
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+    
+        if (end < start) return 'Invalid Date Range';
+
         const formattedStart = formatDate(startDate);
         const formattedEnd = formatDate(endDate);
-
+    
         return `${formattedStart} - ${formattedEnd}`;
     };
 
-    const createGoal = async () => {
-        const token = await AsyncStorage.getItem('access_token');
+    const formatDateToISO = (dateString) => {
+        // Expects: "Wed, 01 Jan 2025"
+        const cleaned = dateString.replace(/^.*?,\s*/, '').trim(); // → "01 Jan 2025"
+        const [day, monthStr, year] = cleaned.split(' ');
+    
+        const monthMap = {
+            Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+            Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12'
+        };
+    
+        const month = monthMap[monthStr];
+        if (!day || !month || !year) return null;
+    
+        return `${year}-${month}-${day.padStart(2, '0')}`;
+    };
+    
 
-        if (!token) {
-            console.error('No Token Found');
-            return;
-        }
-
-        if (!goalTitle || !startDate || !endDate || !targetAmount || !goalType) {
-            Alert.alert('Error', 'Please Fill In All Fields');
-            return;
-        }
-
+    const fetchGoal = async () => {
         try {
-            const response = await fetch(`https://ffm-application-main.onrender.com/create-goal`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    goalTitle: goalTitle.trim(),
-                    targetAmount: targetAmount,
-                    goalType: goalType.toUpperCase(),
-                    startDate: startDate,
-                    endDate: endDate,
-                    color: selectedColor
-                })
-            });
-
+            const response = await fetch(`https://ffm-application-main.onrender.com/goal/${goalID}`);
+            const data = await response.json();
+            
             if (response.ok) {
-                Alert.alert('Success', 'Goal Created Successfully');
-                navigation.goBack();
+                // Goal Details
+                setGoalTitle(data.goal.goalTitle);
+                setTargetAmount(data.goal.targetAmount);
+                setGoalType(data.goal.goalType);
+                setStartDate(data.goal.startDate);
+                setEndDate(data.goal.endDate);
+                setSelectedColor(data.goal.color);
             } else {
-                Alert.alert('Error', 'Failed To Create Goal');
-                console.error(response.statusText);
+                console.error(data.message);
             }
+            console.log('Fetch Goal Status:', data.status);
         } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'Something Went Wrong');
+            console.error('Error Fetching Goal:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchGoal();
+        }, [])
+    );
+
+    // Update Goal API Call
+        const updateGoal = async () => {
+            try {
+                const token = await AsyncStorage.getItem('access_token');
+                const formattedStartDate = formatDateToISO(startDate);
+                const formattedEndDate = formatDateToISO(endDate);
+    
+                if (!token) {
+                    console.error('Missing Required Data');
+                    return;
+                }
+
+                const response = await fetch(`https://ffm-application-main.onrender.com/goal/${goalID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        goalTitle: goalTitle,
+                        goalType: goalType.trim().toUpperCase(),
+                        targetAmount: parseFloat(targetAmount.replace(/[^0-9.-]+/g, '')),
+                        startDate: formattedStartDate,
+                        endDate: formattedEndDate,
+                        color: selectedColor
+                    }),
+                });
+    
+                const data = await response.json();
+    
+                if (response.ok) {
+                    alert(data.message)
+                    navigation.goBack();
+                } else {
+                    alert(data.message)
+                }
+            } catch (error) {
+                console.error(error.message);
+                alert('An Error Occurred: ' + error.message);
+            }
+        };
+
 return (
-    <View style={styles.createGoalScreen}>
+    <View style={styles.editGoalScreen}>
         <InAppBackground>
             <BackButton goBack={navigation.goBack} />
 
@@ -125,7 +186,7 @@ return (
                 <DateSelector
                     showDatePicker={showStartDatePicker}
                     onSave={handleStartDateSave}
-                    onCancel={handleEndDateCancel}
+                    onCancel={handleStartDateCancel}
                 />
             )}
 
@@ -141,7 +202,7 @@ return (
                 <View>
                     <View style={styles.headerContainer}>
                         <View style={styles.cardTitle}>
-                            <InAppHeader>New Goal</InAppHeader>
+                            <InAppHeader>Edit Goal</InAppHeader>
                         </View>
                     </View>
                 </View>
@@ -163,29 +224,30 @@ return (
                             style={[styles.input, styles.shortInput, styles.defaultText]}
                             keyboardType="numeric"
                         />
-                         <Text style={styles.defaultText}>Select Goal Type</Text>
+                         <Text style={styles.defaultText}>Goal Type</Text>
                         {/* Filter Tags - Goal Type */}
                         <View style={styles.filterTagsContainer}>
-                            <FilterTag
-                                label="Savings"
-                                isSelected={goalType === 'Savings'}
-                                onPress={() => setGoalType('Savings')}
-                            />
-                            <FilterTag
-                                label="Expense"
-                                isSelected={goalType === 'Expense'}
-                                onPress={() => setGoalType('Expense')}
-                            />
+                            {goalType === 'Savings' && (
+                                <FilterTag
+                                    label="Savings"
+                                    isSelected={true}
+                                    onPress={null}
+                                />
+                            )}
+
+                            {goalType === 'Expense' && (
+                                <FilterTag
+                                    label="Expense"
+                                    isSelected={true}
+                                    onPress={null}
+                                />
+                            )}
                         </View>
 
                         <Text style={styles.defaultText}>Starting:</Text>
 
                         <ButtonSmall
-                            label={
-                                startDate
-                                    ? `${startDate.split('-')[2]}-${startDate.split('-')[1]}-${startDate.split('-')[0]}`
-                                    : 'Select Date'
-                            }
+                            label={startDate}
                             onPress={handleShowStartDatePicker}
                             mode="contained"
                         />
@@ -193,11 +255,7 @@ return (
                         <Text style={styles.defaultText}>Until:</Text>
                             
                             <ButtonSmall
-                                label={
-                                    endDate
-                                        ? `${endDate.split('-')[2]}-${endDate.split('-')[1]}-${endDate.split('-')[0]}`
-                                        : 'Select Date'
-                                }
+                                label={endDate}
                                 onPress={handleShowEndDatePicker}
                                 mode="contained"
                             />
@@ -213,8 +271,13 @@ return (
                     selectedColor={selectedColor} 
                     onColorSelect={handleColorSelect}
                 />
-                <Button mode="contained" onPress={createGoal} style={styles.buttonStyle}>
-                    Create Goal
+                <Button
+                    mode="contained"
+                    onPress={updateGoal}
+                    style={styles.buttonStyle}
+                    disabled={!isFormValid()}
+                >
+                    Update Goal
                 </Button>
             </View>
         </InAppBackground>
@@ -223,7 +286,7 @@ return (
 }
 
 const styles = StyleSheet.create({
-    createGoalScreen: {
+    editGoalScreen: {
         flex: 1,
         justifyContent: 'flex-start',
     },

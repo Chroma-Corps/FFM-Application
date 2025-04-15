@@ -1,10 +1,10 @@
 import { React, useState } from 'react'
-import Background from '../components/Background'
-import Header from '../components/Header'
-import Paragraph from '../components/Paragraph'
-import Button from '../components/Button'
-import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { theme } from '../core/theme'
+import Background from '../../components/Background'
+import Header from '../../components/Header'
+import Paragraph from '../../components/Paragraph'
+import Button from '../../components/Button'
+import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { theme } from '../../core/theme'
 import { MaterialIcons } from '@expo/vector-icons'; 
 
 export default function SelectCircleTypeScreen({ navigation }) {
@@ -123,23 +123,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-evenly',
         padding: 20,
         gap: 20,
-    },
-
-    cardText: {
-        fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 20,
-        color: theme.colors.description,
-        textAlign: 'center',
-        marginTop: 10,
-    },
-
-    selected: {
-        borderColor: theme.colors.primary,
-        backgroundColor: theme.colors.primary,
-    },
-
-    unselected: {
-        borderColor: 'black',
     },
 
     descriptionContainer: {

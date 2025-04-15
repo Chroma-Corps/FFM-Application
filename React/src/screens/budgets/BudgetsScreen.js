@@ -5,15 +5,15 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
 import { Image, Alert } from 'react-native';
-import InAppBackground from '../components/InAppBackground';
-import InAppHeader from '../components/InAppHeader';
-import { theme } from '../core/theme';
+import InAppBackground from '../../components/InAppBackground';
+import InAppHeader from '../../components/InAppHeader';
+import { theme } from '../../core/theme';
 import { MaterialIcons } from '@expo/vector-icons';
-import NotificationBell from '../components/NotificationButton';
-import FilterTag from '../components/FilterTag';
-import ProgressBar from '../components/ProgressBar';
-import RadialMenu from '../components/RadialMenu';
+import FilterTag from '../../components/FilterTag';
+import ProgressBar from '../../components/ProgressBar';
+import RadialMenu from '../../components/RadialMenu';
 import DraggableFlatList from "react-native-draggable-flatlist";
+import categoryIcons from '../../constants/categoryIcons';
 
 export default function BudgetsScreen({ navigation }) {
   const filters = ['All', 'Savings', 'Expense'];
@@ -196,7 +196,7 @@ export default function BudgetsScreen({ navigation }) {
               </Text>
             </View>
             <View style={styles.editModeIcons}>
-              <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: item.budgetID })}>
+              <TouchableOpacity onPress={() => navigation.push('EditBudget', { budgetID: item.budgetID })}>
                 <MaterialIcons name={"edit"} size={25} color={"white"} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeleteBudget(item.budgetID)}>
@@ -216,15 +216,6 @@ export default function BudgetsScreen({ navigation }) {
     const budgetColorTheme = item.color || '#9ACBD0';
 
     const renderCategories = (budgetCategories) => {
-      const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png')
-      };
-
       const categoriesToDisplay = budgetCategories && budgetCategories.length > 0
         ? budgetCategories
         : [];
@@ -235,7 +226,7 @@ export default function BudgetsScreen({ navigation }) {
       const categoryWithImages = displayedCategories.map((category, index) => {
         const categoryName = category.toLowerCase();
         return {
-          image: categoryImages[categoryName] || require('../assets/default_img.jpg') // Fallback image
+          image: categoryIcons[categoryName] || require('../../assets/default_img.jpg') // Fallback image
         };
       });
 
@@ -345,14 +336,23 @@ export default function BudgetsScreen({ navigation }) {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          ) : data.length === 0 ? (
+          <View style={styles.centeredMessageContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>Loading Budgets...</Text>
+          </View>
+          ) : filteredBudgets.length === 0 ? (
             <View>
               <Image
                 style={styles.image}
-                source={require('../assets/empty.png')}
+                source={require('../../assets/empty.png')}
               />
-              <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
+              <Text style={styles.defaultText}>
+                {selectedFilter === 'Expense'
+                  ? 'You Have No Expense Budgets.'
+                  : selectedFilter === 'Savings'
+                  ? 'You Have No Savings Budgets.'
+                  : 'You have No Budgets Yet!'}
+              </Text>
             </View>
           ) : isEditMode ? (
             <View style={{ flex: 1 }}>
@@ -387,6 +387,19 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     lineHeight: 21,
     textAlign: 'center',
+  },
+
+  centeredMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+      marginTop: 15,
+      fontSize: 16,
+      color: 'white',
+      fontFamily: theme.fonts.regular.fontFamily,
   },
 
   image: {

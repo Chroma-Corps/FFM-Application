@@ -40,6 +40,8 @@ class Goal(db.Model):
         self.color = color
 
         # Set currentAmount Based On GoalType Enum
+        self.goalType = GoalType(goalType)
+
         if self.goalType == GoalType.SAVINGS:
             self.currentAmount = 0
         else:
@@ -67,7 +69,8 @@ class Goal(db.Model):
             'goalType': self.goalType.value,
             'startDate': self.startDate.strftime("%a, %d %b %Y"),
             'endDate': self.endDate.strftime("%a, %d %b %Y"),
-            'color': self.color
+            'color': self.color,
+            'owner': self.user_goals[0].user.name
         }
 
     def __str__(self):

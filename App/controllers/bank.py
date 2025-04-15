@@ -8,6 +8,9 @@ from App.controllers.userBank import create_user_bank, is_bank_owner
 def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, color, userIDs=None):
     try:
         user = get_user_json(userID)
+        circleID = user["activeCircle"]
+        if isPrimary:
+            Bank.query.filter_by(circleID=circleID, isPrimary=True).update({"isPrimary": False})
 
         new_bank = Bank (
             bankTitle=bankTitle,
@@ -16,7 +19,7 @@ def create_bank(userID, bankTitle, bankCurrency, bankAmount, isPrimary, color, u
             remainingBankAmount=bankAmount,
             isPrimary=isPrimary,
             color=color,
-            circleID=user["activeCircle"]
+            circleID=circleID
         )
         db.session.add(new_bank)
         db.session.commit()

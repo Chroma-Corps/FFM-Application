@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { MaterialIcons } from '@expo/vector-icons';
-import { showToast } from '../components/ToastNotification';
+import { showToast } from '../../components/ToastNotification';
 
 export default function CircleDetailsScreen({ route, navigation }) {
   const { circle } = route.params;
@@ -71,6 +71,7 @@ export default function CircleDetailsScreen({ route, navigation }) {
         <Image source={{ uri: circle.circleImage }} style={styles.circleImage} />
         <Text style={styles.circleName}>{circle.circleName}</Text>
         <Text style={styles.circleType}>{circle.circleType}</Text>
+         <Text style={styles.createdByText}>Created By {circle.owner}</Text>
         <Text style={styles.sectionTitle}>Invite Code</Text>
         <View style={styles.circleCodeContainer}>
           <TouchableOpacity 
@@ -134,6 +135,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+  },
+  createdByText: {
+      fontSize: 14,
+      color: theme.colors.grayedText,
+      fontFamily: theme.fonts.medium.fontFamily,
+      lineHeight: 20,
   },
   memberIcon: {
     width: 16,

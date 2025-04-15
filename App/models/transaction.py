@@ -66,7 +66,8 @@ class Transaction(db.Model):
             'transactionBank': self.bankID,
             'transactionBudget': self.budgetID,
             'transactionGoal': self.goalID,
-            'attachments': [attachment.get_json() for attachment in self.attachments]
+            'attachments': [attachment.get_json() for attachment in self.attachments],
+            'owner': self.user_transactions[0].user.name
         }
         
     def __str__(self):

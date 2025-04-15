@@ -1,54 +1,84 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { theme } from '../core/theme'
-import BackButton from '../components/BackButton'
-import InAppBackground from '../components/InAppBackground';
-import ProgressBar from '../components/ProgressBar';
-import DonutChart from '../components/DonutChart';
+import React, { useState, useEffect, useCallback} from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { theme } from '../../core/theme'
+import BackButton from '../../components/BackButton'
+import InAppBackground from '../../components/InAppBackground';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const categoryImages = {
-    shopping: require('../assets/icons/shopping.png'),
-    transit: require('../assets/icons/transit.png'),
-    entertainment: require('../assets/icons/entertainment.png'),
-    bills: require('../assets/icons/bills.png'),
-    groceries: require('../assets/icons/groceries.png'),
-    income: require('../assets/icons/income.png'),
-    default: require('../assets/default_img.jpg')
-};
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function TransactionDetailsScreen({ navigation, route }) {
     const { transactionID } = route.params;
     const [transactionDetails, setTransactionDetails] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchTransactionDetails = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`https://ffm-application-main.onrender.com/transaction/${transactionID}`);
-                const data = await response.json();
-    
-                if (response.ok) {
-                    setTransactionDetails(data.transaction);
-                } else {
-                    console.error("Fetch Transaction Details Error:", data.message);
-                }
-            } catch (error) {
-                console.error('Error Fetching Transaction Details:', error);
+    const fetchTransactionDetails = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`https://ffm-application-main.onrender.com/transaction/${transactionID}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                setTransactionDetails(data.transaction);
+            } else {
+                console.error("Fetch Transaction Details Error:", data.message);
             }
-            setLoading(false);
+        } catch (error) {
+            console.error('Error Fetching Transaction Details:', error);
+        }
+        setLoading(false);
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchTransactionDetails();
+        }, [transactionID])
+    );
+
+    const voidTransaction = async (transactionID) => {
+            try {
+                setLoading(true);
+                const token = await AsyncStorage.getItem("access_token");
+            
+                if (!token) {
+                    console.error('No Token Found');
+                    return;
+                }
+            
+                const response = await fetch(`https://ffm-application-main.onrender.com/${transactionID}/void`, {
+                    method: 'PUT',
+                    headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    }
+                });
+            
+                const data = await response.json();
+            
+                if (response.ok) {
+                    alert(data.message)
+                    navigation.goBack
+                } else {
+                    console.error(data.message);
+                }
+                console.log('Void Transaction Status:', data.status)
+            } catch (error) {
+                console.error('Error Fetching Transactions:', error);
+            } finally {
+                setLoading(false);
+            }
         };
-        fetchTransactionDetails();
-    }, [transactionID]);
 
     if (loading) {
-        return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" color={theme.colors.primary} />
-            </View>
-        );
+            return (
+                <InAppBackground>
+                    <BackButton goBack={navigation.goBack} />
+                    <View style={styles.centeredMessageContainer}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                        <Text style={styles.loadingText}>Loading Transaction Details...</Text>
+                    </View>
+                </InAppBackground>
+            );
     }
 
     if (!transactionDetails) {
@@ -68,13 +98,19 @@ export default function TransactionDetailsScreen({ navigation, route }) {
         <View style={styles.container}>
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
-                <TouchableOpacity onPress={() => navigation.push('UpdateTransaction', { transactionID: transactionID })} style={{ alignSelf: 'flex-end', marginRight: 20, marginTop: 10 }}>
-                    <MaterialIcons name={"edit"} size={30} color={"white"} />
-                </TouchableOpacity>
+                <View style={{alignSelf: 'flex-end', marginRight: 10, alignContent:'center', flexDirection: 'row'}}>
+                    <TouchableOpacity onPress={null} style={{ alignSelf: 'flex-end', marginRight: 20, marginTop: 10 }}>
+                        <MaterialIcons name={"visibility-off"} size={25} color={"white"} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.push('UpdateTransaction', { transactionID: transactionID })} style={{ alignSelf: 'flex-end', marginRight: 20, marginTop: 10 }}>
+                        <MaterialIcons name={"edit"} size={25} color={"white"} />
+                    </TouchableOpacity>
+                </View>
                 <ScrollView>
                     <View style={[styles.contentContainer, { borderColor: theme.colors.primary}]}>
                         <Text style={styles.titleText}>{transactionDetails.transactionTitle}</Text>
                         <Text style={styles.amountText}>{transactionDetails.transactionAmount}</Text>
+                        <Text style={styles.createdByText}>Created By {transactionDetails.owner}</Text>
                     </View>
                     <Text
                         style={[
@@ -91,9 +127,12 @@ export default function TransactionDetailsScreen({ navigation, route }) {
                     >
                         {transactionDetails.transactionType ?? 'Type N/A'} Transaction
                     </Text>
-                    <Text style={[styles.transactionCategoryText]}>
-                        {transactionDetails.transactionCategory.join(' • ')}
+                    <Text style={styles.transactionCategoryText}>
+                    {transactionDetails.transactionCategory && transactionDetails.transactionCategory.length > 0
+                        ? transactionDetails.transactionCategory.join(' • ')
+                        : 'No Category'}
                     </Text>
+
 
                     <Text style={styles.descriptionText}>{transactionDetails.transactionDescription}</Text>
                         <View style={styles.transactionsActivityContainer}>
@@ -162,6 +201,24 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
+    },
+    centeredMessageContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    createdByText: {
+        fontSize: 14,
+        color: theme.colors.grayedText,
+        fontFamily: theme.fonts.medium.fontFamily,
+        lineHeight: 20,
+    },
+    loadingText: {
+        marginTop: 15,
+        fontSize: 16,
+        color: 'white',
+        fontFamily: theme.fonts.regular.fontFamily,
     },
     categoryText: {
         fontSize: 14,

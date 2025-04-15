@@ -1,17 +1,18 @@
 // Imports
-import { theme } from '../core/theme';
-import Button from '../components/Button';
-import BackButton from '../components/BackButton'
+import { theme } from '../../core/theme';
+import Button from '../../components/Button';
+import BackButton from '../../components/BackButton'
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScrollView, FlatList } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
+import InAppHeader from '../../components/InAppHeader';
 import { useFocusEffect } from '@react-navigation/native';
-import TransactionType from '../constants/TransactionTypes';
-import InAppBackground from '../components/InAppBackground';
+import TransactionType from '../../constants/TransactionTypes';
+import InAppBackground from '../../components/InAppBackground';
 import React, { useState, useEffect, useCallback } from 'react';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
+import categoryIcons from '../../constants/categoryIcons';
 import { View, ActivityIndicator, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, Platform, Image} from 'react-native';
 
 export default function AddTransactionScreen({ navigation }) {
@@ -41,14 +42,6 @@ export default function AddTransactionScreen({ navigation }) {
     const [showPicker, setShowPicker] = useState(false);
     const [time, setTime] = useState(new Date());
     const [showTimePicker, setShowTimePicker] = useState(false);
-    const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png')
-    };
 
     // Helper Functions
     const toggleDatepicker = () => {
@@ -247,7 +240,7 @@ export default function AddTransactionScreen({ navigation }) {
                     return {
                         id: index + 1,
                         name: value,
-                        image: categoryImages[categoryName] || require('../assets/default_img.jpg') // FallBack
+                        image: categoryIcons[categoryName] || require('../../assets/default_img.jpg') // FallBack
                     };
                 });
                 setCategories(categoryArray);

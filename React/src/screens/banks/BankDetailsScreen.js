@@ -1,26 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, Image, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
-import { theme } from '../core/theme';
-import BackButton from '../components/BackButton';
-import Button from '../components/Button';
-import ButtonSmall from '../components/ButtonSmall';
-import InAppBackground from '../components/InAppBackground';
-import EditButton from '../components/EditButton';
-import TransactionType from '../constants/TransactionTypes';
-import BankTransactionsPopup from '../components/BankTransactionsPopup';
+import { View, Text, Image, StyleSheet, ActivityIndicator, ScrollView } from 'react-native';
+import { theme } from '../../core/theme';
+import BackButton from '../../components/BackButton';
+import Button from '../../components/Button';
+import ButtonSmall from '../../components/ButtonSmall';
+import InAppBackground from '../../components/InAppBackground';
+import TransactionType from '../../constants/TransactionTypes';
+import BankTransactionsPopup from '../../components/BankTransactionsPopup';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import DonutChart from '../components/DonutChart';
-
-const categoryImages = {
-    bills: require('../assets/icons/bills.png'),
-    entertainment: require('../assets/icons/entertainment.png'),
-    groceries: require('../assets/icons/groceries.png'),
-    income: require('../assets/icons/income.png'),
-    shopping: require('../assets/icons/shopping.png'),
-    transit: require('../assets/icons/transit.png'),
-    default: require('../assets/default_img.jpg')
-};
+import DonutChart from '../../components/DonutChart';
+import categoryIcons from '../../constants/categoryIcons';
 
 const parseTransactionAmount = (amountString) => {
     if (typeof amountString !== 'string') {
@@ -267,14 +257,14 @@ export default function BankDetailsScreen({ navigation, route }) {
             .map((category, index) => {
                 const categoryData = selectedOption === 'Income' ? category.income : category.expense;
                 const categoryNameLower = category.name.toLowerCase();
-                const imageKey = categoryImages[categoryNameLower] ? categoryNameLower : 'default';
+                const imageKey = categoryIcons[categoryNameLower] ? categoryNameLower : 'default';
 
                 return {
                     name: category.name,
                     value: categoryData.count,
                     color: getCategoryColor(category.name, index),
                     label: category.name,
-                    image: categoryImages[imageKey],
+                    image: categoryIcons[imageKey],
                 };
             })
             .filter(data => data.value > 0);
@@ -286,7 +276,7 @@ export default function BankDetailsScreen({ navigation, route }) {
                 value: 1,
                 color: theme.colors.disabled || '#CCCCCC',
                 label: 'No Data',
-                image: categoryImages.default
+                image: categoryIcons.default
             }];
         }
 
@@ -352,6 +342,7 @@ export default function BankDetailsScreen({ navigation, route }) {
                         bankTransactions={bankTransactions.filter(t => t.transactionType?.toLowerCase() === selectedOption.toLowerCase())}
                         currencySymbol={currencySymbol}
                         setShowBankTransactionsPopup={setShowBankTransactionsPopup}
+                        visible={showBankTransactionsPopup}
                     />
                 )}
 
@@ -360,7 +351,13 @@ export default function BankDetailsScreen({ navigation, route }) {
 
                         <View style={styles.headerContainer}>
                             <Text style={[styles.defaultText, styles.headerTitle]}>{bankDetails.bankTitle}</Text>
+                            <Text style={[styles.defaultText]}>
+                                {bankDetails.isPrimary && (
+                                        <Text style={styles.primaryBankText}>Primary Bank</Text>
+                                )}
+                            </Text>
                             <Text style={[styles.defaultText, styles.headerAmount]}>{bankDetails.remainingBankAmount}</Text>
+                            <Text style={styles.createdByText}>Created By {bankDetails.owner}</Text>
 
                             <View style={styles.allTimeSummaryContainer}>
                                 <Text style={[styles.defaultText, styles.subHeaderText]}>All Time</Text>
@@ -552,6 +549,12 @@ const styles = StyleSheet.create({
     incomeSelected: {
         backgroundColor: theme.colors.income,
         borderColor: theme.colors.income,
+    },
+    createdByText: {
+        fontSize: 14,
+        color: theme.colors.grayedText,
+        fontFamily: theme.fonts.medium.fontFamily,
+        lineHeight: 20,
     },
     expenseSelected: {
         backgroundColor: theme.colors.expense,
