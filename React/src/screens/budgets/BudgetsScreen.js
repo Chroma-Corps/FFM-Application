@@ -196,7 +196,7 @@ export default function BudgetsScreen({ navigation }) {
               </Text>
             </View>
             <View style={styles.editModeIcons}>
-              <TouchableOpacity onPress={() => navigation.push('EditBudgetScreen', { budgetID: item.budgetID })}>
+              <TouchableOpacity onPress={() => navigation.push('EditBudget', { budgetID: item.budgetID })}>
                 <MaterialIcons name={"edit"} size={25} color={"white"} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeleteBudget(item.budgetID)}>
@@ -336,14 +336,23 @@ export default function BudgetsScreen({ navigation }) {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          ) : data.length === 0 ? (
+          <View style={styles.centeredMessageContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>Loading Budgets...</Text>
+          </View>
+          ) : filteredBudgets.length === 0 ? (
             <View>
               <Image
                 style={styles.image}
                 source={require('../../assets/empty.png')}
               />
-              <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
+              <Text style={styles.defaultText}>
+                {selectedFilter === 'Expense'
+                  ? 'You Have No Expense Budgets.'
+                  : selectedFilter === 'Savings'
+                  ? 'You Have No Savings Budgets.'
+                  : 'You have No Budgets Yet!'}
+              </Text>
             </View>
           ) : isEditMode ? (
             <View style={{ flex: 1 }}>
@@ -378,6 +387,19 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     lineHeight: 21,
     textAlign: 'center',
+  },
+
+  centeredMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+      marginTop: 15,
+      fontSize: 16,
+      color: 'white',
+      fontFamily: theme.fonts.regular.fontFamily,
   },
 
   image: {

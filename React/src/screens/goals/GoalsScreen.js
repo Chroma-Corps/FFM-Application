@@ -183,7 +183,7 @@ export default function GoalsScreen({ navigation }) {
               </Text>
             </View>
             <View style={styles.editModeIcons}>
-              <TouchableOpacity onPress={null}>
+              <TouchableOpacity onPress={() => navigation.push('EditGoal', { goalID: item.goalID })}>
                 <MaterialIcons name={"edit"} size={25} color={"white"} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => handleDeleteGoal(item.goalID)}>
@@ -204,7 +204,7 @@ export default function GoalsScreen({ navigation }) {
 
     return (
       <TouchableOpacity
-        // onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}
+        onPress={() => navigation.push('GoalDetails', { goalID: item.goalID })}
       >
         <Card style={[styles.card, { borderColor: goalColorTheme }]}>
           <View style={styles.cardContentContainer}>
@@ -217,8 +217,8 @@ export default function GoalsScreen({ navigation }) {
 
               <View style={styles.cardDetailsContainer}>
                 <Text style={styles.cardText}>
-                  <Text style={styles.remainingGoalAmountText}>{item.currentAmount} </Text>
-                  left of {item.targetAmount}
+                  <Text style={[styles.remainingGoalAmountText, {color: item.color}]}>{item.currentAmount} </Text>
+                  / {item.targetAmount}
                 </Text>
 
                 <ProgressBar
@@ -291,14 +291,23 @@ export default function GoalsScreen({ navigation }) {
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          ) : data.length === 0 ? (
+          <View style={styles.centeredMessageContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>Loading Goals...</Text>
+          </View>
+          ) : filteredGoals.length === 0 ? (
             <View>
               <Image
                 style={styles.image}
                 source={require('../../assets/empty.png')}
               />
-              <Text style={styles.defaultText}>You Have No Goals Yet!</Text>
+              <Text style={styles.defaultText}>
+                {selectedFilter === 'Expense'
+                  ? 'You Have No Expense Goals.'
+                  : selectedFilter === 'Savings'
+                  ? 'You Have No Savings Goals.'
+                  : 'You have No Goals Yet!'}
+              </Text>
             </View>
           ) : isEditMode ? (
             <View style={{ flex: 1 }}>
@@ -340,6 +349,19 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     resizeMode: 'contain',
+  },
+
+  centeredMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+      marginTop: 15,
+      fontSize: 16,
+      color: 'white',
+      fontFamily: theme.fonts.regular.fontFamily,
   },
 
   headerContainer: {
@@ -445,13 +467,13 @@ const styles = StyleSheet.create({
   },
 
   cardText: {
-    color: "#fff",
+    color: theme.colors.grayedText,
     fontFamily: theme.fonts.medium.fontFamily,
   },
 
   remainingGoalAmountText: {
+    fontSize: 20,
     fontFamily: theme.fonts.bold.fontFamily,
-    color: theme.colors.secondary,
   },
 
   insightsText: {

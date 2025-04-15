@@ -32,8 +32,7 @@ def new_transaction():
         userIDs = data.get('userIDs') or []
         attachments = data.get('attachments') or []
 
-        if not all([userID, transactionTitle, transactionType,
-                    transactionCategory, transactionAmount, transactionDate,
+        if not all([userID, transactionTitle, transactionType, transactionAmount, transactionDate,
                     transactionTime, bankID]):
             return jsonify({"status": "error", "message": "Missing Required Fields"}), 400
 

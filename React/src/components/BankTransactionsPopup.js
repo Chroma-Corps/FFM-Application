@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { theme } from '../core/theme';
 import categoryIcons from '../constants/categoryIcons';
 
-const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTransactionsPopup }) => {
+const BankTransactionsPopup = ({ visible, selectedOption, bankTransactions, setShowBankTransactionsPopup }) => {
     let previousTransactionDate = '';
     const transactionsByDate = [];
 
@@ -28,7 +28,7 @@ const BankTransactionsPopup = ({ selectedOption, bankTransactions, setShowBankTr
     };
 
     return (
-        <Modal transparent={true} visible={true} animationType='fade'>
+        <Modal transparent={true} visible={visible} animationType='fade'>
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
 
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
         right: 10,
         top: 10,
         padding: 10,
+        zIndex: 10,
     },
 
     scrollView: {

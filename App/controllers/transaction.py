@@ -7,7 +7,6 @@ from App.controllers.user import get_user_json
 from App.models.bank import Bank
 from App.models.goal import Goal
 from App.services.category import CategoryService
-from App.controllers.userBudget import get_user_budgets_json
 from App.services.datetime import convert_to_date, convert_to_time
 from App.models import Transaction, TransactionType, Budget, TransactionScope
 from App.controllers.userTransaction import create_user_transaction, is_transaction_owner, get_user_transaction_by_transaction_id
@@ -17,16 +16,16 @@ def add_transaction(transactionTitle, transactionDesc, transactionType, transact
     try:
         userIDs = userIDs or []
         attachments = attachments or []
+        user = get_user_json(userID)
+        circleID=user['activeCircle']
 
         transaction_data, error = transaction_handler(
             userID, userIDs, transactionTitle, transactionDesc, 
             transactionType, transactionCategory, transactionAmount, 
-            transactionDate, transactionTime, budgetID, bankID, goalID, attachments
+            transactionDate, transactionTime, budgetID, bankID, goalID, attachments, circleID
         )
         if error:
             return None, error
-
-        user = get_user_json(userID)
 
         new_transaction = Transaction(
             transactionTitle=transaction_data['transactionTitle'],
@@ -38,7 +37,7 @@ def add_transaction(transactionTitle, transactionDesc, transactionType, transact
             transactionTime=transaction_data['transactionTime'],
             budgetID=transaction_data['budgetID'],
             bankID=transaction_data['bankID'],
-            circleID=user['activeCircle'],
+            circleID=circleID,
             goalID=transaction_data['goalID'],
             attachments=None
         )
@@ -140,7 +139,7 @@ def get_all_goal_transactions(goalID):
     goal = Goal.query.get(goalID)
     if not goal:
         return {"error": "Budget Not Found"}
-    transactions = Transaction.query.filter_by(circleID=goal.circleID).all()
+    transactions = Transaction.query.filter_by(circleID=goal.circleID, goalID=goalID).all()
     return [transaction.get_json() for transaction in transactions]
 
 # Get Transaction Associated With A Circle
@@ -307,12 +306,13 @@ def adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount
         db.session.commit()
 
 # Adjusts Inclusive Budget Balance Based On Transaction Type (Income/Expense)
-def adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount):
+def adjust_inclusive_budgets(circleID, transactionCategory, transactionType, transactionAmount):
     try:
-        user_budgets_json = get_user_budgets_json(userID)
+        from App.controllers.circle import get_circle_budgets_json
+        user_circles_json = get_circle_budgets_json(circleID)
 
-        for user_budget in user_budgets_json:
-            inclusive_budget = get_budget(user_budget['budgetID'])
+        for user_circle in user_circles_json:
+            inclusive_budget = get_budget(user_circle['budgetID'])
             if inclusive_budget and inclusive_budget.transactionScope.value == TransactionScope.INCLUSIVE.value:
 
                 # Rather Do This Here Than In Frontend
@@ -321,6 +321,7 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
 
                 if any(cat in normalized_budget_categories for cat in normalized_transaction_categories):
                     transaction_type_str = str(transactionType).lower() if isinstance(transactionType, str) else transactionType.value.lower()
+
                     if transaction_type_str == TransactionType.INCOME.value.lower():
                         inclusive_budget.remainingBudgetAmount += transactionAmount
                     else:
@@ -334,12 +335,12 @@ def adjust_inclusive_budgets(userID, transactionCategory, transactionType, trans
         db.session.rollback()
         raise ValueError(f"Error adjusting inclusive budgets: {str(e)}")
 
-def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID, attachments):
+def transaction_handler(userID, userIDs, transactionTitle, transactionDesc, transactionType, transactionCategory, transactionAmount, transactionDate, transactionTime, budgetID, bankID, goalID, attachments, circleID):
     try:
         adjust_bank_balance(bankID, transactionType, transactionAmount)
+        adjust_inclusive_budgets(circleID, transactionCategory, transactionType, transactionAmount)
         if goalID is not None:
             adjust_goal_balance(goalID, transactionType, transactionAmount)
-        adjust_inclusive_budgets(userID, transactionCategory, transactionType, transactionAmount)
         if budgetID is not None:
             adjust_exclusive_budget_balance(budgetID, transactionType, transactionAmount)
 

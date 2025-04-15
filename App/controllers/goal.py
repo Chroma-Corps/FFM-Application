@@ -69,7 +69,7 @@ def get_all_goals_json():
     return goals
 
 # Update Existing Goal
-def update_goal(goalID, goalTitle=None, targetAmount=None, goalType=None, startDate=None, endDate=None, color=None):
+def update_goal(goalID, goalTitle=None, targetAmount=None, startDate=None, endDate=None, color=None):
     try:
         goal = get_goal(goalID)
 
@@ -78,9 +78,6 @@ def update_goal(goalID, goalTitle=None, targetAmount=None, goalType=None, startD
                 goal.goalTitle = goalTitle
             if targetAmount is not None:
                 goal.targetAmount = targetAmount
-                goal.currentAmount = targetAmount
-            if goalType:
-                goal.goalType = goalType
             if startDate:
                 goal.startDate = convert_to_date(startDate)
             if endDate:

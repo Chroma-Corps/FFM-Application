@@ -41,7 +41,8 @@ class Bank(db.Model):
             'bankAmount': balance,
             'remainingBankAmount': remainingBalance,
             'isPrimary': self.isPrimary,
-            'color': self.color
+            'color': self.color,
+            'owner': self.user_banks[0].user.name
         }
 
     def __str__(self):

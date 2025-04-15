@@ -71,6 +71,7 @@ export default function CircleDetailsScreen({ route, navigation }) {
         <Image source={{ uri: circle.circleImage }} style={styles.circleImage} />
         <Text style={styles.circleName}>{circle.circleName}</Text>
         <Text style={styles.circleType}>{circle.circleType}</Text>
+         <Text style={styles.createdByText}>Created By {circle.owner}</Text>
         <Text style={styles.sectionTitle}>Invite Code</Text>
         <View style={styles.circleCodeContainer}>
           <TouchableOpacity 
@@ -134,6 +135,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
+  },
+  createdByText: {
+      fontSize: 14,
+      color: theme.colors.grayedText,
+      fontFamily: theme.fonts.medium.fontFamily,
+      lineHeight: 20,
   },
   memberIcon: {
     width: 16,

@@ -83,8 +83,10 @@ def update_budget(budgetID, budgetTitle=None, budgetAmount=None, budgetType=None
             if budgetTitle:
                 budget.budgetTitle = budgetTitle
             if budgetAmount is not None:
+                # Only reset remaining amount if budget hasn't changed yet
+                if budget.remainingBudgetAmount == budget.budgetAmount:
+                    budget.remainingBudgetAmount = budgetAmount
                 budget.budgetAmount = budgetAmount
-                budget.remainingBudgetAmount = budgetAmount
             if budgetType:
                 budget.budgetType = budgetType
             if budgetCategory:

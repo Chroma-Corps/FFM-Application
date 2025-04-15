@@ -292,7 +292,16 @@ export default function EditBudgetScreen({ navigation, route }) {
 
     const displayBudgetPeriod = () => {
         if (!startDate || !endDate) return '--';
-        return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+    
+        if (end < start) return 'Invalid Date Range';
+
+        const formattedStart = formatDate(startDate);
+        const formattedEnd = formatDate(endDate);
+    
+        return `${formattedStart} - ${formattedEnd}`;
     };
 
     const handleCategorySelect = (item) => {

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Image, View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Image, View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import Button from '../../components/Button';
 import InAppHeader from '../../components/InAppHeader';
 import InAppBackground from '../../components/InAppBackground';
@@ -9,6 +9,7 @@ import { theme } from '../../core/theme';
 import RadialMenu from '../../components/RadialMenu';
 import { MaterialIcons } from '@expo/vector-icons'
 import StreakIcon from '../../assets/icons/streak.svg';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);
@@ -24,7 +25,23 @@ export default function Dashboard({ navigation }) {
   const [currentCircle, setCurrentCircle] = useState(null);
   const [prevCircle, setPrevCircle] = useState(null);
   const [defaultCirle, setDefaultCircle] = useState(null);
+  const [recentTransactions, setRecentTransactions] = useState(null);
   const days = ["Su", "M", "Tu", "W", "Th", "F", "Sa"];
+
+  const formatTime12Hour = (timeString) => {
+    if (!timeString) return '';
+
+    const date = new Date(`1970-01-01T${timeString}`);
+    if (isNaN(date)) return timeString; // Fallback
+
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+
+    const formattedHours = hours % 12 || 12;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    return `${formattedHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  };
 
   const fetchActiveCircle = async () => {
     try {
@@ -158,6 +175,66 @@ export default function Dashboard({ navigation }) {
     }
   };
 
+  const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const token = await AsyncStorage.getItem("access_token");
+  
+        if (!token) {
+          console.error('No Token Found');
+          return;
+        }
+  
+        const response = await fetch(`https://ffm-application-main.onrender.com/transactions`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
+  
+        const data = await response.json();
+  
+        if (response.ok) {
+          const latestTwo = data.transactions?.slice(0, 2) || [];
+          setRecentTransactions(latestTwo);
+          console.log("Latest Two Transactions:", latestTwo);
+        }
+        else {
+          console.error(data.message);
+        } 
+        console.log('Fetch Transactions Status:', data.status)
+      } catch (error) {
+        console.error('Error Fetching Transactions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const renderTransaction = ({ item }) => {
+      const isExpense = item.transactionType === "Expense";
+  
+      return (
+      <View>
+          <TouchableOpacity style={styles.cardStyle} onPress={() => navigation.navigate('TransactionDetails', { transactionID: item.transactionID })}>
+              <View style={styles.cardRow}>
+                <Text style={styles.titleText}>{item.transactionTitle}</Text>
+                <View style={styles.amountContainer}>
+                  <Icon
+                    name={isExpense ? "arrow-down" : "arrow-up"}
+                    size={18}
+                    color={isExpense ? theme.colors.expense : theme.colors.income}
+                  />
+                  <Text style={[styles.amountText, { color: isExpense ? theme.colors.expense : theme.colors.income }]}>
+                    {item.transactionAmount}
+                  </Text>
+                </View>
+              </View>
+          </TouchableOpacity>
+      </View>
+      );
+    };
+
   const fetchCircles = async () => {
     try {
       const token = await AsyncStorage.getItem("access_token");
@@ -207,6 +284,7 @@ export default function Dashboard({ navigation }) {
       fetchUser();
       fetchBanks();
       fetchCircles();
+      fetchTransactions();
     }, [reload])
   );
 
@@ -235,7 +313,7 @@ export default function Dashboard({ navigation }) {
   const renderBankItem = ({ item }) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.push('BankDetailsScreen', { bankID: item.bankID })} style={[styles.bankCard, { borderColor: item.color || theme.colors.primary }]}
+        onPress={() => navigation.push('BankDetails', { bankID: item.bankID })} style={[styles.bankCard, { borderColor: item.color || theme.colors.primary }]}
       >
         <Text style={styles.bankCardTitle}>{item.bankTitle}</Text>
         <Text style={styles.bankCardAmount}>
@@ -377,14 +455,23 @@ export default function Dashboard({ navigation }) {
           </View>
         )}
         {circleType === 'Group' && (
-          <View>
-            <Text style={styles.sectionTitle}>Most Recent Activity</Text>
-            <TouchableOpacity
-              style={styles.viewCircleContainer}
-              onPress={() => navigation.navigate('CircleDetailsScreen', { circle: currentCircle })}>
-              <Text style={styles.viewCircleText}>View Circle</Text>
-            </TouchableOpacity>
-          </View>
+         <View>
+           <Text style={styles.sectionTitle}>Most Recent Activity</Text>
+           {recentTransactions.length === 0 ? (
+             <Text style={styles.noRecentActivityText}>No Recent Activity</Text>
+           ) : (
+             <FlatList
+               data={recentTransactions}
+               keyExtractor={(item) => `transaction-${item.transactionID}`}
+               renderItem={({ item }) => renderTransaction({ item })}
+             />
+           )}
+           <TouchableOpacity
+             style={styles.viewCircleContainer}
+             onPress={() => navigation.navigate('CircleDetails', { circle: currentCircle })}>
+             <Text style={styles.viewCircleText}>View Circle</Text>
+           </TouchableOpacity>
+         </View>
         )}
       </View>
       <RadialMenu navigation={navigation} />
@@ -405,6 +492,14 @@ const styles = StyleSheet.create({
     color: theme.colors.description,
     textAlign: 'center',
     marginTop: 10,
+  },
+
+  noRecentActivityText: {
+    fontSize: 16,
+    fontFamily: theme.fonts.medium.fontFamily,
+    color: theme.colors.description,
+    textAlign: 'center',
+    margin: 20,
   },
 
   lineContainer: {
@@ -520,7 +615,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 5,
   },
 
   streakContainer: {
@@ -626,5 +721,44 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontFamily: theme.fonts.bold.fontFamily,
     color: theme.colors.textSecondary,
-  }
+  },
+  cardStyle: {
+    margin: 15,
+    paddingLeft: 5,
+    paddingRight: 5,
+    borderBottomWidth: 2,
+    borderColor: theme.colors.primaryDimmed,
+  },
+  cardRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  titleText: {
+    fontSize: 18,
+    color: theme.colors.surface,
+    fontFamily: theme.fonts.medium.fontFamily,
+  },
+  amountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5, 
+  },
+  amountText: {
+    fontSize: 15,
+    color: '#E57373',
+    fontFamily: theme.fonts.bold.fontFamily,
+  },
+  cardText: {
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.medium.fontFamily,
+  },
+  timeText: {
+    fontSize: 12,
+    fontFamily: theme.fonts.bold.fontFamily,
+    color: theme.colors.description,
+    textAlign: "right",
+    marginRight: 10,
+  },
+
 });

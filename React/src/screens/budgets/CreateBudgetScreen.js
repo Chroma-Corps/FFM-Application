@@ -159,9 +159,14 @@ export default function CreateBudgetsScreen({ navigation }) {
     const displayBudgetPeriod = () => {
         if (!startDate || !endDate) return '--';
 
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+    
+        if (end < start) return 'Invalid Date Range';
+
         const formattedStart = formatDate(startDate);
         const formattedEnd = formatDate(endDate);
-
+    
         return `${formattedStart} - ${formattedEnd}`;
     };
 

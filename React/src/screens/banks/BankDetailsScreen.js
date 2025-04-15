@@ -342,6 +342,7 @@ export default function BankDetailsScreen({ navigation, route }) {
                         bankTransactions={bankTransactions.filter(t => t.transactionType?.toLowerCase() === selectedOption.toLowerCase())}
                         currencySymbol={currencySymbol}
                         setShowBankTransactionsPopup={setShowBankTransactionsPopup}
+                        visible={showBankTransactionsPopup}
                     />
                 )}
 
@@ -350,7 +351,13 @@ export default function BankDetailsScreen({ navigation, route }) {
 
                         <View style={styles.headerContainer}>
                             <Text style={[styles.defaultText, styles.headerTitle]}>{bankDetails.bankTitle}</Text>
+                            <Text style={[styles.defaultText]}>
+                                {bankDetails.isPrimary && (
+                                        <Text style={styles.primaryBankText}>Primary Bank</Text>
+                                )}
+                            </Text>
                             <Text style={[styles.defaultText, styles.headerAmount]}>{bankDetails.remainingBankAmount}</Text>
+                            <Text style={styles.createdByText}>Created By {bankDetails.owner}</Text>
 
                             <View style={styles.allTimeSummaryContainer}>
                                 <Text style={[styles.defaultText, styles.subHeaderText]}>All Time</Text>
@@ -542,6 +549,12 @@ const styles = StyleSheet.create({
     incomeSelected: {
         backgroundColor: theme.colors.income,
         borderColor: theme.colors.income,
+    },
+    createdByText: {
+        fontSize: 14,
+        color: theme.colors.grayedText,
+        fontFamily: theme.fonts.medium.fontFamily,
+        lineHeight: 20,
     },
     expenseSelected: {
         backgroundColor: theme.colors.expense,

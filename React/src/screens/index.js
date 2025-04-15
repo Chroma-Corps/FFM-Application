@@ -28,6 +28,8 @@ export { default as SettingsScreen }from './main/SettingsScreen'
 
 // Goals
 export { default as CreateGoalScreen } from './goals/CreateGoalScreen'
+export { default as EditGoalScreen } from './goals/EditGoalScreen'
+export { default as GoalDetailsScreen } from './goals/GoalDetailsScreen'
 export { default as GoalsScreen } from './goals/GoalsScreen'
 
 // Transactions

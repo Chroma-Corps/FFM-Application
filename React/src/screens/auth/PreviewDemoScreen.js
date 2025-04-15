@@ -53,7 +53,7 @@ export default function PreviewDemoScreen({ navigation }) {
                         {selectedCircleType === 'Self' && (
                             <View>
                                 <Text style={styles.descriptionText}>
-                                    Meet Maya Maywheather circle includes everything she needs to manage her personal finances.
+                                    Meet Maya Mayweather—her circle includes everything she needs to manage her personal finances.
                                     She can set budgeting goals, track her expenses, and stay on top of her financial progress—all in one place.
                                 </Text>
                             </View>
@@ -61,7 +61,7 @@ export default function PreviewDemoScreen({ navigation }) {
                         {selectedCircleType === 'Group' && (
                             <View>
                                 <Text style={styles.descriptionText}>
-                                    Meet Mr. Bob Bobberson Bob's circle includes all the tools his family needs to manage shared household finances.
+                                    Meet Mr. Bob Bobberson—his circle includes all the tools his family needs to manage shared household finances.
                                     He can set joint budgeting goals, track family expenses, and ensure everyone stays on the same page with their spending.
                                 </Text>
                             </View>

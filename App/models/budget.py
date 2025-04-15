@@ -78,7 +78,8 @@ class Budget(db.Model):
             'startDate': self.startDate.strftime("%a, %d %b %Y"),
             'endDate': self.endDate.strftime("%a, %d %b %Y"),
             'bankID': self.bankID,
-            'color': self.color
+            'color': self.color,
+            'owner': self.user_budgets[0].user.name
         }
 
     def __str__(self):

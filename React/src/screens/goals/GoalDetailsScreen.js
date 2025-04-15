@@ -13,10 +13,10 @@ const parseTransactionAmount = (amountString) =>
     ({ amount: parseFloat(String(amountString).replace(/[^0-9.]/g, '')) || 0 });
 
 
-export default function BudgetDetailsScreen({ navigation, route }) {
-    const { budgetID } = route.params;
-    const [budgetDetails, setBudgetDetails] = useState(null);
-    const [budgetTransactions, setBudgetTransactions] = useState([]);
+export default function GoalDetailsScreen({ navigation, route }) {
+    const { goalID } = route.params;
+    const [goalDetails, setGoalDetails] = useState(null);
+    const [goalTransactions, setGoalTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [chartData, setChartData] = useState({ series: [], keyData: [] });
 
@@ -39,7 +39,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
 
     const setDefaultChart = (message) => {
         const defaultColor = theme.colors.disabled || '#CCCCCC';
-        const isNoTransactionMessage = message.includes('No Spending') || message.includes('No Budget Data') || message.includes('No transactions');
+        const isNoTransactionMessage = message.includes('No Spending') || message.includes('No Goal Data') || message.includes('No transactions');
 
         setChartData({
             series: [{ value: 1, color: defaultColor }],
@@ -51,54 +51,56 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         });
     };
 
+    const fetchGoalDetails = async () => {
+        try {
+            const response = await fetch(`https://ffm-application-main.onrender.com/goal/${goalID}`);
+            const data = await response.json();
+            if (response.ok) {
+                setGoalDetails(data.goal);
+            } else {
+                console.error("Fetch Goal Details Error:", data.message);
+                setGoalDetails(null);
+            }
+        } catch (error) {
+            console.error('Error Fetching Goal Details:', error);
+            setGoalDetails(null);
+        }
+    };
+
+    const fetchGoalTransactions = async () => {
+        try {
+            const response = await fetch(`https://ffm-application-main.onrender.com/goal/${goalID}/transactions`);
+            const data = await response.json();
+            if (response.ok) {
+                setGoalTransactions(data.transactions || []);
+            } else {
+                console.error("Fetch Goal Transactions Error:", data.message);
+                setGoalTransactions([]);
+            }
+        } catch (error) {
+            console.error('Error Fetching Goal Transactions:', error);
+            setGoalTransactions([]);
+        }
+    };
+
+    const loadData = async () => {
+        setLoading(true);
+        categoryColorMap.clear();
+        await fetchGoalDetails();
+        await fetchGoalTransactions();
+        setLoading(false);
+    };
+
     useFocusEffect(
         useCallback(() => {
-            const fetchBudgetDetails = async () => {
-                try {
-                    const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}`);
-                    const data = await response.json();
-                    if (response.ok) {
-                        setBudgetDetails(data.budget);
-                    } else {
-                        console.error("Fetch Budget Details Error:", data.message);
-                        setBudgetDetails(null);
-                    }
-                } catch (error) {
-                    console.error('Error fetching budget details:', error);
-                    setBudgetDetails(null);
-                }
-            };
-    
-            const fetchBudgetTransactions = async () => {
-                try {
-                    const response = await fetch(`https://ffm-application-main.onrender.com/budget/${budgetID}/transactions`);
-                    const data = await response.json();
-                    if (response.ok) {
-                        setBudgetTransactions(data.transactions || []);
-                    } else {
-                        console.error("Fetch Budget Transactions Error:", data.message);
-                        setBudgetTransactions([]);
-                    }
-                } catch (error) {
-                    console.error('Error Fetching Budget Transactions:', error);
-                    setBudgetTransactions([]);
-                }
-            };
-
-            const loadData = async () => {
-                setLoading(true);
-                categoryColorMap.clear();
-                await fetchBudgetDetails();
-                await fetchBudgetTransactions();
-                setLoading(false);
-            };
             loadData();
-        }, [budgetID])
+        }, [goalID, categoryColorMap])
     );
+    
 
     useEffect(() => {
-        if (!budgetDetails || !budgetDetails.transactionScope || !budgetTransactions) {
-            setDefaultChart('Loading Budget Data...');
+        if (!goalDetails || !goalTransactions) {
+            setDefaultChart('Loading Goal Data...');
             return;
         }
 
@@ -106,74 +108,36 @@ export default function BudgetDetailsScreen({ navigation, route }) {
         const seriesWithObjects = [];
         const keyData = [];
         let hasSpending = false;
-        const scope = budgetDetails.transactionScope.toUpperCase();
 
-        if (scope === 'INCLUSIVE') {
-            if (budgetDetails.budgetCategory && budgetDetails.budgetCategory.length > 0) {
-                budgetDetails.budgetCategory.forEach(category => {
-                    categorySpending[category.toLowerCase()] = 0;
-                });
+        goalTransactions.forEach(transaction => {
+            const { amount } = parseTransactionAmount(transaction.transactionAmount);
+            if (amount > 0) {
+                hasSpending = true;
+                let categories = transaction.transactionCategory;
+                if (!Array.isArray(categories) || categories.length === 0) {
+                    categories = ['Uncategorized'];
+                }
 
-                budgetTransactions.forEach(transaction => {
-                    const { amount } = parseTransactionAmount(transaction.transactionAmount);
-                    if (Array.isArray(transaction.transactionCategory)) {
-                        transaction.transactionCategory.forEach(category => {
-                            const key = category.toLowerCase();
-                            if (categorySpending.hasOwnProperty(key)) {
-                                categorySpending[key] += amount;
-                                if (amount > 0) hasSpending = true;
-                            }
-                        });
-                    }
-                });
-
-                budgetDetails.budgetCategory.forEach(categoryName => {
-                    const key = categoryName.toLowerCase();
-                    const spending = categorySpending[key];
-                    if (spending > 0) {
-                        const color = getCategoryColor(key);
-                        seriesWithObjects.push({ value: spending, color });
-                        const imageKey = categoryIcons[key] ? key : 'default';
-                        keyData.push({
-                            name: categoryName,
-                            color,
-                            image: categoryIcons[imageKey]
-                        });
-                    }
+                categories.forEach(category => {
+                    const key = category.toLowerCase();
+                    categorySpending[key] = (categorySpending[key] || 0) + amount;
                 });
             }
+        });
 
-        } else if (scope === 'EXCLUSIVE') {
-            budgetTransactions.forEach(transaction => {
-                const { amount } = parseTransactionAmount(transaction.transactionAmount);
-                if (amount > 0) {
-                    hasSpending = true;
-                    let categories = transaction.transactionCategory;
-                    if (!Array.isArray(categories) || categories.length === 0) {
-                        categories = ['Uncategorized'];
-                    }
-
-                    categories.forEach(category => {
-                        const key = category.toLowerCase();
-                        categorySpending[key] = (categorySpending[key] || 0) + amount;
-                    });
-                }
-            });
-
-            Object.entries(categorySpending).forEach(([categoryKey, spending]) => {
-                if (spending > 0) {
-                    const color = getCategoryColor(categoryKey);
-                    seriesWithObjects.push({ value: spending, color });
-                    const displayName = categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
-                    const imageKey = categoryIcons[categoryKey] ? categoryKey : 'default';
-                    keyData.push({
-                        name: displayName,
-                        color,
-                        image: categoryIcons[imageKey]
-                    });
-                }
-            });
-        }
+        Object.entries(categorySpending).forEach(([categoryKey, spending]) => {
+            if (spending > 0) {
+                const color = getCategoryColor(categoryKey);
+                seriesWithObjects.push({ value: spending, color });
+                const displayName = categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
+                const imageKey = categoryIcons[categoryKey] ? categoryKey : 'default';
+                keyData.push({
+                    name: displayName,
+                    color,
+                    image: categoryIcons[imageKey]
+                });
+            }
+        });
 
         if (seriesWithObjects.length === 0) {
             setDefaultChart(hasSpending ? 'Spending Outside Scope' : 'No Spending Recorded Yet');
@@ -181,28 +145,27 @@ export default function BudgetDetailsScreen({ navigation, route }) {
             keyData.sort((a, b) => a.name.localeCompare(b.name));
             setChartData({ series: seriesWithObjects, keyData });
         }
-    }, [budgetTransactions, budgetDetails, getCategoryColor]);
-
+    }, [goalTransactions, goalDetails, getCategoryColor]);
 
     if (loading) {
-        return (
-            <InAppBackground>
-                <BackButton goBack={navigation.goBack} />
-                <View style={styles.centeredMessageContainer}>
-                    <ActivityIndicator size="large" color={theme.colors.primary} />
-                    <Text style={styles.loadingText}>Loading Budget Details...</Text>
-                </View>
-            </InAppBackground>
-        );
+            return (
+                <InAppBackground>
+                    <BackButton goBack={navigation.goBack} />
+                    <View style={styles.centeredMessageContainer}>
+                        <ActivityIndicator size="large" color={theme.colors.primary} />
+                        <Text style={styles.loadingText}>Loading Goal Details...</Text>
+                    </View>
+                </InAppBackground>
+            );
     }
 
-    if (!budgetDetails) {
+    if (!goalDetails) {
         return (
             <View style={styles.container}>
                 <InAppBackground>
                     <BackButton goBack={navigation.goBack} />
                     <View style={styles.centered}>
-                        <Text style={styles.descriptionText}>Budget details could not be loaded.</Text>
+                        <Text style={styles.descriptionText}>Goal details could not be loaded.</Text>
                     </View>
                 </InAppBackground>
             </View>
@@ -280,30 +243,28 @@ export default function BudgetDetailsScreen({ navigation, route }) {
             <InAppBackground>
                 <BackButton goBack={navigation.goBack} />
                 <View style={{ alignSelf: 'flex-end', marginRight: 20, marginTop: 10, alignItems:'center', flexDirection: 'row', gap: 10}}>
-                    <TouchableOpacity onPress={() => navigation.push('EditBudget', { budgetID: budgetDetails.budgetID })}>
+                    <TouchableOpacity onPress={() => navigation.push('EditGoal', { goalID: goalDetails.goalID })}>
                         <MaterialIcons name={"edit"} size={25} color={"white"} />
                     </TouchableOpacity>
                 </View>
                 <ScrollView>
-                    <View style={[styles.contentContainer, { borderColor: budgetDetails.color }]}>
-                        <Text style={styles.titleText}>{budgetDetails.budgetTitle}</Text>
+                    <View style={[styles.contentContainer, { borderColor: goalDetails.color }]}>
+                        <Text style={styles.titleText}>{goalDetails.goalTitle}</Text>
 
                         <Text style={styles.amountText}>
-                            <Text style={[styles.amountTextBold, {color: budgetDetails.color}]}>{budgetDetails.remainingBudgetAmount} </Text>
-                            left of {budgetDetails.budgetAmount}
+                            <Text style={[styles.amountTextBold, {color: goalDetails.color}]}>{goalDetails.currentAmount} </Text>
+                            / {goalDetails.targetAmount}
                         </Text>
-
-                        <Text style={styles.createdByText}>Created By {budgetDetails.owner}</Text>
-
+                         <Text style={styles.createdByText}>Created By {goalDetails.owner}</Text>
                         <View style={styles.progressBarContainer}>
 
                             <View style={styles.progressBarContainer}>
                                 <ProgressBar
-                                    startDate={budgetDetails.startDate}
-                                    endDate={budgetDetails.endDate}
-                                    colorTheme={budgetDetails.color || '#9ACBD0'}
-                                    amount={budgetDetails.budgetAmount}
-                                    remainingAmount={budgetDetails.remainingBudgetAmount}
+                                    startDate={goalDetails.startDate}
+                                    endDate={goalDetails.endDate}
+                                    colorTheme={goalDetails.color || '#9ACBD0'}
+                                    amount={goalDetails.targetAmount}
+                                    remainingAmount={goalDetails.currentAmount}
                                 />
                             </View>
 
@@ -312,20 +273,20 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                                     styles.categoryText,
                                     {
                                         backgroundColor:
-                                            budgetDetails.budgetType?.toLowerCase() === 'savings'
+                                            goalDetails.goalType?.toLowerCase() === 'savings'
                                                 ? '#81C784' // green
-                                                : budgetDetails.budgetType?.toLowerCase() === 'expense'
+                                                : goalDetails.goalType?.toLowerCase() === 'expense'
                                                     ? '#E57373' // red
                                                     : '#B0BEC5' // fallback gray
                                     }
                                 ]}
                             >
-                                {budgetDetails.budgetType ?? 'Type N/A'} Budget - {budgetDetails.transactionScope}
+                                {goalDetails.goalType ?? 'Type N/A'} Goal
                             </Text>
                         </View>
 
                         <View style={styles.chartSectionContainer}>
-                            <Text style={[styles.descriptionText, styles.sectionTitle]}>Budget Activity</Text>
+                            <Text style={[styles.descriptionText, styles.sectionTitle]}>Goal Activity</Text>
                             <View style={styles.chartAndKeyWrapper}>
                                 <View style={styles.chartContainer}>
                                     <DonutChart
@@ -352,11 +313,11 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                                 Transactions Activity
                             </Text>
                             <View style={styles.transactionsList}>
-                            {budgetTransactions.length > 0 ? (
-                                budgetTransactions.map(item => renderTransaction({ item }))
+                            {goalTransactions.length > 0 ? (
+                                goalTransactions.map(item => renderTransaction({ item }))
                             ) : (
                                 <Text style={[styles.descriptionText, { textAlign: 'center', marginTop: 20 }]}>
-                                    No transactions recorded for this budget yet.
+                                    No transactions recorded for this goal yet.
                                 </Text>
                             )}
                             </View>
@@ -378,6 +339,12 @@ const styles = StyleSheet.create({
     scrollContentContainer: {
         paddingBottom: 40,
     },
+    centered: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
     centeredMessageContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -385,17 +352,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     loadingText: {
-        marginTop: 15,
-        fontSize: 16,
-        color: 'white',
-        fontFamily: theme.fonts.regular.fontFamily,
-    },
-    centered: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-    },
+            marginTop: 15,
+            fontSize: 16,
+            color: 'white',
+            fontFamily: theme.fonts.regular.fontFamily,
+        },
     contentContainer: {
         padding: 15,
         marginTop: 30,
@@ -411,6 +372,12 @@ const styles = StyleSheet.create({
     descriptionText: {
         fontSize: 14,
         color: theme.colors.textSecondary,
+        fontFamily: theme.fonts.medium.fontFamily,
+        lineHeight: 20,
+    },
+    createdByText: {
+        fontSize: 14,
+        color: theme.colors.grayedText,
         fontFamily: theme.fonts.medium.fontFamily,
         lineHeight: 20,
     },
@@ -431,7 +398,7 @@ const styles = StyleSheet.create({
     },
     amountText: {
         fontSize: 15,
-        color: theme.colors.textSecondary,
+        color: theme.colors.secondary,
         fontFamily: theme.fonts.bold.fontFamily,
         textAlign: 'left',
         paddingTop: 8,
@@ -521,12 +488,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: theme.colors.textSecondary,
         fontFamily: theme.fonts.bold.fontFamily,
-        lineHeight: 20,
-    },
-    createdByText: {
-        fontSize: 14,
-        color: theme.colors.grayedText,
-        fontFamily: theme.fonts.medium.fontFamily,
         lineHeight: 20,
     },
     categoryRow: {
