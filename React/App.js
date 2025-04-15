@@ -5,36 +5,34 @@ import { createStackNavigator, TransitionPresets} from '@react-navigation/stack'
 import { theme } from './src/core/theme';
 import Toast from 'react-native-toast-message';
 import { useFonts } from 'expo-font';
+import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
+
 import {
-  StartScreen,
-  PreviewDemoScreen,
-  MainAuthScreen,
   LoginScreen,
-  ResetPasswordScreen,
+  MainAuthScreen,
+  PreviewDemoScreen,
   RegisterScreen,
+  ResetPasswordScreen,
   SelectCircleTypeScreen,
-  SetupPersonalCircleScreen,
-  SetupFamilyCircleScreen,
-  Dashboard,
+  StartScreen,
+  CreateBankScreen,
   BankDetailsScreen,
-  BudgetsScreen,
   BudgetDetailsScreen,
+  BudgetsScreen,
   CreateBudgetScreen,
   EditBudgetScreen,
-  CreateBankScreen,
-  AddTransactionScreen,
-  TransactionsScreen,
-  TransactionDetailsScreen,
-  UpdateTransactionScreen,
-  GoalsScreen,
-  CreateGoalScreen,
-  CreateCircleScreen,
-  SettingsScreen,
+  AllCirclesScreen,
   CircleDetailsScreen,
-  AllCirclesScreen
+  CreateCircleScreen,
+  Dashboard,
+  SettingsScreen,
+  CreateGoalScreen,
+  GoalsScreen,
+  AddTransactionScreen,
+  TransactionDetailsScreen,
+  TransactionsScreen,
+  UpdateTransactionScreen,
 } from './src/screens'
-
-import BottomTabsNavigator from './src/navigation/BottomTabsNavigator'
 
 const Stack = createStackNavigator()
 
@@ -77,8 +75,6 @@ export default function App() {
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
 
             <Stack.Screen name="SelectCircleTypeScreen" component={SelectCircleTypeScreen} />
-            <Stack.Screen name="SetupPersonalCircleScreen" component={SetupPersonalCircleScreen} />
-            <Stack.Screen name="SetupFamilyCircleScreen" component={SetupFamilyCircleScreen} />
 
             <Stack.Screen name="Dashboard" component={Dashboard} />
             <Stack.Screen name="BankDetailsScreen" component={BankDetailsScreen} />

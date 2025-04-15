@@ -5,14 +5,13 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
 import { Image, Alert } from 'react-native';
-import InAppBackground from '../components/InAppBackground';
-import InAppHeader from '../components/InAppHeader';
-import { theme } from '../core/theme';
+import InAppBackground from '../../components/InAppBackground';
+import InAppHeader from '../../components/InAppHeader';
+import { theme } from '../../core/theme';
 import { MaterialIcons } from '@expo/vector-icons';
-import NotificationBell from '../components/NotificationButton';
-import FilterTag from '../components/FilterTag';
-import ProgressBar from '../components/ProgressBar';
-import RadialMenu from '../components/RadialMenu';
+import FilterTag from '../../components/FilterTag';
+import ProgressBar from '../../components/ProgressBar';
+import RadialMenu from '../../components/RadialMenu';
 import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function GoalsScreen({ navigation }) {
@@ -297,7 +296,7 @@ export default function GoalsScreen({ navigation }) {
             <View>
               <Image
                 style={styles.image}
-                source={require('../assets/empty.png')}
+                source={require('../../assets/empty.png')}
               />
               <Text style={styles.defaultText}>You Have No Goals Yet!</Text>
             </View>

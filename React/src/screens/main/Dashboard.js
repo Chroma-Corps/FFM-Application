@@ -1,14 +1,14 @@
 import React, { useState, useCallback } from 'react';
-import { Image, View, Text, StyleSheet, FlatList, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
-import Button from '../components/Button';
-import InAppHeader from '../components/InAppHeader';
-import InAppBackground from '../components/InAppBackground';
+import { Image, View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import Button from '../../components/Button';
+import InAppHeader from '../../components/InAppHeader';
+import InAppBackground from '../../components/InAppBackground';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { theme } from '../core/theme';
-import RadialMenu from '../components/RadialMenu';
+import { theme } from '../../core/theme';
+import RadialMenu from '../../components/RadialMenu';
 import { MaterialIcons } from '@expo/vector-icons'
-import StreakIcon from '../assets/icons/streak.svg';
+import StreakIcon from '../../assets/icons/streak.svg';
 
 export default function Dashboard({ navigation }) {
   const [banks, setBanks] = useState([]);

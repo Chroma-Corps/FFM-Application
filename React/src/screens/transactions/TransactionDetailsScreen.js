@@ -1,22 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { theme } from '../core/theme'
-import BackButton from '../components/BackButton'
-import InAppBackground from '../components/InAppBackground';
-import ProgressBar from '../components/ProgressBar';
-import DonutChart from '../components/DonutChart';
+import React, { useState, useEffect} from 'react';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { theme } from '../../core/theme'
+import BackButton from '../../components/BackButton'
+import InAppBackground from '../../components/InAppBackground';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const categoryImages = {
-    shopping: require('../assets/icons/shopping.png'),
-    transit: require('../assets/icons/transit.png'),
-    entertainment: require('../assets/icons/entertainment.png'),
-    bills: require('../assets/icons/bills.png'),
-    groceries: require('../assets/icons/groceries.png'),
-    income: require('../assets/icons/income.png'),
-    default: require('../assets/default_img.jpg')
-};
 
 export default function TransactionDetailsScreen({ navigation, route }) {
     const { transactionID } = route.params;

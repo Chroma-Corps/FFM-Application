@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
+import InAppHeader from '../../components/InAppHeader';
+import Button from '../../components/Button';
+import InAppBackground from '../../components/InAppBackground';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
-import DateSelector from '../components/DateSelector';
-import FilterTag from '../components/FilterTag';
-import ButtonSmall from '../components/ButtonSmall';
-import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
+import DateSelector from '../../components/DateSelector';
+import FilterTag from '../../components/FilterTag';
+import ButtonSmall from '../../components/ButtonSmall';
+import PeriodSelectionPopup from '../../components/PeriodSelectionPopup';
+import categoryIcons from '../../constants/categoryIcons';
 
 const formatDateForDisplay = (dateString) => {
     if (!dateString || !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return 'Select Date';
@@ -147,16 +148,6 @@ export default function EditBudgetScreen({ navigation, route }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
-    const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png'),
-        unknown: require('../assets/default_img.jpg')
-    };
-
     useEffect(() => {
         if (!budgetID) {
             Alert.alert("Error", "No Budget ID provided.", [{ text: "OK", onPress: () => navigation.goBack() }]);
@@ -212,7 +203,7 @@ export default function EditBudgetScreen({ navigation, route }) {
                         return {
                             id: index + 1,
                             name: value,
-                            image: categoryImages[categoryName] || categoryImages.unknown
+                            image: categoryIcons[categoryName] || categoryIcons.unknown
                         };
                     });
                     setCategories(categoryArray);
@@ -274,7 +265,30 @@ export default function EditBudgetScreen({ navigation, route }) {
         }
     }, [startDate, duration, selectedPeriod]);
 
-    
+    const displayPeriodSelected = (period) => {
+        let formattedPeriod = '';
+            switch (period) {
+            case 'Daily':
+                formattedPeriod = 'Day';
+                break;
+            case 'Weekly':
+                formattedPeriod = 'Week';
+                break;
+            case 'Monthly':
+                formattedPeriod = 'Month';
+                break;
+            case 'Yearly':
+                formattedPeriod = 'Year';
+                break;
+            default:
+                formattedPeriod = period;
+        }
+
+        if (duration > 1 && formattedPeriod.length > 0) {
+            formattedPeriod += 's';
+        }
+        return formattedPeriod;
+    };
 
     const displayBudgetPeriod = () => {
         if (!startDate || !endDate) return '--';

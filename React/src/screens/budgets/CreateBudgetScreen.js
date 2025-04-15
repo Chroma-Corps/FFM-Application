@@ -1,18 +1,19 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
+import InAppHeader from '../../components/InAppHeader';
+import Button from '../../components/Button';
+import InAppBackground from '../../components/InAppBackground';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
-import BackButton from '../components/BackButton';
-import BottomDrawer from '../components/BottomDrawer';
-import { theme } from '../core/theme';
-import DateSelector from '../components/DateSelector';
-import FilterTag from '../components/FilterTag';
-import ButtonSmall from '../components/ButtonSmall';
-import PeriodSelectionPopup from '../components/PeriodSelectionPopup';
-import ColorTray from '../components/ColorTray'
+import BackButton from '../../components/BackButton';
+import BottomDrawer from '../../components/BottomDrawer';
+import { theme } from '../../core/theme';
+import DateSelector from '../../components/DateSelector';
+import FilterTag from '../../components/FilterTag';
+import ButtonSmall from '../../components/ButtonSmall';
+import PeriodSelectionPopup from '../../components/PeriodSelectionPopup';
+import ColorTray from '../../components/ColorTray';
+import categoryIcons from '../../constants/categoryIcons';
 
 const formatDate = (date) => {
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -95,15 +96,6 @@ export default function CreateBudgetsScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
     const [budgetScope, setBudgetScope] = useState('Inclusive');
 
-    const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png')
-      };
-
     useEffect(() => {
         fetch('https://ffm-application-main.onrender.com/ffm/categories')
             .then(response => response.json())
@@ -124,7 +116,7 @@ export default function CreateBudgetsScreen({ navigation }) {
                     return {
                         id: index + 1,
                         name: value,
-                        image: categoryImages[categoryName] || require('../assets/default_img.jpg') // FallBack
+                        image: categoryIcons[categoryName] || require('../../assets/default_img.jpg') // FallBack
                     };
                 });
                 setCategories(categoryArray);
@@ -141,8 +133,7 @@ export default function CreateBudgetsScreen({ navigation }) {
 
     const displayPeriodSelected = (period) => {
         let formattedPeriod = '';
-    
-        switch (period) {
+            switch (period) {
             case 'Daily':
                 formattedPeriod = 'Day';
                 break;

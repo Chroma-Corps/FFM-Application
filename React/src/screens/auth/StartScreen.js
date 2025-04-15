@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
-import { theme } from '../core/theme';
-import ArrowButton from '../components/ArrowButton';
-import Background from '../components/Background';
-import Button from '../components/Button';
-import Header from '../components/Header';
-import Paragraph from '../components/Paragraph';
-import StartSlider from '../components/StartSlider';
+import { View, StyleSheet } from 'react-native';
+import { theme } from '../../core/theme';
+import ArrowButton from '../../components/ArrowButton';
+import Background from '../../components/Background';
+import Button from '../../components/Button';
+import Header from '../../components/Header';
+import Paragraph from '../../components/Paragraph';
+import StartSlider from '../../components/StartSlider';
 
 export default function StartScreen({ navigation }) {
   const [startImages] = useState([
     {
-      image: require('../assets/pig_bank.png'),
+      image: require('../../assets/pig_bank.png'),
     },
     {
-      image: require('../assets/bank_or_pig.png'),
+      image: require('../../assets/bank_or_pig.png'),
     },
     {
-      image: require('../assets/search_pig.png'),
+      image: require('../../assets/search_pig.png'),
     },
   ]);
 
@@ -31,28 +31,13 @@ export default function StartScreen({ navigation }) {
              Your financial journey starts here!
           </Paragraph>
         </View>
-
-          {/* Image */}
-          {/* <View style={{ alignItems: 'center' }}>
-            <Image
-              source={require('../assets/PigBank.png')}
-              style={{
-                width: '100%',
-                maxWidth:400, 
-                height: undefined, 
-                aspectRatio: 1,
-                resizeMode: 'contain',
-              }}
-            />
-          </View> */}
-
-                <View style={styles.sliderContainer}>
-                  <StartSlider
-                      data={startImages}
-                      width={350}
-                      height={350}
-                  />
-                    </View>
+        <View style={styles.sliderContainer}>
+          <StartSlider
+              data={startImages}
+              width={350}
+              height={350}
+          />
+          </View>
         <View style={{ alignItems: 'center', width: '100%'}}>
           <Paragraph>
             Let's build a smart, sustainable budget that works for you—one step at a time.

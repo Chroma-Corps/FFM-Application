@@ -1,13 +1,12 @@
 import React from 'react';
-import Background from '../components/Background';
-import Header from '../components/Header';
-import Button from '../components/Button';
-import Paragraph from '../components/Paragraph';
-import Carousel from '../components/Carousel';
-import ArrowButton from '../components/ArrowButton';
+import Background from '../../components/Background';
+import Header from '../../components/Header';
+import Button from '../../components/Button';
+import Paragraph from '../../components/Paragraph';
+import Carousel from '../../components/Carousel';
+import ArrowButton from '../../components/ArrowButton';
 import { View, StyleSheet } from 'react-native';
-import { theme } from '../core/theme';
-
+import { theme } from '../../core/theme';
 
 export default function MainAuthScreen({ navigation }) {
 
@@ -47,6 +46,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.surface,
     },
+
     contentBlock: {
         alignItems: 'center',
         width: '100%',
@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginBottom: 20
     },
+
     button: {
         width: '100%',
         marginVertical: 8,

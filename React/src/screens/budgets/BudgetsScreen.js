@@ -5,15 +5,15 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, 
 import { useFocusEffect } from '@react-navigation/native';
 import { Card } from 'react-native-paper';
 import { Image, Alert } from 'react-native';
-import InAppBackground from '../components/InAppBackground';
-import InAppHeader from '../components/InAppHeader';
-import { theme } from '../core/theme';
+import InAppBackground from '../../components/InAppBackground';
+import InAppHeader from '../../components/InAppHeader';
+import { theme } from '../../core/theme';
 import { MaterialIcons } from '@expo/vector-icons';
-import NotificationBell from '../components/NotificationButton';
-import FilterTag from '../components/FilterTag';
-import ProgressBar from '../components/ProgressBar';
-import RadialMenu from '../components/RadialMenu';
+import FilterTag from '../../components/FilterTag';
+import ProgressBar from '../../components/ProgressBar';
+import RadialMenu from '../../components/RadialMenu';
 import DraggableFlatList from "react-native-draggable-flatlist";
+import categoryIcons from '../../constants/categoryIcons';
 
 export default function BudgetsScreen({ navigation }) {
   const filters = ['All', 'Savings', 'Expense'];
@@ -216,15 +216,6 @@ export default function BudgetsScreen({ navigation }) {
     const budgetColorTheme = item.color || '#9ACBD0';
 
     const renderCategories = (budgetCategories) => {
-      const categoryImages = {
-        bills: require('../assets/icons/bills.png'),
-        entertainment: require('../assets/icons/entertainment.png'),
-        groceries: require('../assets/icons/groceries.png'),
-        income: require('../assets/icons/income.png'),
-        shopping: require('../assets/icons/shopping.png'),
-        transit: require('../assets/icons/transit.png')
-      };
-
       const categoriesToDisplay = budgetCategories && budgetCategories.length > 0
         ? budgetCategories
         : [];
@@ -235,7 +226,7 @@ export default function BudgetsScreen({ navigation }) {
       const categoryWithImages = displayedCategories.map((category, index) => {
         const categoryName = category.toLowerCase();
         return {
-          image: categoryImages[categoryName] || require('../assets/default_img.jpg') // Fallback image
+          image: categoryIcons[categoryName] || require('../../assets/default_img.jpg') // Fallback image
         };
       });
 
@@ -350,7 +341,7 @@ export default function BudgetsScreen({ navigation }) {
             <View>
               <Image
                 style={styles.image}
-                source={require('../assets/empty.png')}
+                source={require('../../assets/empty.png')}
               />
               <Text style={styles.defaultText}>You Have No Budgets Yet!</Text>
             </View>

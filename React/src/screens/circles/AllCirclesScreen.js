@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Image, FlatList, ScrollView, Modal, TextInput, TouchableOpacity } from 'react-native';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
-import Button from '../components/Button';
+import { View, Text, StyleSheet, ActivityIndicator, Image, FlatList, Modal, TextInput, TouchableOpacity } from 'react-native';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
+import Button from '../../components/Button';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 
 export default function AllCirclesScreen({ navigation }) {
     const [userCircles, setUserCircles] = useState([]);

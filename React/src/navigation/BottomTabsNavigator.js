@@ -1,10 +1,10 @@
 import React from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { MaterialIcons } from '@expo/vector-icons'
-import Dashboard from '../screens/Dashboard' 
-import BudgetsScreen from '../screens/BudgetsScreen'
-import TransactionsScreen from '../screens/TransactionsScreen'
-import GoalsScreen from '../screens/GoalsScreen'
+import Dashboard from '../screens/main/Dashboard' 
+import BudgetsScreen from '../screens/budgets/BudgetsScreen'
+import TransactionsScreen from '../screens/transactions/TransactionsScreen'
+import GoalsScreen from '../screens/goals/GoalsScreen'
 import { theme } from '../core/theme'
 
 const Tab = createBottomTabNavigator()

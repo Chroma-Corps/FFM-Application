@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Image, FlatList, TouchableOpacity } from 'react-native';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import { MaterialIcons } from '@expo/vector-icons';
-import { showToast } from '../components/ToastNotification';
+import { showToast } from '../../components/ToastNotification';
 
 export default function CircleDetailsScreen({ route, navigation }) {
   const { circle } = route.params;

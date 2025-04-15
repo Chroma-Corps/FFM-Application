@@ -1,22 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
-import { theme } from '../core/theme'
-import BackButton from '../components/BackButton'
-import InAppBackground from '../components/InAppBackground';
-import ProgressBar from '../components/ProgressBar';
-import DonutChart from '../components/DonutChart';
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { theme } from '../../core/theme'
+import BackButton from '../../components/BackButton'
+import InAppBackground from '../../components/InAppBackground';
+import ProgressBar from '../../components/ProgressBar';
+import DonutChart from '../../components/DonutChart';
 import { MaterialIcons } from '@expo/vector-icons';
-
-const categoryImages = {
-    shopping: require('../assets/icons/shopping.png'),
-    transit: require('../assets/icons/transit.png'),
-    entertainment: require('../assets/icons/entertainment.png'),
-    bills: require('../assets/icons/bills.png'),
-    groceries: require('../assets/icons/groceries.png'),
-    income: require('../assets/icons/income.png'),
-    default: require('../assets/default_img.jpg')
-};
+import categoryIcons from '../../constants/categoryIcons';
 
 const parseTransactionAmount = (amountString) =>
     ({ amount: parseFloat(String(amountString).replace(/[^0-9.]/g, '')) || 0 });
@@ -55,7 +45,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
             keyData: [{
                 name: isNoTransactionMessage ? "No Associated Transactions" : message,
                 color: defaultColor,
-                image: isNoTransactionMessage ? null : categoryImages.default
+                image: isNoTransactionMessage ? null : categoryIcons.default
             }]
         });
     };
@@ -141,11 +131,11 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     if (spending > 0) {
                         const color = getCategoryColor(key);
                         seriesWithObjects.push({ value: spending, color });
-                        const imageKey = categoryImages[key] ? key : 'default';
+                        const imageKey = categoryIcons[key] ? key : 'default';
                         keyData.push({
                             name: categoryName,
                             color,
-                            image: categoryImages[imageKey]
+                            image: categoryIcons[imageKey]
                         });
                     }
                 });
@@ -173,11 +163,11 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     const color = getCategoryColor(categoryKey);
                     seriesWithObjects.push({ value: spending, color });
                     const displayName = categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
-                    const imageKey = categoryImages[categoryKey] ? categoryKey : 'default';
+                    const imageKey = categoryIcons[categoryKey] ? categoryKey : 'default';
                     keyData.push({
                         name: displayName,
                         color,
-                        image: categoryImages[imageKey]
+                        image: categoryIcons[imageKey]
                     });
                 }
             });
@@ -216,7 +206,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
     const getPrimaryCategoryImage = (category) => {
         const name = Array.isArray(category) ? category[0] : category;
         const key = (name || '').toLowerCase();
-        return categoryImages[key] || categoryImages.default;
+        return categoryIcons[key] || categoryIcons.default;
     };
 
     const renderTransaction = ({ item }) => {
@@ -237,7 +227,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     {Array.isArray(item.transactionCategory) && item.transactionCategory.length > 0 ? (
                         item.transactionCategory.map((cat, index) => {
                             const imageKey = cat.toLowerCase();
-                            const imageSource = categoryImages[imageKey] || categoryImages.default;
+                            const imageSource = categoryIcons[imageKey] || categoryIcons.default;
 
                             return (
                                 <View
@@ -259,7 +249,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                     ) : (
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image
-                                source={categoryImages.default}
+                                source={categoryIcons.default}
                                 style={[styles.categoryImage, { marginRight: 4 }]}
                                 resizeMode="contain"
                             />

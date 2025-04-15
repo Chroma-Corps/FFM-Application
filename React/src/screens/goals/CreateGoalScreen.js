@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
-import InAppHeader from '../components/InAppHeader';
-import Button from '../components/Button';
-import InAppBackground from '../components/InAppBackground';
-import BackButton from '../components/BackButton';
-import { theme } from '../core/theme';
-import FilterTag from '../components/FilterTag';
-import ButtonSmall from '../components/ButtonSmall';
-import DateSelector from '../components/DateSelector';
+import React, { useState } from 'react';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert} from 'react-native';
+import InAppHeader from '../../components/InAppHeader';
+import Button from '../../components/Button';
+import InAppBackground from '../../components/InAppBackground';
+import BackButton from '../../components/BackButton';
+import { theme } from '../../core/theme';
+import FilterTag from '../../components/FilterTag';
+import ButtonSmall from '../../components/ButtonSmall';
+import DateSelector from '../../components/DateSelector';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ColorTray from '../components/ColorTray'
+import ColorTray from '../../components/ColorTray'
 
 export default function CreateGoalsScreen({ navigation }) {
 

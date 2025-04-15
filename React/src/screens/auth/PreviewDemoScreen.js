@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import Background from '../components/Background'
-import Header from '../components/Header'
-import Button from '../components/Button'
-import ViewDemoPopUp from '../components/ViewDemoPopUp';
+import Background from '../../components/Background'
+import Button from '../../components/Button'
+import ViewDemoPopUp from '../../components/ViewDemoPopUp';
 import { Text, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { theme } from '../core/theme'
+import { theme } from '../../core/theme'
 
 export default function PreviewDemoScreen({ navigation }) {
     const [selectedCircleType, setSelectedCircleType] = useState('Self');
@@ -35,14 +34,14 @@ export default function PreviewDemoScreen({ navigation }) {
                     <View style={styles.container}>
                         <Card
                             id="Self"
-                            source={require('../assets/maya_icon.png')}
+                            source={require('../../assets/maya_icon.png')}
                             text="Maya"
                             isSelected={selectedCircleType === 'Self'}
                         />
 
                         <Card
                             id="Group"
-                            source={require('../assets/bob_icon.png')}
+                            source={require('../../assets/bob_icon.png')}
                             text="Bob"
                             isSelected={selectedCircleType === 'Group'}
                         />
@@ -108,23 +107,6 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
-    demoImageContainer: {
-        backgroundColor: theme.colors.secondary,
-        borderRadius: 10,
-        padding: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 100,
-        height: 90,
-    },
-
-    demoImage: {
-        width: 150,
-        height: 100,
-        resizeMode: 'contain',
-    },
-
-
     container: {
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -155,14 +137,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
 
-    descriptionTitle: {
-        fontFamily: theme.fonts.bold.fontFamily,
-        fontSize: 20,
-        color: theme.colors.primary,
-        textAlign: 'center',
-        marginBottom: 10,
-    },
-
     descriptionText: {
         fontFamily: theme.fonts.medium.fontFamily,
         fontSize: 17,
@@ -179,11 +153,10 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         alignItems: 'center',
-      },
-      
-      exitButton: {
+    },
+
+        exitButton: {
         width: 100,
         backgroundColor: theme.colors.expense,
-      },
-
+    },
 })
