@@ -695,32 +695,54 @@ class TransactionUnitTests(unittest.TestCase):
 
 '''
     Integration Tests
+
+    These tests focus solely on:
+    - Specific use case scenarios
 '''
 
-# class UserIntegrationTests(unittest.TestCase):
+# User
+class UserIntegrationTests(unittest.TestCase):
 
-#     def test_int_01_create_user(self):
-#         newuser = create_user("Johnny Applesauce", "johnny@mail.com", "johnnypass")
-#         user = get_user(newuser.id)
-#         assert user.email == "johnny@mail.com"
+    def test_int_01_create_user(self):
+        newuser = create_user(name="Johnny Applesauce",
+                              email="johnny@mail.com",
+                              password="johnnypass")
 
-#     def test_int_02_authenticate(self):
-#         newuser = create_user("Bubble Bub", "bubble@mail.com", "bubblepass")
-#         response = login(newuser.email, "bubblepass")
-#         assert response is not None
+        user = get_user(newuser.id)
+        assert user.email == "johnny@mail.com"
 
-#     def test_int_03_get_all_users_json(self):
-#         users_json = get_all_users_json()
-#         print(users_json)
-#         self.assertListEqual([{"id":1, "name":"Johnny Applesauce","email":"johnny@mail.com"},
-#                               {"id":2, "name":"Bubble Bub", "email":"bubble@mail.com"}
-#                               ], users_json)
+    def test_int_02_authenticate(self):
+        newuser = create_user(name="Bubble Bub",
+                              email="bubble@mail.com",
+                              password="bubblepass")
 
-#     def test_int_04_update_user(self):
-#         newuser = create_user("Ronnie Ron", "runnie@mail.com", "ronniepass")
-#         update_user(newuser.id, "ronnie@mail.com")
-#         user = get_user(newuser.id)
-#         assert user.email == "ronnie@mail.com"
+        response = login(newuser.email, "bubblepass")
+        assert response is not None
+
+    def test_int_03_get_all_users_json(self):
+        users_json = get_all_users_json()
+        print(users_json)
+        self.assertListEqual([{"id":1, "name":"Johnny Applesauce","email":"johnny@mail.com", "activeCircle":None},
+                              {"id":2, "name":"Bubble Bub", "email":"bubble@mail.com", "activeCircle": None}
+                              ], users_json)
+
+    def test_int_04_update_user_email(self):
+        newuser = create_user(name="Ronnie Ron",
+                              email="runnie@mail.com",
+                              password="ronniepass")
+
+        update_user(userID=newuser.id, newEmail="ronnie@mail.com")
+        user = get_user(newuser.id)
+        assert user.email == "ronnie@mail.com"
+
+    def test_int_05_user_forgot_password(self):
+        newuser = create_user(name="Sonnie Bonnie",
+                              email="sonnie@mail.com",
+                              password="sonniepass")
+
+        update_user(userID=newuser.id, newPassword="newsonniepass")
+        user = get_user(newuser.id)
+        assert user.password == "newsonniepass"
 
 # class BudgetIntegrationTests(unittest.TestCase):
 
