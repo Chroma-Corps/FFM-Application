@@ -246,6 +246,168 @@ class BankUnitTests(unittest.TestCase):
         }
         self.assertDictEqual(bank_json, expected)
 
+# Budget
+class BudgetUnitTests(unittest.TestCase):
+
+    def test_unit_12_new_savings_budget(self):
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        budget = Budget(circleID=circle.circleID,
+                        bankID=bank.bankID,
+                        budgetTitle="Savings Budget",
+                        budgetAmount=200,
+                        remainingBudgetAmount=200,
+                        budgetType=BudgetType.SAVINGS.value,
+                        budgetCategory=["Shopping"],
+                        transactionScope=TransactionScope.INCLUSIVE,
+                        startDate="2025-04-16",
+                        endDate="2025-04-17",
+                        color="#6A3D9A")
+
+        assert budget.budgetTitle == "Savings Budget"
+        assert budget.budgetType == "Savings"
+
+    def test_unit_13_get_new_savings_budget(self):
+        user = User(name="Bob Bobberson",
+                    email="bob@mail.com",
+                    password="bobpass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        budget = Budget(circleID=circle.circleID,
+                        bankID=bank.bankID,
+                        budgetTitle="Savings Budget",
+                        budgetAmount=200,
+                        remainingBudgetAmount=200,
+                        budgetType=BudgetType.SAVINGS,
+                        budgetCategory=["Shopping"],
+                        transactionScope=TransactionScope.INCLUSIVE,
+                        startDate="2025-04-16",
+                        endDate="2025-04-17",
+                        color="#6A3D9A")
+
+        ub = UserBudget(user=user, budget=budget)
+        budget.user_budgets = [ub]
+
+        budget_json = budget.get_json()
+        expected = {
+            "budgetID": None,
+            "budgetTitle": "Savings Budget",
+            "budgetAmount": "TT$200.00",
+            "remainingBudgetAmount": "TT$200.00",
+            "budgetType": "Savings",
+            "budgetCategory":["Shopping"],
+            "transactionScope": "Inclusive",
+            "startDate": "Wed, 16 Apr 2025",
+            "endDate":"Thu, 17 Apr 2025",
+            "bankID": None,
+            "color": "#6A3D9A",
+            "owner": "Bob Bobberson"
+        }
+        self.assertDictEqual(budget_json, expected)
+
+    def test_unit_14_new_expense_budget(self):
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        budget = Budget(circleID=circle.circleID,
+                        bankID=bank.bankID,
+                        budgetTitle="Expense Budget",
+                        budgetAmount=200,
+                        remainingBudgetAmount=200,
+                        budgetType=BudgetType.EXPENSE.value,
+                        budgetCategory=["Shopping"],
+                        transactionScope=TransactionScope.INCLUSIVE,
+                        startDate="2025-04-16",
+                        endDate="2025-04-17",
+                        color="#6A3D9A")
+
+        assert budget.budgetTitle == "Expense Budget"
+        assert budget.budgetType == "Expense"
+
+    def test_unit_15_get_new_expense_budget(self):
+        user = User(name="Alice Aliceson",
+                    email="alice@mail.com",
+                    password="alicepass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        budget = Budget(circleID=circle.circleID,
+                        bankID=bank.bankID,
+                        budgetTitle="Expense Budget",
+                        budgetAmount=200,
+                        remainingBudgetAmount=200,
+                        budgetType=BudgetType.EXPENSE,
+                        budgetCategory=[],
+                        transactionScope=TransactionScope.EXCLUSIVE,
+                        startDate="2025-04-16",
+                        endDate="2025-04-17",
+                        color="#6A3D9A")
+
+        ub = UserBudget(user=user, budget=budget)
+        budget.user_budgets = [ub]
+
+        budget_json = budget.get_json()
+        expected = {
+            "budgetID": None,
+            "budgetTitle": "Expense Budget",
+            "budgetAmount": "TT$200.00",
+            "remainingBudgetAmount": "TT$200.00",
+            "budgetType": "Expense",
+            "budgetCategory":[],
+            "transactionScope": "Exclusive",
+            "startDate": "Wed, 16 Apr 2025",
+            "endDate":"Thu, 17 Apr 2025",
+            "bankID": None,
+            "color": "#6A3D9A",
+            "owner": "Alice Aliceson"
+        }
+        self.assertDictEqual(budget_json, expected)
 
 '''
     Integration Tests
