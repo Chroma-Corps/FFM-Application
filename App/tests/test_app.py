@@ -409,6 +409,290 @@ class BudgetUnitTests(unittest.TestCase):
         }
         self.assertDictEqual(budget_json, expected)
 
+# Goal
+class GoalUnitTests(unittest.TestCase):
+
+    def test_unit_16_new_savings_goal(self):
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        goal = Goal(circleID=circle.circleID,
+                    goalTitle="Savings Goal",
+                    targetAmount=150,
+                    currentAmount=None,
+                    goalType=GoalType.SAVINGS,
+                    startDate="2025-04-16",
+                    endDate="2025-04-17",
+                    color="#6A3D9A")
+
+        assert goal.goalTitle == "Savings Goal"
+        assert goal.goalType.value == "Savings"
+
+    def test_unit_17_get_new_savings_goal(self):
+        user = User(name="Bob Bobberson",
+                    email="bob@mail.com",
+                    password="bobpass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        goal = Goal(circleID=circle.circleID,
+                    goalTitle="Savings Goal",
+                    targetAmount=150,
+                    currentAmount=0,
+                    goalType=GoalType.SAVINGS,
+                    startDate="2025-04-16",
+                    endDate="2025-04-17",
+                    color="#6A3D9A")
+
+        ug = UserGoal(user=user, goal=goal)
+        goal.user_goals = [ug]
+
+        goal_json = goal.get_json()
+        expected = {
+            "goalID": None,
+            "goalTitle": "Savings Goal",
+            "targetAmount": "TT$150.00",
+            "currentAmount": "TT$0.00",
+            "goalType": "Savings",
+            "startDate": "Wed, 16 Apr 2025",
+            "endDate":"Thu, 17 Apr 2025",
+            "color": "#6A3D9A",
+            "owner": "Bob Bobberson"
+        }
+        self.assertDictEqual(goal_json, expected)
+
+    def test_unit_18_new_expense_goal(self):
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        goal = Goal(circleID=circle.circleID,
+                    goalTitle="Expense Goal",
+                    targetAmount=150,
+                    currentAmount=None,
+                    goalType=GoalType.EXPENSE,
+                    startDate="2025-04-16",
+                    endDate="2025-04-17",
+                    color="#6A3D9A")
+
+        assert goal.goalTitle == "Expense Goal"
+        assert goal.goalType.value == "Expense"
+
+    def test_unit_19_get_new_expense_goal(self):
+        user = User(name="Alice Aliceson",
+                    email="alice@mail.com",
+                    password="alicepass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        goal = Goal(circleID=circle.circleID,
+                    goalTitle="Expense Goal",
+                    targetAmount=150,
+                    currentAmount=150,
+                    goalType=GoalType.EXPENSE.value,
+                    startDate="2025-04-16",
+                    endDate="2025-04-17",
+                    color="#6A3D9A")
+
+        ug = UserGoal(user=user, goal=goal)
+        goal.user_goals = [ug]
+
+        goal_json = goal.get_json()
+        expected = {
+            "goalID": None,
+            "goalTitle": "Expense Goal",
+            "targetAmount": "TT$150.00",
+            "currentAmount": "TT$150.00",
+            "goalType": "Expense",
+            "startDate": "Wed, 16 Apr 2025",
+            "endDate":"Thu, 17 Apr 2025",
+            "color": "#6A3D9A",
+            "owner": "Alice Aliceson"
+        }
+        self.assertDictEqual(goal_json, expected)
+
+# Transaction
+class TransactionUnitTests(unittest.TestCase):
+
+    def test_unit_20_new_income_transaction(self): 
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        transaction = Transaction(bankID=bank.bankID,
+                                  budgetID=None,
+                                  goalID=None,
+                                  circleID=circle.circleID,
+                                  transactionTitle="Income Transaction",
+                                  transactionDesc="This is an income transaction",
+                                  transactionType=TransactionType.INCOME,
+                                  transactionCategory=["Income"],
+                                  transactionAmount=200,
+                                  transactionDate="2025-04-16",
+                                  transactionTime="3:00",
+                                  attachments=[])
+
+        assert transaction.transactionTitle == "Income Transaction"
+        assert transaction.transactionType.value == "Income"
+
+    def test_unit_21_get_new_income_transaction(self):
+        user = User(name="Bob Bobberson",
+                    email="bob@mail.com",
+                    password="bobpass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        transaction = Transaction(bankID=bank.bankID,
+                                  budgetID=None,
+                                  goalID=None,
+                                  circleID=circle.circleID,
+                                  transactionTitle="Income Transaction",
+                                  transactionDesc="This is an income transaction",
+                                  transactionType=TransactionType.INCOME,
+                                  transactionCategory=["Income"],
+                                  transactionAmount=200,
+                                  transactionDate="2025-04-16",
+                                  transactionTime="3:00",
+                                  attachments=[])
+
+        transaction.bank = bank
+        ut = UserTransaction(user=user, transaction=transaction)
+        transaction.user_transactions = [ut]
+
+        transaction_json = transaction.get_json()
+        expected = {
+            "transactionID": None,
+            "transactionTitle": "Income Transaction",
+            "transactionDescription": "This is an income transaction",
+            "transactionType": "Income",
+            "transactionCategory": ["Income"],
+            "transactionAmount": "TT$200.00",
+            "transactionDate":"Wed, Apr 16 2025",
+            "transactionTime": "03:00",
+            "transactionBank": None,
+            "transactionBudget": None,
+            "transactionGoal": None,
+            "attachments": [],
+            "owner": "Bob Bobberson"
+        }
+        self.assertDictEqual(transaction_json, expected)
+
+    def test_unit_22_new_expense_transaction(self):
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        transaction = Transaction(bankID=bank.bankID,
+                                  budgetID=None,
+                                  goalID=None,
+                                  circleID=circle.circleID,
+                                  transactionTitle="Expense Transaction",
+                                  transactionDesc="This is an expense transaction",
+                                  transactionType=TransactionType.EXPENSE,
+                                  transactionCategory=["Transit"],
+                                  transactionAmount=20,
+                                  transactionDate="2025-04-17",
+                                  transactionTime="5:00",
+                                  attachments=[])
+
+        assert transaction.transactionTitle == "Expense Transaction"
+        assert transaction.transactionType.value == "Expense"
+
+    def test_unit_23_get_new_expense_transaction(self):
+        user = User(name="Alice Aliceson",
+                    email="alice@mail.com",
+                    password="alicepass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        transaction = Transaction(bankID=bank.bankID,
+                                  budgetID=None,
+                                  goalID=None,
+                                  circleID=circle.circleID,
+                                  transactionTitle="Expense Transaction",
+                                  transactionDesc="This is an expense transaction",
+                                  transactionType=TransactionType.EXPENSE,
+                                  transactionCategory=["Transit"],
+                                  transactionAmount=20,
+                                  transactionDate="2025-04-17",
+                                  transactionTime="11:00",
+                                  attachments=[])
+
+        transaction.bank = bank
+        ut = UserTransaction(user=user, transaction=transaction)
+        transaction.user_transactions = [ut]
+
+        transaction_json = transaction.get_json()
+        expected = {
+            "transactionID": None,
+            "transactionTitle": "Expense Transaction",
+            "transactionDescription": "This is an expense transaction",
+            "transactionType": "Expense",
+            "transactionCategory": ["Transit"],
+            "transactionAmount": "TT$20.00",
+            "transactionDate":"Thu, Apr 17 2025",
+            "transactionTime": "11:00",
+            "transactionBank": None,
+            "transactionBudget": None,
+            "transactionGoal": None,
+            "attachments": [],
+            "owner": "Alice Aliceson"
+        }
+        self.assertDictEqual(transaction_json, expected)
+
 '''
     Integration Tests
 '''

@@ -66,12 +66,36 @@ def budget_tests_command(type):
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
+# eg : flask test goal
+@test.command("goal", help="Run Goal Tests")
+@click.argument("type", default="all")
+def goal_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "GoalUnitTests"]))
+    elif type == "int":
+        sys.exit(pytest.main(["-k", "GoalIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
 # eg : flask test transaction
 @test.command("transaction", help="Run Transaction Tests")
 @click.argument("type", default="all")
-def budget_tests_command(type):
-    if type == "int":
+def transaction_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "TransactionUnitTests"]))
+    elif type == "int":
         sys.exit(pytest.main(["-k", "TransactionIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+# eg : flask test all
+@test.command("all", help="Run All Tests")
+@click.argument("type", default="all")
+def all_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "UserUnitTests or CircleUnitTests or BankUnitTests or BudgetUnitTests or GoalUnitTests or TransactionUnitTests"]))
+    elif type == "int":
+        sys.exit(pytest.main(["-k", "UserIntegrationTests or CircleIntegrationTests or BankIntegrationTests or BudgetIntegrationTests or GoalIntegrationTests or TransactionIntegrationTests"]))
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
