@@ -109,6 +109,86 @@ class UserUnitTests(unittest.TestCase):
         self.assertDictEqual(user2_json, {"id":None, "name":"Anna Annabelle", "email":"anna@mail.com", "activeCircle":None})
         self.assertDictEqual(user3_json, {"id":None, "name":"Bella Churchbell", "email":"bella@mail.com", "activeCircle":None})
 
+# Circle
+class CircleUnitTests(unittest.TestCase):
+
+    def test_unit_06_new_self_circle(self):
+        self_circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        assert self_circle.circleName == "Self Circle"
+        assert self_circle.circleType == CircleType.SELF
+
+    def test_unit_07_get_self_circle(self):
+        user = User(name="Bob Bobberson",
+                    email="bob@mail.com",
+                    password="bobpass",
+                    activeCircleID=None)
+
+        self_circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        uc = UserCircle(user=user, circle=self_circle)
+        circle.user_circles = [uc]
+
+        self_circle_json = self_circle.get_json()
+        expected = {
+            "circleID": None,
+            "circleName": "Self Circle",
+            "circleType": CircleType.SELF.value,
+            "circleColor": "#6A3D9A",
+            "circleImage": "https://picsum.photos/id/82/300/300.jpg",
+            "owner": "Bob Bobberson"
+        }
+
+        actual = self_circle_json.copy()
+        actual.pop("circleCode")
+
+        self.assertDictEqual(actual, expected)
+        self.assertTrue(self_circle_json["circleCode"].startswith("SEL-"))
+
+    def test_unit_08_new_group_circle(self):
+        group_circle = Circle(circleName="Group Circle",
+                            circleType=CircleType.GROUP,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        assert group_circle.circleName == "Group Circle"
+        assert group_circle.circleType == CircleType.GROUP
+
+    def test_unit_09_get_group_circle(self):
+        user = User(name="Alice Aliceson",
+                    email="alice@mail.com",
+                    password="alicepass",
+                    activeCircleID=None)
+
+        group_circle = Circle(circleName="Group Circle",
+                            circleType=CircleType.GROUP,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        uc = UserCircle(user=user, circle=group_circle)
+        circle.user_circles = [uc]
+
+        group_circle_json = group_circle.get_json()
+        expected = {
+            "circleID": None,
+            "circleName": "Group Circle",
+            "circleType": CircleType.GROUP.value,
+            "circleColor": "#6A3D9A",
+            "circleImage": "https://picsum.photos/id/82/300/300.jpg",
+            "owner": "Alice Aliceson"
+        }
+
+        actual = group_circle_json.copy()
+        actual.pop("circleCode")
+
+        self.assertDictEqual(actual, expected)
+        self.assertTrue(group_circle_json["circleCode"].startswith("GRO-"))
 
 '''
     Integration Tests

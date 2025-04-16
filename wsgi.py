@@ -32,6 +32,16 @@ def user_tests_command(type):
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
+@test.command("circle", help="Run Circle Tests")
+@click.argument("type", default="all")
+def user_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "CircleUnitTests"]))
+    elif type == "int":
+        sys.exit(pytest.main(["-k", "CircleIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
 @test.command("budget", help="Run Budget Tests")
 @click.argument("type", default="all")
 def budget_tests_command(type):
