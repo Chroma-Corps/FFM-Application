@@ -21,9 +21,10 @@ def empty_db():
     Models covered in this test suite:
     1. User
     2. Circle
-    3. Budget
-    4. Goal
-    5. Transaction
+    3. Bank
+    4. Budget
+    5. Goal
+    6. Transaction
 '''
 
 '''
@@ -189,6 +190,62 @@ class CircleUnitTests(unittest.TestCase):
 
         self.assertDictEqual(actual, expected)
         self.assertTrue(group_circle_json["circleCode"].startswith("GRO-"))
+
+# Bank
+class BankUnitTests(unittest.TestCase):
+
+    def test_unit_10_new_bank(self):
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        assert bank.bankTitle == "New Wallet"
+        assert bank.bankAmount == 500
+
+    def test_unit_11_get_new_bank(self):
+        user = User(name="Alice Aliceson",
+                    email="alice@mail.com",
+                    password="alicepass",
+                    activeCircleID=None)
+
+        circle = Circle(circleName="Self Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg")
+
+        bank = Bank(bankTitle="New Wallet",
+                    bankCurrency="TTD",
+                    bankAmount=500,
+                    remainingBankAmount=500,
+                    isPrimary=True,
+                    color="#6A3D9A",
+                    circleID=circle.circleID)
+
+        ub = UserBank(user=user, bank=bank)
+        bank.user_banks = [ub]
+
+        bank_json = bank.get_json()
+        expected = {
+            "bankID": None,
+            "bankTitle": "New Wallet",
+            "bankCurrency": "TTD",
+            "bankAmount": "TT$500.00",
+            "remainingBankAmount": "TT$500.00",
+            "isPrimary": True,
+            "color": "#6A3D9A",
+            "owner": "Alice Aliceson"
+        }
+        self.assertDictEqual(bank_json, expected)
+
 
 '''
     Integration Tests

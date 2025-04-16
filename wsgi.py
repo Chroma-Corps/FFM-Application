@@ -22,6 +22,7 @@ Test Commands
 test = AppGroup('test', help='Testing Commands')
 # eg : flask test <command>
 
+# eg : flask test user
 @test.command("user", help="Run User Tests")
 @click.argument("type", default="all")
 def user_tests_command(type):
@@ -32,9 +33,10 @@ def user_tests_command(type):
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
+# eg : flask test circle
 @test.command("circle", help="Run Circle Tests")
 @click.argument("type", default="all")
-def user_tests_command(type):
+def circle_tests_command(type):
     if type == "unit":
         sys.exit(pytest.main(["-k", "CircleUnitTests"]))
     elif type == "int":
@@ -42,27 +44,34 @@ def user_tests_command(type):
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
+# eg : flask test bank
+@test.command("bank", help="Run Bank Tests")
+@click.argument("type", default="all")
+def bank_tests_command(type):
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "BankUnitTests"]))
+    elif type == "int":
+        sys.exit(pytest.main(["-k", "BankIntegrationTests"]))
+    else:
+        sys.exit(pytest.main(["-k", "App"]))
+
+# eg : flask test budget
 @test.command("budget", help="Run Budget Tests")
 @click.argument("type", default="all")
 def budget_tests_command(type):
-    if type == "int":
+    if type == "unit":
+        sys.exit(pytest.main(["-k", "BudgetUnitTests"]))
+    elif type == "int":
         sys.exit(pytest.main(["-k", "BudgetIntegrationTests"]))
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
+# eg : flask test transaction
 @test.command("transaction", help="Run Transaction Tests")
 @click.argument("type", default="all")
 def budget_tests_command(type):
     if type == "int":
         sys.exit(pytest.main(["-k", "TransactionIntegrationTests"]))
-    else:
-        sys.exit(pytest.main(["-k", "App"]))
-
-@test.command("bank", help="Run Bank Tests")
-@click.argument("type", default="all")
-def budget_tests_command(type):
-    if type == "int":
-        sys.exit(pytest.main(["-k", "BankIntegrationTests"]))
     else:
         sys.exit(pytest.main(["-k", "App"]))
 
