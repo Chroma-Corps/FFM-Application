@@ -721,7 +721,6 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_int_03_get_all_users_json(self):
         users_json = get_all_users_json()
-        print(users_json)
         self.assertListEqual([{"id":1, "name":"Johnny Applesauce","email":"johnny@mail.com", "activeCircle":None},
                               {"id":2, "name":"Bubble Bub", "email":"bubble@mail.com", "activeCircle": None}
                               ], users_json)
@@ -744,9 +743,238 @@ class UserIntegrationTests(unittest.TestCase):
         user = get_user(newuser.id)
         assert user.password == "newsonniepass"
 
+# Circle
+class CircleIntegrationTests(unittest.TestCase):
+
+    def test_int_06_create_circle(self):
+        user = create_user(name="Johnny Applesauce",
+                              email="johnny1@mail.com",
+                              password="johnnypass")
+
+        circle = create_circle(circleName="Johnny Circle",
+                               circleType=CircleType.SELF,
+                               circleColor="#6A3D9A",
+                               circleImage="https://picsum.photos/id/82/300/300.jpg",
+                               userID=user.id)
+
+        assert circle.circleName == "Johnny Circle"
+
+    def test_int_07_get_user_circles_json(self):
+        user = create_user(name="Johnny Applesauce",
+                            email="johnny2@mail.com",
+                            password="johnnypass")
+
+        create_circle(circleName="Johnny Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        circles_json = get_user_circles_json(userID=user.id)
+
+        self.assertGreater(len(circles_json), 0, "No circles found for the user")
+
+        first_circle = circles_json[0]
+
+        expected = {
+            "circleID": first_circle["circleID"],
+            "circleName": "Johnny Circle",
+            "circleType": "Self",
+            "circleColor": "#6A3D9A",
+            "circleImage": "https://picsum.photos/id/82/300/300.jpg",
+            "owner": user.name
+        }
+
+        actual = first_circle.copy()
+        actual.pop("circleCode", None)
+
+        self.assertDictEqual(actual, expected)
+        self.assertTrue(first_circle["circleCode"].startswith("JOH-"))
+
+    def test_int_08_update_circle(self):
+        user = create_user(name="Johnny Applesauce",
+                            email="johnny3@mail.com",
+                            password="johnnypass")
+
+        circle = create_circle(circleName="Johnny Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        updated_circle = update_circle(circleID=circle.circleID,
+                                       circleName="My Circle")
+        assert updated_circle.circleName == "My Circle"
+
+    def test_int_09_delete_circle(self):
+        user = create_user(name="Johnny Applesauce",
+                            email="johnny4@mail.com",
+                            password="johnnypass")
+
+        circle = create_circle(circleName="Johnny Circle",
+                            circleType=CircleType.SELF,
+                            circleColor="#6A3D9A",
+                            circleImage="https://picsum.photos/id/82/300/300.jpg",
+                            userID=user.id)
+
+        delete_circle(userID=user.id, circleID=circle.circleID)
+        deletedcircle = get_circle(circleID=circle.circleID)
+        self.assertIsNone(deletedcircle)
+
+    def test_int_10_join_circle(self):
+        user1 = create_user(name="Johnny Applesauce",
+                              email="johnny5@mail.com",
+                              password="johnnypass")
+        
+        user2 = create_user(name="Jenny Applesauce",
+                              email="jenny@mail.com",
+                              password="johnnypass")
+
+        circle = create_circle(circleName="Applesauce",
+                               circleType=CircleType.GROUP,
+                               circleColor="#6A3D9A",
+                               circleImage="https://picsum.photos/id/82/300/300.jpg",
+                               userID=user1.id)
+
+        add_to_circle(circleCode=circle.circleCode, userID=user2.id)
+
+        circle_users=get_circle_users_json(circleID=circle.circleID)
+        self.assertListEqual([{"id":user1.id, "name":"Johnny Applesauce","email":"johnny5@mail.com", "activeCircle":None},
+                              {"id":user2.id, "name":"Jenny Applesauce", "email":"jenny@mail.com", "activeCircle": None}
+                              ], circle_users)
+
+    def test_int_11_leave_circle(self):
+        user1 = create_user(name="Johnny Applesauce",
+                              email="johnny6@mail.com",
+                              password="johnnypass")
+
+        user2 = create_user(name="Jenny Applesauce",
+                              email="jenny1@mail.com",
+                              password="jennypass")
+
+        circle = create_circle(circleName="Applesauce",
+                               circleType=CircleType.GROUP,
+                               circleColor="#6A3D9A",
+                               circleImage="https://picsum.photos/id/82/300/300.jpg",
+                               userID=user1.id)
+
+        add_to_circle(circleCode=circle.circleCode, userID=user2.id)
+        remove_from_circle(circleCode=circle.circleCode, userID=user1.id)
+
+        circle_users=get_circle_users_json(circleID=circle.circleID)
+        self.assertListEqual([{"id":user2.id, "name":"Jenny Applesauce", "email":"jenny1@mail.com", "activeCircle": None}
+                              ], circle_users)
+
+# Bank
+class BankIntegrationTests(unittest.TestCase):
+
+    def test_int_12_create_bank(self):
+        user = create_user(name="Jenny Applesauce",
+                            email="jenny1@mail.com",
+                            password="jennypass")
+
+        circle = create_circle(circleName="Jenny Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Jenny Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=1000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        assert bank.bankTitle == "Jenny Wallet"
+
+    def test_int_13_get_user_banks_json(self):
+        user = create_user(name="Jenny Applesauce",
+                              email="jenny2@mail.com",
+                              password="jennypass")
+
+        circle = create_circle(circleName="Jenny Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Jenny Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=1000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        user_banks_json = get_user_banks_json(userID=user.id)
+
+        expected = [{
+            "bankID": bank.bankID,
+            "bankTitle": "Jenny Wallet",
+            "bankCurrency": "TTD",
+            "bankAmount": "TT$1000.00",
+            "remainingBankAmount": "TT$1000.00",
+            "isPrimary":True,
+            "color": "#6A3D9A",
+            "owner": "Jenny Applesauce"
+        }]
+
+        self.assertListEqual(user_banks_json, expected)
+
+    def test_int_14_update_bank(self): 
+        user = create_user(name="Jenny Applesauce",
+                            email="jenny3@mail.com",
+                            password="jennypass")
+
+        circle = create_circle(circleName="Jenny Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Jenny Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=1000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        updated_bank = update_bank(bankID=bank.bankID, bankAmount=5000)
+        assert updated_bank.bankAmount == 5000
+
+    def test_int_15_delete_bank(self):
+        user = create_user(name="Jenny Applesauce",
+                            email="jenny4@mail.com",
+                            password="jennypass")
+
+        circle = create_circle(circleName="Jenny Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Jenny Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=1000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        delete_bank(userID=user.id, bankID=bank.bankID)
+        deletedbank = get_bank(bankID=bank.bankID)
+        self.assertIsNone(deletedbank)
+
 # class BudgetIntegrationTests(unittest.TestCase):
 
-#     def test_int_05_create_budget(self):
+#     def test_int_06_create_budget(self):
 #         newuser = create_user(name="Alex Alexander", email="alex@mail.com", password="alexpass")
 #         newbank = create_bank(userID=newuser.id, bankTitle="Alex Bank", bankCurrency="USD", bankAmount=5000.00)
 #         newbudget = create_budget(budgetTitle="Alex Budget", budgetAmount=200.00, budgetType=BudgetType.EXPENSE, budgetCategory="ENTERTAINMENT", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
@@ -754,7 +982,7 @@ class UserIntegrationTests(unittest.TestCase):
 #         assert budget.budgetTitle == "Alex Budget"
 #         assert budget.budgetAmount == 200.00
 
-#     def test_int_06_get_user_budgets_json(self):
+#     def test_int_07_get_user_budgets_json(self):
 #         newuser = create_user(name="Michael Myers", email="michael@mail.com", password="michaelpass")
 #         newbank = create_bank(userID=newuser.id, bankTitle="Michael Bank", bankCurrency="USD", bankAmount=5000.00)
 #         newbudget = create_budget(budgetTitle="Michael Budget", budgetAmount=500.00, budgetType=BudgetType.EXPENSE, budgetCategory="SHOPPING", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
@@ -771,7 +999,7 @@ class UserIntegrationTests(unittest.TestCase):
 #                                "bankID": newbank.bankID},
 #                               ], user_budgets_json)
 
-#     def test_int_07_update_budget(self):
+#     def test_int_08_update_budget(self):
 #         newuser = create_user(name="John Wick", email="wick@mail.com", password="wickpass")
 #         newbank = create_bank(userID=newuser.id, bankTitle="Wick Bank", bankCurrency="TTD", bankAmount=10000.00)
 #         newbudget = create_budget(budgetTitle="Wick Budget", budgetAmount=20.00, budgetType=BudgetType.EXPENSE, budgetCategory="TRANSIT", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
@@ -779,7 +1007,7 @@ class UserIntegrationTests(unittest.TestCase):
 #         budget = get_budget(newbudget.budgetID)
 #         assert budget.budgetAmount == 2000.00
 
-#     def test_int_08_delete_budget(self):
+#     def test_int_09_delete_budget(self):
 #         newuser = create_user(name="Poppy Poppyseed", email="poppy@mail.com", password="poppypass")
 #         newbank = create_bank(userID=newuser.id, bankTitle="Poppy Bank", bankCurrency="TTD", bankAmount=10000.00)
 #         newbudget = create_budget(budgetTitle="Poppy Budget", budgetAmount=250.15, budgetType=BudgetType.EXPENSE, budgetCategory="GROCERIES", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
@@ -910,5 +1138,3 @@ class UserIntegrationTests(unittest.TestCase):
 #         assert deletedbank is None
 
 # # class GoalIntegration(unittest.TestCase):
-
-# # class CircleIntegrationTests(unittest.TestCase):

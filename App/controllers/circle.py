@@ -89,6 +89,7 @@ def delete_circle(userID, circleID):
         user_circles = UserCircle.query.filter_by(circleID=circleID).all()
         for user_circle in user_circles:
             db.session.delete(user_circle)
+        db.session.commit()
 
         db.session.delete(circle)
         db.session.commit()
