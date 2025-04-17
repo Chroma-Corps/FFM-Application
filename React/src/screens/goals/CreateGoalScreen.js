@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert} from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import InAppHeader from '../../components/InAppHeader';
 import Button from '../../components/Button';
 import InAppBackground from '../../components/InAppBackground';
@@ -149,7 +149,10 @@ return (
                     onCancel={handleEndDateCancel}
                 />
             )}
-            
+            <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
                 <View>
                     <View style={styles.headerContainer}>
@@ -220,13 +223,14 @@ return (
                         </Text>
                     </View>
                 </View>
-            </ScrollView>
-            <View style={styles.buttonContainer}>
+                <View style={styles.buttonContainer}>
                 <ColorTray 
                     selectedColor={selectedColor} 
                     onColorSelect={handleColorSelect}
                 />
-                <Button
+            </View>
+            </ScrollView>
+            <Button
                     mode="contained"
                     onPress={createGoal}
                     style={styles.buttonStyle}
@@ -234,7 +238,7 @@ return (
                 >
                     Create Goal
                 </Button>
-            </View>
+            </KeyboardAvoidingView>
         </InAppBackground>
     </View>
   );

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert} from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import InAppHeader from '../../components/InAppHeader';
 import Button from '../../components/Button';
 import { useFocusEffect } from '@react-navigation/native';
@@ -197,7 +197,10 @@ return (
                     onCancel={handleEndDateCancel}
                 />
             )}
-            
+            <KeyboardAvoidingView
+                                style={{ flex: 1 }}
+                                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                                >
             <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20, paddingTop: 10 }}>
                 <View>
                     <View style={styles.headerContainer}>
@@ -265,12 +268,13 @@ return (
                         </Text>
                     </View>
                 </View>
-            </ScrollView>
-            <View style={styles.buttonContainer}>
                 <ColorTray 
                     selectedColor={selectedColor} 
                     onColorSelect={handleColorSelect}
                 />
+            </ScrollView>
+            </KeyboardAvoidingView>
+            <View style={styles.buttonContainer}>
                 <Button
                     mode="contained"
                     onPress={updateGoal}

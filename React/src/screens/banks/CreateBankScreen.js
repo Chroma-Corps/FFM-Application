@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView} from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform} from 'react-native';
 import Button from '../../components/Button';
 import InAppBackground from '../../components/InAppBackground';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -332,7 +332,10 @@ export default function CreateBudgetsScreen({ navigation, route }) {
                 )}
 
                 <View style={styles.createBankDetailsContainer}>
-
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+                >
                 <ScrollView>
                     <View 
                         style={[
@@ -402,7 +405,7 @@ export default function CreateBudgetsScreen({ navigation, route }) {
                             </View>
                         </View>
                     </View>
-                    </ScrollView>
+
                     <View style={styles.bankThemeOptionsContainer}>
                             <View style={styles.buttonContainer}>
                                 <ColorTray
@@ -414,6 +417,8 @@ export default function CreateBudgetsScreen({ navigation, route }) {
                     <Button mode="contained" onPress={handlePress} style={styles.buttonStyle}>
                         {getButtonText()}
                     </Button>
+                    </ScrollView>
+                    </KeyboardAvoidingView>
                 </View>
             </InAppBackground >
         </View >

@@ -454,24 +454,24 @@ export default function Dashboard({ navigation }) {
             </Button>
           </View>
         )}
-        {circleType === 'Group' && (
-         <View>
-           <Text style={styles.sectionTitle}>Most Recent Activity</Text>
-           {recentTransactions.length === 0 ? (
-             <Text style={styles.noRecentActivityText}>No Recent Activity</Text>
-           ) : (
-             <FlatList
-               data={recentTransactions}
-               keyExtractor={(item) => `transaction-${item.transactionID}`}
-               renderItem={({ item }) => renderTransaction({ item })}
-             />
-           )}
-           <TouchableOpacity
-             style={styles.viewCircleContainer}
-             onPress={() => navigation.navigate('CircleDetails', { circle: currentCircle })}>
-             <Text style={styles.viewCircleText}>View Circle</Text>
-           </TouchableOpacity>
-         </View>
+       {circleType === 'Group' && (
+          <View>
+            <Text style={styles.sectionTitle}>Most Recent Activity</Text>
+            {Array.isArray(recentTransactions) && recentTransactions.length > 0 ? (
+              <FlatList
+                data={recentTransactions}
+                keyExtractor={(item) => `transaction-${item.transactionID}`}
+                renderItem={({ item }) => renderTransaction({ item })}
+              />
+            ) : (
+              <Text style={styles.noRecentActivityText}>No Recent Activity</Text>
+            )}
+            <TouchableOpacity
+              style={styles.viewCircleContainer}
+              onPress={() => navigation.navigate('CircleDetails', { circle: currentCircle })}>
+              <Text style={styles.viewCircleText}>View Circle</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       <RadialMenu navigation={navigation} />

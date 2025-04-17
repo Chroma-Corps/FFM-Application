@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, View, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import InAppHeader from '../../components/InAppHeader';
 import Button from '../../components/Button';
 import InAppBackground from '../../components/InAppBackground';
@@ -123,9 +123,12 @@ export default function CreateCircleScreen({ navigation, route }) {
       <InAppBackground>
         <BackButton goBack={navigation.goBack} />
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}>
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          >
           <View style={styles.headerContainer}>
-            <View style={{alignSelf: 'center'}}>
+            <View style={{alignSelf: 'center', marginTop: 20}}>
               <InAppHeader >New Circle</InAppHeader>
             </View>
 
@@ -161,30 +164,6 @@ export default function CreateCircleScreen({ navigation, route }) {
                 ))}
               </View>
             )}
-
-            {/* <Text style={styles.label}>Choose Colour:</Text>
-            <View style={styles.colorPalette}>
-              {presetColors.map((color) => (
-                <TouchableOpacity
-                  key={color}
-                  style={[
-                    styles.colorCircle,
-                    { backgroundColor: color },
-                    circleColor === color && styles.selectedCircle,
-                  ]}
-                  onPress={() => setCircleColor(color)}
-                />
-              ))}
-              <TouchableOpacity onPress={() => {
-                setTempColor(circleColor);
-                setShowColorPicker(true);
-              }}>
-                <View style={[styles.colorCircle, styles.plusCircle]}>
-                  <Text style={styles.plusText}>+</Text>
-                </View>
-              </TouchableOpacity>
-            </View> */}
-
             <Text style={styles.label}>Select Circle Image:</Text>
             <TouchableOpacity onPress={handleImagePick} style={styles.imagePicker}>
               {circleImage ? (
@@ -198,63 +177,16 @@ export default function CreateCircleScreen({ navigation, route }) {
               <Text style={styles.hexPreview}>{selectedColor}</Text>
             </View>
           </View>
-        </ScrollView>
-
-        <View style={styles.buttonContainer}>
-          <ColorTray 
+          <ColorTray
             selectedColor={selectedColor} 
             onColorSelect={handleColorSelect}
           />
-          <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
-            Create Circle
-          </Button>
-      </View>
-
-        {/* Modal for Custom Color Picker */}
-        {/* <Modal visible={showColorPicker} transparent animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.label}>Pick a Custom Colour</Text>
-              <ColorPicker
-                color={tempColor}
-                swatches={false}
-                onColorChange={setTempColor}
-                onColorChangeComplete={(c) => setTempColor(c)}
-                thumbSize={30}
-                sliderSize={20}
-                noSnap
-                row={false}
-                style={{ width: 200, height: 200 }}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Hex code"
-                placeholderTextColor="#aaa"
-                value={tempColor}
-                onChangeText={(text) => setTempColor(text)}
-              />
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setShowColorPicker(false)}
-                  style={{ width: '45%' }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={() => {
-                    setCircleColor(tempColor);
-                    setShowColorPicker(false);
-                  }}
-                  style={{ width: '45%' }}
-                >
-                  Select
-                </Button>
-              </View>
-            </View>
+          <View style={styles.buttonContainer}>
+            <Button mode="contained" onPress={createCircle} style={styles.buttonStyle}>
+              Create Circle
+            </Button>
           </View>
-        </Modal> */}
+        </KeyboardAvoidingView>
       </InAppBackground>
     </View>
   );
@@ -273,6 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     fontFamily: theme.fonts.medium.fontFamily,
+    margin: 20
   },
   label: {
     fontSize: 16,
