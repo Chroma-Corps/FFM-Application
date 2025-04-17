@@ -5,7 +5,7 @@ import { theme } from '../core/theme'
 
 export default function BackButton({ goBack }) {
   return (
-    <TouchableOpacity onPress={goBack} style={styles.container} hitSlop={100}>
+    <TouchableOpacity onPress={goBack} style={styles.container} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
       <Image
         style={[styles.image, styles.imageColor]}
         source={require('../assets/arrow_back.png')}
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 12 + getStatusBarHeight(),
     left: 10,
-    zIndex: 1,
+    zIndex: 1
   },
   image: {
     width: 40,

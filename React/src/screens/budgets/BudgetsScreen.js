@@ -275,6 +275,8 @@ export default function BudgetsScreen({ navigation }) {
                     colorTheme={budgetColorTheme}
                     amount={item.budgetAmount} 
                     remainingAmount={item.remainingBudgetAmount}
+                    itemType="Budget"
+                    category={item.budgetType}
                   />
                 </View>
               </View>

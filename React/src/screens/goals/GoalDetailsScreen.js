@@ -265,6 +265,8 @@ export default function GoalDetailsScreen({ navigation, route }) {
                                     colorTheme={goalDetails.color || '#9ACBD0'}
                                     amount={goalDetails.targetAmount}
                                     remainingAmount={goalDetails.currentAmount}
+                                    itemType="Goal"
+                                    category={goalDetails.goalType}
                                 />
                             </View>
 

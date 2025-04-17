@@ -304,6 +304,7 @@ export default function BudgetDetailsScreen({ navigation, route }) {
                                     colorTheme={budgetDetails.color || '#9ACBD0'}
                                     amount={budgetDetails.budgetAmount}
                                     remainingAmount={budgetDetails.remainingBudgetAmount}
+                                    category={budgetDetails.budgetType}
                                 />
                             </View>
 

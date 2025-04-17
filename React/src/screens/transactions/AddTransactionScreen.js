@@ -205,6 +205,7 @@ export default function AddTransactionScreen({ navigation }) {
     };
 
     const formatTimeToISO = (timeString) => {
+        timeString = timeString.replace(/\s+/g, ' ').trim();
         let [hour, minuteWithSuffix] = timeString.split(':');
         const [minute, suffix] = minuteWithSuffix.split(' ');
 
@@ -440,6 +441,8 @@ export default function AddTransactionScreen({ navigation }) {
             const token = await AsyncStorage.getItem('access_token');
             const formattedTransactionDate = formatDateToISO(transactionDate);
             const formattedTransactionTime = formatTimeToISO(transactionTime);
+            console.log("Original Transaction Time:", transactionTime)
+            console.log("Formatted Transaction Time:", formattedTransactionTime)
 
             if (!token) {
                 console.error('Missing required data');

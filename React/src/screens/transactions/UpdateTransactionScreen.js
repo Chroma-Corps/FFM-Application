@@ -147,6 +147,7 @@ export default function EditTransactionScreen({ navigation, route }) {
     };
 
     const formatTimeToISO = (timeString) => {
+        timeString = timeString.replace(/\s+/g, ' ').trim();
         let [hour, minuteWithSuffix] = timeString.split(':');
         const [minute, suffix] = minuteWithSuffix.split(' ');
 
@@ -422,8 +423,6 @@ export default function EditTransactionScreen({ navigation, route }) {
                 console.error('Missing Required Data');
                 return;
             }
-            console.log('Selected Goal ID:', selectedGoal)
-            console.log('Selected Budget ID:', selectedBudget)
 
             const response = await fetch(`https://ffm-application-main.onrender.com/transaction/${transactionID}`, {
                 method: 'PUT',

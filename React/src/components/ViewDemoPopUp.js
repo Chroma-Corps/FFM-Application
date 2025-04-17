@@ -17,13 +17,13 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
             title: 'Set Personal Budgets',
             color: '#4682B4',
             description: 'Create custom budgets to manage bills, savings, and fun while tracking progress toward your goals with ease.',
-            image: require('../assets/default_img.jpg'),
+            image: require('../assets/maya_budget.jpg'),
         },
         {
             title: 'Set Personal Goals',
             color: '#8B4513',
             description: 'Set and track your short-term financial goals, no matter how small, and stay motivated as you achieve each milestone.',
-            image: require('../assets/default_img.jpg'),
+            image: require('../assets/maya_goal.jpg'),
         },
     ]);
 
@@ -32,18 +32,22 @@ const ViewDemoPopUp = ({ selectedCircleType, setShowPreviewDemoPopup }) => {
         {
             title: 'Set Collaborative Budgets',
             color: '#6A4E23',
-            description: '. . . ',
-            image: require('../assets/default_img.jpg'),
+            description: 'Easily create and manage budgets with your family, track shared expenses, and stay on top of financial goals together.',
+            image: require('../assets/bob_budgets.jpg'),
         },
         {
-            title: 'Track Circle Acticivity',
+            title: 'Track Circle Activity',
             color: '#4682B4',
-            description: '. . .',
-            image: require('../assets/default_img.jpg'),
+            description: 'Monitor family spending and saving activities in real-time to keep everyone aligned with your financial plans.',
+            image: require('../assets/bob_circle.jpg'),
+        },
+        {
+            title: 'Set Collaborative Goals',
+            color: '#4682B4',
+            description: "Set and track shared savings or spending goals with your family, making it easier to achieve financial milestones together.",
+            image: require('../assets/bob_goal.jpg'),
         },
     ]);
-
-
 
     const imageSource = selectedCircleType === 'Self'
         ? require('../assets/maya_icon.png')

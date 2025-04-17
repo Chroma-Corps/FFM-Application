@@ -62,12 +62,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 15,
         paddingVertical: 10,
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.primaryDimmed,
         position: 'relative',
     },
 
     textContainer: {
-        backgroundColor: '#2C2C2C',
+        backgroundColor: theme.colors.background,
         borderRadius: 25,
         paddingHorizontal: 20,
         paddingVertical: 10,
@@ -81,8 +81,7 @@ const styles = StyleSheet.create({
     text: {
         fontFamily: theme.fonts.bold.fontFamily,
         fontSize: 18,
-        fontWeight: 'bold',
-        color: '#FFFFFF',
+        color: theme.colors.textSecondary,
         textAlign: 'center',
     },
 

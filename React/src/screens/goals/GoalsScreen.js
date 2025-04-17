@@ -227,6 +227,8 @@ export default function GoalsScreen({ navigation }) {
                   colorTheme={goalColorTheme}
                   amount={item.targetAmount} 
                   remainingAmount={item.currentAmount}
+                  itemType="Goal"
+                  category={item.goalType}
                 />
 
                 <Text style={styles.insightsText}>

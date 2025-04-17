@@ -7,21 +7,47 @@ const formatDate = (dateString) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 };
 
-export const ProgressBar = ({ startDate, endDate, colorTheme, amount, remainingAmount }) => {
+export const ProgressBar = ({ startDate, endDate, colorTheme, amount, remainingAmount, itemType, category }) => {
 
     const today = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
     const cleanBudgetAmount = parseFloat(amount.replace(/[^0-9.-]+/g, ""));
     const cleanRemainingBudgetAmount = parseFloat(remainingAmount.replace(/[^0-9.-]+/g, ""));
+    const isSavings = category?.toLowerCase() === 'savings';
 
     let progress = 0;
 
-    if (cleanRemainingBudgetAmount < cleanBudgetAmount) {
-        progress = ((cleanBudgetAmount - cleanRemainingBudgetAmount) / cleanBudgetAmount) * 100;
-      } else {
-        progress = 0;
-      }
+    if (itemType === "Goal") {
+        if (isSavings) {  // Savings Goal Logic
+            if (cleanRemainingBudgetAmount === 0) {
+                progress = 0;
+            } else {
+                progress = (cleanRemainingBudgetAmount / cleanBudgetAmount) * 100;
+            }
+        } else {  // Expense Goal Logic
+            if (cleanRemainingBudgetAmount < cleanBudgetAmount) {
+                progress = (cleanRemainingBudgetAmount / cleanBudgetAmount) * 100;
+            } else {
+                progress = 100;
+            }
+        }
+    } else { 
+        if (isSavings) {  // Savings Budget Logic
+            if (cleanRemainingBudgetAmount === 0) {
+                progress = 0;
+            } else {
+                progress = (cleanRemainingBudgetAmount / cleanBudgetAmount) * 100;
+            }
+        } else {  // Expense Budget Logic
+            if (cleanRemainingBudgetAmount < cleanBudgetAmount) {
+                progress = (cleanRemainingBudgetAmount / cleanBudgetAmount) * 100;
+            } else {
+                progress = 100;
+            }
+        }
+    }
+
     progress = Math.round(Math.max(0, Math.min(progress, 100)));
 
     return (
