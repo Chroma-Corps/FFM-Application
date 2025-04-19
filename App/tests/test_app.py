@@ -1127,7 +1127,117 @@ class BudgetIntegrationTests(unittest.TestCase):
         deletedbudget = get_budget(budgetID=budget.budgetID)
         self.assertIsNone(deletedbudget)
 
-# # class GoalIntegration(unittest.TestCase):
+class GoalIntegrationTests(unittest.TestCase):
+
+    def test_int_20_create_goal(self):
+        user = create_user(name="Alex Alexander",
+                              email="alex1@mail.com",
+                              password="alexpass")
+
+        circle = create_circle(circleName="Alex Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        goal = create_goal(goalTitle="Alex Goal",
+                           targetAmount=1000.00,
+                           goalType=GoalType.SAVINGS,
+                           color="#6A3D9A",
+                           startDate="2025-01-01",
+                           endDate="2025-01-31",
+                           userID=user.id)
+
+        newgoal = get_goal(goal.goalID)
+        assert newgoal.goalTitle == "Alex Goal"
+        assert newgoal.targetAmount == 1000.00
+
+    def test_int_21_get_user_goals_json(self):
+        user = create_user(name="Michael Myers", email="michael1@mail.com", password="michaelpass")
+
+        circle = create_circle(circleName="Michael Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        goal = create_goal(goalTitle="Michael Goal",
+                           targetAmount=1000.00,
+                           goalType=GoalType.SAVINGS,
+                           color="#6A3D9A",
+                           startDate="2025-01-01",
+                           endDate="2025-01-31",
+                           userID=user.id)
+
+        user_goals_json = get_user_goals_json(userID=user.id)
+
+        expected = [{
+                    "goalID":goal.goalID,
+                    "goalTitle":"Michael Goal",
+                    "targetAmount":"TT$1000.00",
+                    "currentAmount": "TT$0.00",
+                    "goalType": "Savings",
+                    "startDate":"Wed, 01 Jan 2025",
+                    "endDate":"Fri, 31 Jan 2025",
+                    "color": "#6A3D9A",
+                    "owner": "Michael Myers"
+                    }]
+
+        self.assertListEqual(user_goals_json, expected)
+
+    def test_int_22_update_goal(self):
+        user = create_user(name="John Wick",
+                            email="wick1@mail.com",
+                            password="wickpass")
+
+        circle = create_circle(circleName="Wick Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        goal = create_goal(goalTitle="Wick Goal",
+                           targetAmount=20.00,
+                           goalType=GoalType.SAVINGS,
+                           color="#6A3D9A",
+                           startDate="2025-01-01",
+                           endDate="2025-01-31",
+                           userID=user.id)
+
+        update_goal(goalID=goal.goalID, targetAmount=2200)
+        updated_goal = get_goal(goal.goalID)
+        assert updated_goal.targetAmount == 2200
+
+    def test_int_23_delete_goal(self):
+        user = create_user(name="Poppy Poppyseed",
+                              email="poppy1@mail.com",
+                              password="poppypass")
+
+        circle = create_circle(circleName="Poppy Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        goal = create_goal(goalTitle="Popppy Goal",
+                           targetAmount=1000.00,
+                           goalType=GoalType.SAVINGS,
+                           color="#6A3D9A",
+                           startDate="2025-01-01",
+                           endDate="2025-01-31",
+                           userID=user.id)
+
+        delete_goal(userID=user.id, goalID=goal.goalID)
+        deletedgoal = get_goal(goalID=goal.goalID)
+        self.assertIsNone(deletedgoal)
 
 # class TransactionIntegrationTests(unittest.TestCase):
 
