@@ -870,7 +870,7 @@ class BankIntegrationTests(unittest.TestCase):
 
     def test_int_12_create_bank(self):
         user = create_user(name="Jenny Applesauce",
-                            email="jenny1@mail.com",
+                            email="jenny2@mail.com",
                             password="jennypass")
 
         circle = create_circle(circleName="Jenny Circle",
@@ -892,7 +892,7 @@ class BankIntegrationTests(unittest.TestCase):
 
     def test_int_13_get_user_banks_json(self):
         user = create_user(name="Jenny Applesauce",
-                              email="jenny2@mail.com",
+                              email="jenny3@mail.com",
                               password="jennypass")
 
         circle = create_circle(circleName="Jenny Circle",
@@ -927,7 +927,7 @@ class BankIntegrationTests(unittest.TestCase):
 
     def test_int_14_update_bank(self): 
         user = create_user(name="Jenny Applesauce",
-                            email="jenny3@mail.com",
+                            email="jenny4@mail.com",
                             password="jennypass")
 
         circle = create_circle(circleName="Jenny Circle",
@@ -950,7 +950,7 @@ class BankIntegrationTests(unittest.TestCase):
 
     def test_int_15_delete_bank(self):
         user = create_user(name="Jenny Applesauce",
-                            email="jenny4@mail.com",
+                            email="jenny5@mail.com",
                             password="jennypass")
 
         circle = create_circle(circleName="Jenny Circle",
@@ -972,48 +972,162 @@ class BankIntegrationTests(unittest.TestCase):
         deletedbank = get_bank(bankID=bank.bankID)
         self.assertIsNone(deletedbank)
 
-# class BudgetIntegrationTests(unittest.TestCase):
+class BudgetIntegrationTests(unittest.TestCase):
 
-#     def test_int_06_create_budget(self):
-#         newuser = create_user(name="Alex Alexander", email="alex@mail.com", password="alexpass")
-#         newbank = create_bank(userID=newuser.id, bankTitle="Alex Bank", bankCurrency="USD", bankAmount=5000.00)
-#         newbudget = create_budget(budgetTitle="Alex Budget", budgetAmount=200.00, budgetType=BudgetType.EXPENSE, budgetCategory="ENTERTAINMENT", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
-#         budget = get_budget(newbudget.budgetID)
-#         assert budget.budgetTitle == "Alex Budget"
-#         assert budget.budgetAmount == 200.00
+    def test_int_16_create_budget(self):
+        user = create_user(name="Alex Alexander",
+                              email="alex@mail.com",
+                              password="alexpass")
 
-#     def test_int_07_get_user_budgets_json(self):
-#         newuser = create_user(name="Michael Myers", email="michael@mail.com", password="michaelpass")
-#         newbank = create_bank(userID=newuser.id, bankTitle="Michael Bank", bankCurrency="USD", bankAmount=5000.00)
-#         newbudget = create_budget(budgetTitle="Michael Budget", budgetAmount=500.00, budgetType=BudgetType.EXPENSE, budgetCategory="SHOPPING", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
-#         user_budgets_json = get_user_budgets_json(newuser.id)
-#         self.assertListEqual([{"budgetID":newbudget.budgetID, 
-#                                "budgetTitle":"Michael Budget",
-#                                "budgetAmount":"$500.00",
-#                                "remainingBudgetAmount":"$500.00",
-#                                "budgetType": "Expense",
-#                                "budgetCategory": "Shopping",
-#                                "startDate":"Wed, 01 Jan 2025",
-#                                "endDate":"Fri, 31 Jan 2025",
-#                                "userID": newuser.id,
-#                                "bankID": newbank.bankID},
-#                               ], user_budgets_json)
+        circle = create_circle(circleName="Alex Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
 
-#     def test_int_08_update_budget(self):
-#         newuser = create_user(name="John Wick", email="wick@mail.com", password="wickpass")
-#         newbank = create_bank(userID=newuser.id, bankTitle="Wick Bank", bankCurrency="TTD", bankAmount=10000.00)
-#         newbudget = create_budget(budgetTitle="Wick Budget", budgetAmount=20.00, budgetType=BudgetType.EXPENSE, budgetCategory="TRANSIT", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
-#         update_budget(budgetID=newbudget.budgetID, budgetTitle=None, budgetAmount=2000.00, budgetType=None, budgetCategory=None, startDate=None, endDate=None, bankID=None)
-#         budget = get_budget(newbudget.budgetID)
-#         assert budget.budgetAmount == 2000.00
+        set_active_circle(userID=user.id, circleID=circle.circleID)
 
-#     def test_int_09_delete_budget(self):
-#         newuser = create_user(name="Poppy Poppyseed", email="poppy@mail.com", password="poppypass")
-#         newbank = create_bank(userID=newuser.id, bankTitle="Poppy Bank", bankCurrency="TTD", bankAmount=10000.00)
-#         newbudget = create_budget(budgetTitle="Poppy Budget", budgetAmount=250.15, budgetType=BudgetType.EXPENSE, budgetCategory="GROCERIES", startDate="2025-01-01", endDate="2025-01-31", userID=newuser.id, bankID=newbank.bankID)
-#         delete_budget(newbudget.budgetID)
-#         deletedbudget = get_budget(newbudget.budgetID)
-#         assert deletedbudget is None
+        bank = create_bank(userID=user.id,
+                           bankTitle="Alex Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=1000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        budget = create_budget(budgetTitle="Alex Budget", 
+                               budgetAmount=200.00,
+                               budgetType=BudgetType.EXPENSE,
+                               budgetCategory=["ENTERTAINMENT"],
+                               transactionScope=TransactionScope.INCLUSIVE,
+                               color="#6A3D9A",
+                               startDate="2025-01-01",
+                               endDate="2025-01-31",
+                               userID=user.id,
+                               bankID=bank.bankID)
+
+        newbudget = get_budget(budget.budgetID)
+        assert newbudget.budgetTitle == "Alex Budget"
+        assert newbudget.budgetAmount == 200.00
+
+    def test_int_17_get_user_budgets_json(self):
+        user = create_user(name="Michael Myers", email="michael@mail.com", password="michaelpass")
+
+        circle = create_circle(circleName="Michael Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Michael Wallet",
+                           bankCurrency="USD",
+                           bankAmount=5000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        budget = create_budget(budgetTitle="Michael Budget", 
+                            budgetAmount=500.00,
+                            budgetType=BudgetType.EXPENSE,
+                            budgetCategory=["SHOPPING"],
+                            transactionScope=TransactionScope.INCLUSIVE,
+                            color="#6A3D9A",
+                            startDate="2025-01-01",
+                            endDate="2025-01-31",
+                            userID=user.id,
+                            bankID=bank.bankID)
+
+        user_budgets_json = get_user_budgets_json(userID=user.id)
+
+        expected = [{
+                    "budgetID":budget.budgetID,
+                    "budgetTitle":"Michael Budget",
+                    "budgetAmount":"$500.00",
+                    "remainingBudgetAmount":"$500.00",
+                    "budgetType": "Expense",
+                    "budgetCategory": ["Shopping"],
+                    "transactionScope": "Inclusive",
+                    "startDate":"Wed, 01 Jan 2025",
+                    "endDate":"Fri, 31 Jan 2025",
+                    "bankID": bank.bankID,
+                    "color": "#6A3D9A",
+                    "owner": "Michael Myers"
+                    }]
+
+        self.assertListEqual(user_budgets_json, expected)
+
+    def test_int_18_update_budget(self):
+        user = create_user(name="John Wick",
+                              email="wick@mail.com",
+                              password="wickpass")
+
+        circle = create_circle(circleName="Wick Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Wick Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=10000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        budget = create_budget(budgetTitle="Wick Budget", 
+                               budgetAmount=250.00,
+                               budgetType=BudgetType.EXPENSE,
+                               budgetCategory=["TRANSIT"],
+                               transactionScope=TransactionScope.INCLUSIVE,
+                               color="#6A3D9A",
+                               startDate="2025-01-01",
+                               endDate="2025-01-31",
+                               userID=user.id,
+                               bankID=bank.bankID)
+
+        update_budget(budgetID=budget.budgetID, budgetTitle="John Wick Budget")
+        updated_budget = get_budget(budget.budgetID)
+        assert updated_budget.budgetTitle == "John Wick Budget"
+
+    def test_int_19_delete_budget(self):
+        user = create_user(name="Poppy Poppyseed",
+                              email="poppy@mail.com",
+                              password="poppypass")
+
+        circle = create_circle(circleName="Poppy Circle",
+                        circleType=CircleType.SELF,
+                        circleColor="#6A3D9A",
+                        circleImage="https://picsum.photos/id/82/300/300.jpg",
+                        userID=user.id)
+
+        set_active_circle(userID=user.id, circleID=circle.circleID)
+
+        bank = create_bank(userID=user.id,
+                           bankTitle="Poppy Wallet",
+                           bankCurrency="TTD",
+                           bankAmount=10000,
+                           isPrimary=True,
+                           color="#6A3D9A")
+
+        budget = create_budget(budgetTitle="Poppy Budget", 
+                               budgetAmount=250.15,
+                               budgetType=BudgetType.EXPENSE,
+                               budgetCategory=["GROCERIES"],
+                               transactionScope=TransactionScope.EXCLUSIVE,
+                               color="#6A3D9A",
+                               startDate="2025-01-01",
+                               endDate="2025-01-31",
+                               userID=user.id,
+                               bankID=bank.bankID)
+
+        delete_budget(userID=user.id, budgetID=budget.budgetID)
+        deletedbudget = get_budget(budgetID=budget.budgetID)
+        self.assertIsNone(deletedbudget)
+
+# # class GoalIntegration(unittest.TestCase):
 
 # class TransactionIntegrationTests(unittest.TestCase):
 
@@ -1136,5 +1250,3 @@ class BankIntegrationTests(unittest.TestCase):
 #         delete_bank(newbank.bankID)
 #         deletedbank = get_budget(newbank.bankID)
 #         assert deletedbank is None
-
-# # class GoalIntegration(unittest.TestCase):
